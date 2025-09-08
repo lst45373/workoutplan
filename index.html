@@ -1,0 +1,860 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>13주 훈련 프로그램 | 인터랙티브 플래너</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        body { font-family: 'Pretendard', sans-serif; }
+        .tab-active { border-color: #3b82f6; color: #3b82f6; background-color: #eff6ff; }
+        .week-btn-active { background-color: #3b82f6; color: white; }
+        .day-btn-active { background-color: #2563eb; color: white; }
+        .card-enter, .modal-enter { animation: fadeIn 0.5s ease-in-out; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: #f1f5f9; }
+        ::-webkit-scrollbar-thumb { background: #94a3b8; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #475569; }
+        .chart-container { position: relative; width: 100%; max-width: 800px; margin-left: auto; margin-right: auto; height: 300px; max-height: 400px; }
+        @media (min-width: 640px) {
+            .chart-container { height: 40vh; }
+        }
+    </style>
+    <link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css" />
+    <!-- Chosen Palette: Slate & Blue -->
+    <!-- Application Structure Plan: 기존 대시보드 구조에 '기록 보기'라는 분석적 뷰를 추가했습니다. 이 뷰는 사용자가 자신의 성장 과정을 시각적으로 추적하고 싶어하는 핵심 요구사항을 해결합니다. 사용자는 운동 종목을 필터링하여 특정 운동의 중량 변화 추이를 라인 차트로 확인하고, 상세 기록을 표로 검토할 수 있습니다. 이 기능은 localStorage를 활용한 데이터 영속성을 통해 사용자가 앱을 껐다 켜도 기록이 유지되도록 하여, 단순한 일회성 플래너가 아닌 지속 가능한 '개인 트레이닝 로그'로서의 가치를 부여합니다. 이는 사용자의 장기적인 참여와 성과 추적을 유도하는 가장 효과적인 구조입니다. -->
+    <!-- Visualization & Content Choices: Report Info: 사용자의 운동 수행 기록 (중량/횟수) -> Goal: 시간 경과에 따른 성과(중량) 변화를 시각적으로 추적 -> Viz/Presentation Method: 라인 차트 (Chart.js) 및 상세 기록 테이블 -> Interaction: 운동 종목 선택 드롭다운 필터 -> Justification: 라인 차트는 시간의 흐름에 따른 중량 변화라는 연속적 데이터를 표현하는 데 가장 직관적이며, 테이블은 각 세션의 상세 데이터를 정확하게 제공합니다. 드롭다운 필터는 복잡한 데이터 속에서 사용자가 원하는 정보에만 집중할 수 있도록 돕습니다. -->
+    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+</head>
+<body class="bg-slate-100 text-slate-800">
+
+    <div id="app-wrapper">
+        <div class="container mx-auto p-4 sm:p-6 md:p-8 max-w-7xl">
+            <header class="text-center mb-10">
+                <h1 class="text-3xl sm:text-4xl md:text-5xl font-bold text-slate-900">13주 훈련 프로그램</h1>
+                <p class="text-slate-600 mt-3 text-base sm:text-lg">당신만을 위해 설계된 궁극의 인터랙티브 운동 플래너</p>
+            </header>
+
+            <nav class="flex justify-center mb-10 border-b border-slate-300">
+                <button id="tab-today" class="py-3 px-4 sm:py-4 sm:px-6 font-semibold border-b-2 text-sm sm:text-base tab-active" onclick="showView('today')">오늘의 운동</button>
+                <button id="tab-plan" class="py-3 px-4 sm:py-4 sm:px-6 font-semibold border-b-2 text-sm sm:text-base border-transparent text-slate-500 hover:text-blue-600 transition" onclick="showView('plan')">전체 계획서</button>
+                <button id="tab-records" class="py-3 px-4 sm:py-4 sm:px-6 font-semibold border-b-2 text-sm sm:text-base border-transparent text-slate-500 hover:text-blue-600 transition" onclick="showView('records')">기록 보기</button>
+            </nav>
+
+            <main id="main-content">
+                <div id="view-today">
+                    <section id="controls" class="mb-8 p-4 sm:p-6 bg-white rounded-xl shadow-md">
+                        <div class="mb-6">
+                            <h3 class="font-bold text-lg sm:text-xl mb-4 text-slate-800">1. 주차 선택 (Week)</h3>
+                            <div id="week-selector" class="flex flex-wrap gap-2">
+                            </div>
+                        </div>
+                        <div>
+                            <h3 class="font-bold text-lg sm:text-xl mb-4 text-slate-800">2. 요일 선택 (Day)</h3>
+                            <div id="day-selector" class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                                 <button data-day="pull" class="p-3 sm:p-4 rounded-lg font-bold text-base sm:text-lg bg-slate-100 text-slate-700 transition duration-200 hover:bg-slate-200">PULL (당기기)</button>
+                                 <button data-day="leg" class="p-3 sm:p-4 rounded-lg font-bold text-base sm:text-lg bg-slate-100 text-slate-700 transition duration-200 hover:bg-slate-200">LEG (하체)</button>
+                                 <button data-day="push" class="p-3 sm:p-4 rounded-lg font-bold text-base sm:text-lg bg-slate-100 text-slate-700 transition duration-200 hover:bg-slate-200">PUSH (밀기)</button>
+                            </div>
+                        </div>
+                    </section>
+
+                    <section id="workout-display">
+                        <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center mb-4 gap-3">
+                             <h2 id="workout-title" class="text-2xl sm:text-3xl font-bold text-slate-900"></h2>
+                             <span id="workout-phase-badge" class="px-3 py-1 sm:px-4 sm:py-1.5 text-sm sm:text-base font-semibold rounded-full self-start"></span>
+                        </div>
+                        <p id="workout-phase-description" class="p-4 bg-blue-50 border-l-4 border-blue-500 text-blue-900 rounded-r-lg mb-8 text-sm sm:text-base"></p>
+                        <div class="flex items-center justify-center gap-2 text-xs sm:text-sm text-slate-500 mb-6">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-info-circle" viewBox="0 0 16 16"><path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14zm0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16z"/><path d="m8.93 6.588-2.29.287-.082.38.45.083c.294.055.491.206.552.38.062.172.038.397-.04.603-.078.206-.214.394-.383.494-.17.1-.42.15-.66.15-.24.004-.495-.05-.702-.145-.206-.094-.374-.241-.478-.421l-.127-.223-.317.416.127.223c.146.256.358.463.608.583.25.12.532.193.83.232.297.04.61.023.908-.06l.322-.09.303.226c.143.106.323.19.52.247.198.058.42.066.635.034.214-.032.422-.1.616-.208.195-.108.36-.26.486-.444.126-.184.22-.412.27-.66.05-.247.053-.516.01-.78-.043-.263-.153-.521-.33-.742-.176-.22-.422-.405-.71-.524-.287-.12-.62-.19-.97-.24l-.322-.047-.226-.303c-.11-.147-.25-.27-.41-.355-.16-.084-.34-.125-.53-.125-.19.002-.38.044-.56.125-.18.08-.34.2-.47.355l-.127.173.317-.417.127-.173c.147-.197.355-.365.594-.465.24-.1.49-.13.73-.1.24.03.48.1.7.223.22.123.4.295.52.502zM8 4.5a1 1 0 1 1 0-2 1 1 0 0 1 0 2z"/></svg>
+                            <span>기록은 자동으로 저장됩니다. 별도의 저장 버튼이 없습니다.</span>
+                        </div>
+                        <div id="workout-list" class="space-y-5">
+                        </div>
+                    </section>
+                </div>
+
+                <div id="view-plan" class="hidden">
+                     <div class="bg-white p-6 rounded-xl shadow-md overflow-x-auto">
+                        <h2 class="text-2xl font-bold text-slate-900 mb-4">훈련 주기 설명</h2>
+                        <div class="space-y-6 text-slate-700">
+                            <div>
+                                <h3 class="font-bold text-xl text-red-700">강화 주기 (1~3주차, 7~9주차): 최대 근력 증진</h3>
+                                <p class="mt-1">다룰 수 있는 최대 중량(Strength)을 늘리는 데 모든 것을 집중하는 시기입니다. 메인 운동은 **'탑 세트 / 백오프 세트'** 방식으로 진행하며, 매주 점진적으로 더 무거운 무게에 도전하는 것이 목표입니다.</p>
+                            </div>
+                            <div>
+                                <h3 class="font-bold text-xl text-green-700">축적 주기 (4~6주차, 10~12주차): 근비대 집중</h3>
+                                <p class="mt-1">근육의 크기(근비대)를 키우기 위해 충분한 운동량(Volume)을 쌓는 시기입니다. 메인 운동은 **'워킹 세트'** (8~12회 x 3~4세트)로 변경하여 수행합니다. 탑 세트 무게의 75%~85% 무게로, 실패 직전까지만 반복합니다.</p>
+                            </div>
+                            <div>
+                                <h3 class="font-bold text-xl text-sky-700">디로딩 주간 (13주차): 전략적 회복</h3>
+                                <p class="mt-1">'능동적 회복'을 통해 그동안 쌓인 중추신경계와 관절의 피로를 완전히 해소하고 다음 12주를 준비하는 시기입니다. 평소 워킹 세트 중량의 50%~60%, 세트 수의 절반만 가볍게 수행합니다.</p>
+                            </div>
+                        </div>
+
+                        <h2 class="text-2xl font-bold text-slate-900 mt-10 mb-4">13주 전체 계획표 요약</h2>
+                        <table class="w-full text-left border-collapse">
+                            <thead>
+                                <tr class="bg-slate-200">
+                                    <th class="p-3 sm:p-4 font-semibold text-slate-800">주차</th>
+                                    <th class="p-3 sm:p-4 font-semibold text-slate-800">월요일</th>
+                                    <th class="p-3 sm:p-4 font-semibold text-slate-800">수요일</th>
+                                    <th class="p-3 sm:p-4 font-semibold text-slate-800">금요일</th>
+                                    <th class="p-3 sm:p-4 font-semibold text-slate-800">주요 훈련 방식</th>
+                                </tr>
+                            </thead>
+                            <tbody id="plan-table-body" class="text-slate-700">
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <div id="view-records" class="hidden">
+                    <div class="bg-white p-4 sm:p-6 rounded-xl shadow-md">
+                        <h2 class="text-2xl sm:text-3xl font-bold text-slate-900 mb-2">진행 상황 대시보드</h2>
+                        <p class="text-slate-600 mb-8 text-base sm:text-lg">메인 운동별 중량 변화를 추적하고 성장 과정을 확인하세요.</p>
+                        
+                        <div class="mb-8">
+                            <label for="exercise-selector" class="block text-base font-medium text-slate-800 mb-2">분석할 운동 종목 선택:</label>
+                            <select id="exercise-selector" class="w-full max-w-md p-2.5 sm:p-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition">
+                            </select>
+                        </div>
+
+                        <div id="records-content">
+                            <h3 id="chart-title" class="text-xl sm:text-2xl font-bold text-slate-800 mb-4 text-center"></h3>
+                            <div class="chart-container mb-10">
+                                <canvas id="progressChart"></canvas>
+                            </div>
+                            
+                            <h3 class="text-xl sm:text-2xl font-bold text-slate-800 mb-4">상세 기록</h3>
+                            <div id="records-table-container" class="overflow-x-auto rounded-lg border border-slate-200">
+                                 
+                            </div>
+                        </div>
+                        <div id="no-records" class="text-center py-16 hidden">
+                            <p class="text-slate-500 text-lg">아직 이 운동에 대한 기록이 없습니다.</p>
+                            <p class="text-slate-500 mt-2">'오늘의 운동' 탭에서 운동을 기록해주세요.</p>
+                        </div>
+                        <div class="mt-10 pt-8 border-t border-slate-200">
+                            <button id="reset-button" class="w-full bg-red-100 text-red-700 font-bold p-3 sm:p-4 rounded-lg hover:bg-red-200 transition duration-200 flex items-center justify-center gap-2 text-base sm:text-lg">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" class="bi bi-trash" viewBox="0 0 16 16"><path d="M5.5 5.5A.5.5 0 0 1 6 6v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5m2.5 0a.5.5 0 0 1 .5.5v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5m3 .5a.5.5 0 0 0-1 0v6a.5.5 0 0 0 1 0z"/><path d="M14.5 3a1 1 0 0 1-1 1H13v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V4h-.5a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1H6a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1h3.5a1 1 0 0 1 1 1zM4.118 4 4 4.059V13a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1V4.059L11.882 4zM2.5 3h11V2h-11z"/></svg>
+                                모든 기록 삭제 및 새로운 사이클 시작
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </main>
+        </div>
+
+        <div id="reset-modal" class="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center hidden z-50 p-4 modal-enter">
+            <div class="bg-white rounded-xl p-6 md:p-8 shadow-2xl max-w-md w-full">
+                <h3 class="text-xl sm:text-2xl font-bold mb-4 text-slate-900">모든 기록을 삭제하시겠습니까?</h3>
+                <p class="text-slate-600 mb-8 text-sm sm:text-base">이 작업은 되돌릴 수 없습니다. 모든 운동 기록이 영구적으로 삭제되고, 새로운 사이클을 시작할 수 있도록 앱이 초기화됩니다.</p>
+                <div class="flex justify-end gap-3">
+                    <button id="cancel-reset" class="px-4 py-2 sm:px-5 sm:py-2.5 rounded-lg bg-slate-200 text-slate-800 font-bold hover:bg-slate-300 transition">취소</button>
+                    <button id="confirm-reset" class="px-4 py-2 sm:px-5 sm:py-2.5 rounded-lg bg-red-600 text-white font-bold hover:bg-red-700 transition">삭제 및 새 사이클 시작</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+<script>
+    const workoutPlan = {
+        1: {
+            phase: '강화 주기',
+            method: '탑/백오프 세트',
+            pull: { name: '풀(Pull) A', routine: [
+                { type: '웜업', name: '노틸러스 풀오버', sets: '2~3세트', tip: '광배근 스트레칭과 혈류 공급에 집중합니다. 🔥 목표: 40kg x 12-15회.'},
+                { type: '웜업', name: '랫풀다운 (가볍게)', sets: '2세트', tip: '견갑을 아래로 누르는 움직임에 집중하여 등을 활성화시킵니다. 🔥 목표: 30-40kg x 12-15회.'},
+                { type: '메인', name: '해머스트랭스 래터럴 로우 (T바)', sets: '탑/백오프 세트', tip: '의자를 낮추고 오버그립으로 넓게 잡습니다. 팔꿈치를 90도로 벌려 등 중앙을 강하게 쥐어짜는 느낌으로 당깁니다.', baseTopSet: 50, unit: '한쪽'},
+                { type: '메인', name: '해머스트랭스 하이로우', sets: '탑/백오프 세트', tip: '윗가슴을 패드에 고정하고, 팔꿈치를 대각선 아래 & 등 뒤쪽으로 보내며 등 상부 전체를 수축합니다.', baseTopSet: 45, unit: '한쪽'},
+                { type: '메인', name: '해머스트랭스 로우로우', sets: '탑/백오프 세트', tip: '가슴을 패드에 단단히 붙이고, 팔꿈치를 옆구리 뒤로 보낸다는 느낌으로 등 중앙부의 두께감에 집중합니다.', baseTopSet: 50, unit: '한쪽'},
+                { type: '보조', name: '리어 델트 머신', sets: '3~4세트', tip: '가슴을 패드에 붙이고, 팔을 편 상태를 유지하며 어깨 뒤쪽 근육의 힘으로만 핸들을 벌려줍니다. 🔥 목표: 30-40kg x 12-15회.'},
+                { type: '마무리', name: '케이블 푸쉬 다운', sets: '3~4세트', tip: '팔꿈치를 옆구리에 고정한 채, 삼두근 바깥쪽의 힘으로 바를 아래로 눌러줍니다. 상체 반동을 최소화하세요. 🔥 목표: 35-45kg x 10-15회.'},
+            ]},
+            leg: { name: '레그(Leg) A', routine: [
+                { type: '웜업', name: '노틸러스 이너/아웃 타이', sets: '4세트', tip: '고관절 주변 근육을 충분히 활성화시킵니다. 🔥 목표: 100-130 LBS x 10-12회.' },
+                { type: '웜업', name: '레그 익스텐션 (가볍게)', sets: '2세트', tip: '무릎 관절을 예열하고 대퇴사두에 혈류를 보냅니다. 🔥 목표: 20-30kg x 15회.' },
+                { type: '메인', name: '싸이벡스 스미스 머신 스쿼트', sets: '탑/백오프 세트', tip: '발을 어깨너비로 벌리고, 허리를 편 상태를 유지하며 깊게 앉습니다.', baseTopSet: 45, unit: '한쪽'},
+                { type: '메인', name: '레그 프레스', sets: '탑/백오프 세트', tip: '발을 발판 중앙, 어깨너비로 둡니다. 발뒤꿈치로 민다는 느낌으로 허벅지 전체에 부하를 전달합니다.', baseTopSet: 160, unit: '총'},
+                { type: '보조', name: '노틸러스 레그 익스텐션 (보조)', sets: '3~4세트', tip: '다리를 완전히 폈을 때 1~2초간 멈춰 대퇴사두를 강하게 쥐어짭니다. 엉덩이가 뜨지 않도록 주의하세요. 🔥 목표: 50-60kg x 12-15회.' },
+                { type: '보조', name: '노틸러스 레그 컬', sets: '3~4세트', tip: '뒤꿈치를 엉덩이 쪽으로 당길 때 햄스트링을 강하게 수축하고, 천천히 저항을 느끼며 다리를 폅니다. 🔥 목표: 40-50kg x 12-15회.' },
+                { type: '마무리', name: '레그 프레스 카프 레이즈', sets: '3~4세트', tip: '발끝을 발판 아래쪽에 두고, 발뒤꿈치를 최대한 이완시켰다가 발끝으로 강하게 밀어 종아리를 수축합니다. 🔥 목표: 60-80kg x 15-20회.' },
+            ]},
+            push: { name: '푸쉬(Push) A', routine: [
+                { type: '웜업', name: '해머스트랭스 래터럴 로우', sets: '4세트', tip: '견갑을 안정화시키고 후면을 활성화합니다. (한쪽 20kg 고정) 가볍게 당기며 날개뼈 주변을 예열하세요.' },
+                { type: '웜업', name: '팩덱 플라이', sets: '3세트', tip: '가슴 근육을 선피로시켜 프레스 시 자극을 극대화합니다. 🔥 목표: 60kg x 10-12회.' },
+                { type: '메인', name: '로우 인클라인 스미스 프레스', sets: '탑/백오프 세트', tip: '벤치 각도를 낮게 설정하여 쇄골 바로 아래 윗가슴 상부를 타겟합니다.', baseTopSet: 35, unit: '한쪽'},
+                { type: '메인', name: '해머스트랭스 인클라인 프레스', sets: '탑/백오프 세트', tip: '다른 궤적으로 윗가슴에 새로운 자극을 줍니다. 가슴을 활짝 열고 견갑을 패드에 고정하세요.', baseTopSet: 40, unit: '한쪽'},
+                { type: '메인', name: '해머스트랭스 숄더 프레스', sets: '탑/백오프 세트', tip: '어깨의 전면과 측면을 타겟합니다. 어깨가 으쓱하지 않도록 통제하며 귀 옆으로 밀어 올립니다.', baseTopSet: 40, unit: '한쪽'},
+                { type: '보조', name: '뉴텍 암 컬 머신', sets: '3~4세트', tip: '팔을 패드에 완전히 고정하고, 반동 없이 이두근의 힘으로만 핸들을 들어올려 강하게 수축합니다. 🔥 목표: 25-35kg x 10-15회.' },
+                { type: '마무리', name: '딥스 머신', sets: '3~4세트', tip: '상체를 앞으로 살짝 숙이면 아랫가슴, 상체를 세우면 삼두근에 더 집중할 수 있습니다. 🔥 목표: 실패지점까지 x 3-4세트.' },
+            ]},
+        },
+        2: {
+            phase: '강화 주기',
+            method: '탑/백오프 세트',
+            pull: { name: '풀(Pull) B', routine: [
+                 { type: '웜업', name: '노틸러스 풀오버', sets: '2~3세트', tip: '광배근 스트레칭과 혈류 공급에 집중합니다. 🔥 목표: 40kg x 12-15회.'},
+                { type: '웜업', name: '랫풀다운 (가볍게)', sets: '2세트', tip: '견갑을 아래로 누르는 움직임에 집중하여 등을 활성화시킵니다. 🔥 목표: 30-40kg x 12-15회.'},
+                { type: '메인', name: '해머스트랭스 D.Y. 로우', sets: '탑/백오프 세트', tip: '언더그립으로 광배근 하부를 직접적으로 타겟합니다. 팔꿈치를 옆구리에 붙여 배꼽 쪽으로 당기는 느낌에 집중하세요.', baseTopSet: 40, unit: '한쪽'},
+                { type: '메인', name: '랫풀다운 (맥그립 언더)', sets: '탑/백오프 세트', tip: 'D.Y. 로우와 함께 광배근 하부를 다른 각도(수직)에서 공략합니다. 가슴을 열고 당겨주세요.', baseTopSet: 65, unit: '총'},
+                { type: '메인', name: '해머스트랭스 프론트 풀다운', sets: '탑/백오프 세트', tip: '광배근의 최대 이완에 집중하여 너비감을 만듭니다. 팔을 완전히 펴서 광배근이 최대로 늘어나는 것을 느끼세요.', baseTopSet: 40, unit: '한쪽'},
+                { type: '보조', name: '해머스트랭스 래터럴 로우 (원핸드 뉴트럴)', sets: '3~4세트', tip: '등 전체의 \'덩어리감\'과 볼륨을 채워줍니다. 팔꿈치로 등 중앙을 깊게 찍는다는 느낌으로 당깁니다. 🔥 목표: 한쪽 30-40kg x 10-12회.'},
+                { type: '마무리', name: '라잉 트라이셉스 익스텐션', sets: '3~4세트', tip: '삼두근의 가장 큰 부위(장두)를 타겟합니다. 팔꿈치를 고정한 채 이마나 정수리 쪽으로 바를 내립니다. 🔥 목표: 20-30kg (EZ바) x 10-15회.'},
+            ]},
+            leg: { name: '레그(Leg) B', routine: [
+                { type: '웜업', name: '노틸러스 이너/아웃 타이', sets: '4세트', tip: '고관절 주변 근육을 충분히 활성화시킵니다. 🔥 목표: 100-130 LBS x 10-12회.' },
+                { type: '선피로', name: '노틸러스 레그 익스텐션 (선피로)', sets: '3세트', tip: '가벼운 무게로 대퇴사두에 혈류를 집중시킵니다. 펌핑감을 느끼는 데 집중하세요.' },
+                { type: '메인', name: '레그 프레스 (대퇴사두 타겟)', sets: '탑/백오프 세트', tip: '발을 발판 아래쪽에 어깨너비보다 좁게 두어 대퇴사두에 자극을 집중시킵니다. 무릎 통증에 주의하세요.', baseTopSet: 160, unit: '총' },
+                { type: '메인', name: '싸이벡스 핵스쿼트', sets: '탑/백오프 세트', tip: '직선 궤적으로 대퇴사두에 강한 고립감을 줍니다. 등을 패드에 완전히 고정하고 엉덩이가 뜨지 않게 하세요.', baseTopSet: 80, unit: '총' },
+                { type: '보조', name: '노틸러스 레그 익스텐션 (보조)', sets: '3세트', tip: '무거운 무게로 대퇴사두를 완전히 털어냅니다. 최대 수축 지점에서 1~2초 멈춰주세요. 🔥 목표: 50-60kg x 12-15회.' },
+                { type: '마무리', name: '노틸러스 레그 컬', sets: '3세트', tip: '균형을 위해 햄스트링을 가볍게 자극하며 마무리합니다. 네거티브 동작에 집중하세요. 🔥 목표: 40-50kg x 12-15회.' },
+            ]},
+            push: { name: '푸쉬(Push) B', routine: [
+                { type: '웜업', name: '해머스트랭스 래터럴 로우', sets: '4세트', tip: '견갑을 안정화시키고 후면을 활성화합니다. (한쪽 20kg 고정) 가볍게 당기며 날개뼈 주변을 예열하세요.' },
+                { type: '웜업', name: '팩덱 플라이', sets: '3세트', tip: '가슴 근육을 선피로시켜 프레스 시 자극을 극대화합니다.' },
+                { type: '메인', name: '해머스트랭스 시티드 체스트 프레스', sets: '탑/백오프 세트', tip: '가슴 중앙부의 최대 중량에 도전합니다. 가슴을 패드에서 떼지 말고, 견갑을 고정한 채 밀어주세요.', baseTopSet: 30, unit: '한쪽' },
+                { type: '메인', name: '스미스 머신 숄더 프레스', sets: '탑/백오프 세트', tip: '등을 벤치에 완전히 고정하고, 바가 턱 끝이나 쇄골까지 오도록 깊게 내립니다. 고정된 궤적 안에서 어깨 근육의 힘에만 집중하세요.', baseTopSet: 40, unit: '한쪽' },
+                { type: '보조', name: '너틸러스 프레스 (디클라인 응용)', sets: '3~4세트', tip: '아랫가슴 라인을 선명하게 만듭니다. 팔꿈치를 아래쪽으로 내리며 아랫가슴의 스트레칭을 느끼세요. 🔥 목표: 40-50kg x 12-15회.' },
+                { type: '보조', name: '케이블 크로스오버', sets: '3~4세트', tip: '가슴 안쪽을 쥐어짜는 느낌에 집중합니다. 팔꿈치를 살짝 구부린 상태로 큰 원을 그리듯 모아주세요. 🔥 목표: 한쪽 10-15kg x 15-20회.' },
+                { type: '마무리', name: '덤벨 이두 컬', sets: '3~4세트', tip: '이두근의 봉우리를 만드는 데 집중합니다. 손목을 살짝 바깥쪽으로 돌려주며 수축하면 더 강한 자극을 줄 수 있습니다. 🔥 목표: 12-16kg x 10-15회.' },
+            ]},
+        },
+        3: {
+            phase: '강화 주기',
+            method: '탑/백오프 세트',
+             pull: { name: '풀(Pull) C', routine: [
+                { type: '웜업', name: '노틸러스 풀오버', sets: '2~3세트', tip: '광배근 스트레칭과 혈류 공급에 집중합니다. 팔꿈치를 살짝 구부린 상태를 유지하고, 어깨가 아닌 등의 힘으로 큰 호를 그리듯 당겨주세요.'},
+                { type: '웜업', name: '랫풀다운 (가볍게)', sets: '2세트', tip: '견갑을 아래로 누르는 움직임에 집중하여 등을 활성화시킵니다. 가슴을 열고 어깨를 아래로 누르는 느낌을 먼저 찾으세요.'},
+                { type: '메인', name: '랫풀다운 (맥그립 중간)', sets: '탑/백오프 세트', tip: '광배근 전체의 볼륨과 매스를 키우는 올라운더 그립. 가슴을 열고 팔꿈치를 아래로 당깁니다.', baseTopSet: 65, unit: '총'},
+                { type: '메인', name: '원 암 시티드 케이블 로우', sets: '탑/백오프 세트', tip: '케이블의 지속적인 장력으로 광배근을 고립합니다. 당기면서 상체를 살짝 회전시켜 수축감을 극대화하세요.', baseTopSet: 40, unit: '한쪽'},
+                { type: '메인', name: '해머스트랭스 프론트 풀다운 (파나타 스타일)', sets: '탑/백오프 세트', tip: '최대 이완에 집중하여 새로운 자극을 줍니다. 상체를 살짝 뒤로 젖히고 명치 쪽으로 당겨오세요.', baseTopSet: 30, unit: '한쪽'},
+                { type: '보조', name: '백 익스텐션', sets: '3~4세트', tip: '허리 라인의 선명함과 깊이감을 만듭니다. 엉덩이와 등의 힘으로 상체를 들어올리고, 허리가 과하게 꺾이지 않도록 주의합니다. 🔥 목표: 맨몸 또는 10kg 원판 x 15-20회.'},
+                { type: '마무리', name: '뉴텍 오버헤드 트라이셉스 익스텐션', sets: '3~4세트', tip: '시작 저항이 매우 강한 머신입니다. 처음에는 원판 없이 8~10회 x 2~3세트로 시작하여 자극에 적응하세요. 팔꿈치를 고정하고, 천천히 이완하며 삼두근 장두가 최대로 늘어나는 것을 느끼는 것이 핵심입니다.'},
+            ]},
+            leg: { name: '레그(Leg) C', routine: [
+                { type: '웜업', name: '노틸러스 이너/아웃 타이', sets: '4세트', tip: '고관절 주변 근육을 충분히 활성화시킵니다. 동작의 마지막 지점에서 1초간 멈춰 수축감을 느끼세요.' },
+                { type: '선피로', name: '노틸러스 레그 컬', sets: '3세트', tip: '가벼운 무게로 햄스트링에 먼저 자극을 줍니다. 펌핑감에 집중하세요.' },
+                { type: '메인', name: '레그 프레스 (햄스트링/둔근 타겟)', sets: '탑/백오프 세트', tip: '발을 발판 위쪽에 넓게 두어 후면 사슬에 자극을 집중시킵니다. 발뒤꿈치로 민다는 느낌을 유지하세요.', baseTopSet: 160, unit: '총'},
+                { type: '메인', name: '뉴텍 V스쿼트 (리버스)', sets: '탑/백오프 세트', tip: '패드에 가슴을 대고 수행하여 둔근을 직접적으로 공략합니다. 엉덩이를 뒤로 빼며 깊게 앉으세요.', baseTopSet: 80, unit: '총' },
+                { type: '보조', name: '노틸러스 레그 컬', sets: '3~4세트', tip: '무거운 무게로 햄스트링 볼륨을 극대화합니다. 최대 수축 지점에서 1~2초 멈춰주세요. 🔥 목표: 40-50kg x 12-15회.' },
+                { type: '마무리', name: '부티빌더 스탠딩 힙 쓰러스트', sets: '3~4세트', tip: '패드를 골반에 위치시키고, 발뒤꿈치로 강하게 밀어 엉덩이를 최대로 수축합니다. 정점에서 1~2초간 멈춰주세요. 🔥 목표: 40-60kg x 12-15회.' },
+            ]},
+            push: { name: '푸쉬(Push) C', routine: [
+                { type: '웜업', name: '해머스트랭스 래터럴 로우', sets: '4세트', tip: '견갑을 안정화시키고 후면을 활성화합니다. (한쪽 20kg 고정) 가볍게 당기며 날개뼈 주변을 예열하세요.' },
+                { type: '웜업', name: '팩덱 플라이', sets: '3세트', tip: '가슴 근육을 선피로시켜 프레스 시 자극을 극대화합니다.' },
+                { type: '메인', name: '해머스트랭스 인클라인 프레스', sets: '탑/백오프 세트', tip: '윗가슴을 채우는 것으로 루틴을 시작합니다. 가슴을 열고 견갑을 패드에 단단히 고정하세요.', baseTopSet: 40, unit: '한쪽'},
+                { type: '메인', name: '너틸러스 체스트 프레스 (뉴트럴)', sets: '탑/백오프 세트', tip: 'V자 그립으로 가슴 중앙부를 강하게 수축시킵니다. 팔꿈치가 너무 벌어지지 않게 주의하세요.', baseTopSet: 70, unit: '총' },
+                { type: '메인', name: '사이드 래터럴 레이즈 머신', sets: '4~5세트', tip: '어깨 측면을 집중 공략하여 프레임을 넓힙니다. 팔꿈치로 들어올린다는 느낌으로 수행하고, 승모근 개입을 최소화하세요. 🔥 목표: 15-25kg x 15-20회.' },
+                { type: '보조', name: '딥스 머신', sets: '3~4세트', tip: '아랫가슴과 삼두근에 볼륨을 더합니다. 상체를 숙일수록 아랫가슴에 자극이 집중됩니다. 🔥 목표: 실패지점까지 x 3-4세트.' },
+                { type: '마무리', name: '뉴텍 암 컬 머신', sets: '3~4세트', tip: '팔을 패드에 완전히 고정하고, 반동 없이 이두근의 힘으로만 핸들을 들어올려 강하게 수축합니다. 🔥 목표: 25-35kg x 10-15회.' },
+            ]},
+        },
+        13: {
+            phase: '디로딩 주간',
+            method: '디로딩',
+            pull: { name: '풀(Pull) 종합 디로딩', routine: [
+                { type: '웜업', name: '노틸러스 풀오버 (가볍게)', sets: '2세트', tip: '중량 50~60%, 세트 수 절반. 실패지점 금지.'},
+                { type: '회복', name: '랫풀다운 (맥그립 중간)', sets: '2세트', tip: '광배근 전체의 움직임 패턴과 신경계를 가볍게 활성화'},
+                { type: '회복', name: '해머스트랭스 D.Y. 로우', sets: '2세트', tip: '광배근 하부의 독특한 궤적에 대한 감각 유지'},
+                { type: '회복', name: '해머스트랭스 래터럴 로우 (T바)', sets: '2세트', tip: '등 상부를 자극하는 움직임 패턴 유지'},
+                { type: '회복', name: '리어 델트 머신', sets: '2세트', tip: '후면 삼각근 혈류 공급 및 관절 예열'},
+                { type: '회복', name: '케이블 푸쉬 다운', sets: '2세트', tip: '삼두근의 가장 기본적인 움직임 패턴 유지'},
+            ]},
+            leg: { name: '레그(Leg) 종합 디로딩', routine: [
+                { type: '웜업', name: '노틸러스 이너/아웃 타이 (가볍게)', sets: '2세트', tip: '중량 50~60%, 세트 수 절반. 실패지점 금지.'},
+                { type: '회복', name: '싸이벡스 스미스 머신 스쿼트', sets: '2세트', tip: '스쿼트 패턴의 신경계를 유지하고 하체 전체에 혈류 공급'},
+                { type: '회복', name: '레그 프레스 (기본 스탠스)', sets: '2세트', tip: '무릎과 고관절에 부담 없이 하체 볼륨감 유지'},
+                { type: '회복', name: '노틸러스 레그 익스텐션 (보조)', sets: '2세트', tip: '대퇴사두와 무릎 관절의 움직임 감각 유지'},
+                { type: '회복', name: '노틸러스 레그 컬', sets: '2세트', tip: '햄스트링과 무릎 관절 후면의 움직임 감각 유지'},
+                { type: '회복', name: '부티빌더 스탠딩 힙 쓰러스트', sets: '2세트', tip: '둔근의 신경계 활성화'},
+            ]},
+            push: { name: '푸쉬(Push) 종합 디로딩', routine: [
+                { type: '웜업', name: '팩덱 플라이 (가볍게)', sets: '2세트', tip: '중량 50~60%, 세트 수 절반. 실패지점 금지.'},
+                { type: '회복', name: '로우 인클라인 스미스 프레스', sets: '2세트', tip: '윗가슴을 자극하는 메인 프레스 패턴 유지'},
+                { type: '회복', name: '해머스트랭스 시티드 체스트 프레스', sets: '2세트', tip: '가슴 중앙부를 자극하는 다른 궤적의 프레스 패턴 유지'},
+                { type: '회복', name: '해머스트랭스 숄더 프레스', sets: '2세트', tip: '어깨 관절의 수직 프레스 움직임 감각 유지'},
+                { type: '회복', name: '사이드 래터럴 레이즈 머신', sets: '2세트', tip: '어깨 측면의 혈류 공급 및 신경계 활성화'},
+                { type: '회복', name: '케이블 이두 컬', sets: '2세트', tip: '이두근의 가장 기본적인 움직임 패턴 유지'},
+            ]},
+        }
+    };
+
+    let currentWeek = 1;
+    let currentDay = 'pull';
+    let chartInstance = null;
+    
+    const weekSelector = document.getElementById('week-selector');
+    const daySelector = document.getElementById('day-selector');
+    const workoutTitle = document.getElementById('workout-title');
+    const workoutList = document.getElementById('workout-list');
+    const workoutPhaseBadge = document.getElementById('workout-phase-badge');
+    const workoutPhaseDescription = document.getElementById('workout-phase-description');
+    const planTableBody = document.getElementById('plan-table-body');
+    const exerciseSelector = document.getElementById('exercise-selector');
+    const recordsContent = document.getElementById('records-content');
+    const noRecordsDiv = document.getElementById('no-records');
+    const chartTitle = document.getElementById('chart-title');
+    const resetButton = document.getElementById('reset-button');
+    const resetModal = document.getElementById('reset-modal');
+    const confirmReset = document.getElementById('confirm-reset');
+    const cancelReset = document.getElementById('cancel-reset');
+
+    const phaseDescriptions = {
+        '강화 주기': '최대 근력(Strength) 증진. 메인 운동은 \'탑/백오프 세트\' 방식으로 진행하며, 매주 점진적으로 더 무거운 무게에 도전하는 것이 목표입니다.',
+        '축적 주기': '근비대(Hypertrophy)를 위한 운동량(Volume) 확보. 메인 운동은 \'워킹 세트\' (8~12회 x 3~4세트)로 변경하여 수행합니다.',
+        '디로딩 주간': '\'능동적 회복\'을 통해 중추신경계와 관절의 피로를 완전히 해소하고 다음 12주를 준비하는 시기입니다. 평소 워킹 세트 중량의 50%~60%, 세트 수의 절반만 가볍게 수행합니다.'
+    };
+    const phaseColors = {
+        '강화 주기': 'bg-red-100 text-red-800',
+        '축적 주기': 'bg-green-100 text-green-800',
+        '디로딩 주간': 'bg-sky-100 text-sky-800',
+    }
+
+    function getSanitizedName(name) {
+        return name.replace(/\s/g, '').replace(/[^a-zA-Z0-9가-힣]/g, '');
+    }
+
+    function getTodaysDate() {
+        return new Date().toISOString().split('T')[0];
+    }
+    
+    function saveAllSets(exerciseName) {
+        const sanitizedName = getSanitizedName(exerciseName);
+        const setsContainer = document.getElementById(`sets-container-${sanitizedName}`);
+        if (!setsContainer) return;
+
+        const setRows = setsContainer.querySelectorAll('.set-row');
+        const setsData = [];
+        setRows.forEach(row => {
+            const weightInput = row.querySelector('input[data-type="weight"]');
+            const repsInput = row.querySelector('input[data-type="reps"]');
+            if (weightInput.value && repsInput.value) {
+                setsData.push({
+                    weight: parseFloat(weightInput.value),
+                    reps: parseInt(repsInput.value)
+                });
+            }
+        });
+
+        let records = JSON.parse(localStorage.getItem('workoutRecords')) || {};
+        if (!records[sanitizedName]) {
+            records[sanitizedName] = [];
+        }
+
+        const today = getTodaysDate();
+        const recordIndex = records[sanitizedName].findIndex(r => r.date === today && r.week === currentWeek && r.day === currentDay);
+        
+        let dayName = "";
+        let weekData = workoutPlan[currentWeek] || getReferenceData(currentWeek);
+        if (weekData && weekData[currentDay]) {
+            dayName = weekData[currentDay].name;
+        }
+
+        const newRecord = {
+            date: today,
+            week: currentWeek,
+            day: currentDay,
+            dayName: dayName,
+            sets: setsData,
+        };
+
+        if (setsData.length > 0) {
+            if (recordIndex > -1) {
+                records[sanitizedName][recordIndex] = newRecord;
+            } else {
+                records[sanitizedName].push(newRecord);
+            }
+        } else {
+            if (recordIndex > -1) {
+                records[sanitizedName].splice(recordIndex, 1);
+            }
+        }
+        
+        localStorage.setItem('workoutRecords', JSON.stringify(records));
+    }
+    
+    function loadRecordForToday(exerciseName) {
+        const sanitizedName = getSanitizedName(exerciseName);
+        const records = JSON.parse(localStorage.getItem('workoutRecords')) || {};
+        if (!records[sanitizedName]) return null;
+        const today = getTodaysDate();
+        return records[sanitizedName].find(r => r.date === today && r.week === currentWeek && r.day === currentDay);
+    }
+
+    function loadLatestRecord(exerciseName, forWeek) {
+        const sanitizedName = getSanitizedName(exerciseName);
+        const records = JSON.parse(localStorage.getItem('workoutRecords')) || {};
+        if (!records[sanitizedName] || records[sanitizedName].length === 0) return null;
+        
+        const relevantRecords = records[sanitizedName]
+            .filter(r => r.week < forWeek)
+            .sort((a, b) => new Date(b.date) - new Date(a.date));
+        
+        return relevantRecords[0] || null;
+    }
+    
+    function getReferenceData(week) {
+        let referenceWeek = ((week - 1) % 3) + 1;
+        if (week > 6 && week < 10) { referenceWeek = ((week - 1 - 6) % 3) + 1; } 
+        else if (week > 9 && week < 13) { referenceWeek = ((week - 1 - 9) % 3) + 1; }
+        return workoutPlan[referenceWeek];
+    }
+
+    function calculateEpley1RM(weight, reps) {
+        if (reps === 1) return weight;
+        return weight * (1 + reps / 30);
+    }
+
+    function getWeeklyGoalText(exercise, week) {
+        if (!exercise.baseTopSet || week > 12) return exercise.tip;
+        
+        const sanitizedName = getSanitizedName(exercise.name);
+        let records = JSON.parse(localStorage.getItem('workoutRecords')) || {};
+        
+        const isStrength = [1, 2, 3, 7, 8, 9].includes(week);
+        const smallIncrement = 2.5;
+        const bigIncrement = 5;
+        const increment = exercise.unit === '한쪽' ? smallIncrement : bigIncrement;
+
+        if (isStrength) {
+            const strengthCycle = week < 7 ? 1 : 2;
+            const weekInCycle = week <= 3 ? week - 1 : week - 7;
+            
+            let lastCycleTopSet = null;
+            if (strengthCycle === 2 && records[sanitizedName]) {
+                 const prevStrengthRecords = records[sanitizedName]
+                    .filter(r => [1,2,3].includes(r.week) && r.sets.length > 0)
+                    .sort((a,b) => new Date(b.date) - new Date(a.date));
+                if(prevStrengthRecords.length > 0) {
+                   lastCycleTopSet = prevStrengthRecords[0].sets.reduce((max, set) => set.weight > max.weight ? set : max, {weight: 0, reps: 0});
+                }
+            }
+
+            let e1RM;
+            if (lastCycleTopSet && lastCycleTopSet.weight > 0) {
+                 e1RM = calculateEpley1RM(lastCycleTopSet.weight, lastCycleTopSet.reps);
+                 e1RM *= 1.025; 
+            } else {
+                e1RM = calculateEpley1RM(exercise.baseTopSet, 5); 
+            }
+            
+            let goalWeight, goalReps, backoffWeight;
+            if(weekInCycle === 0) {
+                goalWeight = Math.round((e1RM * 0.8) / 2.5) * 2.5;
+                goalReps = "8회";
+            } else if (weekInCycle === 1) {
+                goalWeight = Math.round((e1RM * 0.85) / 2.5) * 2.5;
+                goalReps = "6-7회";
+            } else { 
+                goalWeight = Math.round((e1RM * 0.9) / 2.5) * 2.5;
+                goalReps = "5회";
+            }
+
+            backoffWeight = Math.round((goalWeight * 0.8) / 2.5) * 2.5;
+            return `🔥 강화 목표: 탑 ${goalWeight}kg x ${goalReps} / 백오프 ${backoffWeight}kg x 10-12회.`;
+
+        } else { // Hypertrophy
+            const hypertrophyCycle = week < 7 ? 1 : 2;
+            let lastStrengthTopSetWeight = exercise.baseTopSet;
+            
+            if(records[sanitizedName]){
+                const strengthWeeks = hypertrophyCycle === 1 ? [1,2,3] : [7,8,9];
+                 const prevStrengthRecords = records[sanitizedName]
+                    .filter(r => strengthWeeks.includes(r.week) && r.sets.length > 0)
+                    .sort((a,b) => new Date(b.date) - new Date(a.date));
+
+                if(prevStrengthRecords.length > 0){
+                   lastStrengthTopSetWeight = Math.max(...prevStrengthRecords[0].sets.map(s => s.weight));
+                }
+            }
+            
+            let baseWorkingWeight = Math.round((lastStrengthTopSetWeight * 0.75) / 2.5) * 2.5;
+            
+            let weekInCycle = week <= 6 ? week - 4 : week - 10;
+            let goalWeight = baseWorkingWeight + (increment * weekInCycle);
+
+            return `🔥 축적 목표: 워킹 세트 ${goalWeight}kg x 8-12회 (3-4세트).`;
+        }
+    }
+    
+    function addSetRow(container, exerciseName, setNumber, setData = {weight: '', reps: ''}) {
+        const sanitizedName = getSanitizedName(exerciseName);
+        const setRow = document.createElement('div');
+        setRow.className = 'set-row flex items-center gap-3';
+        setRow.innerHTML = `
+            <span class="font-semibold text-slate-500 w-12 text-right">세트 ${setNumber}</span>
+            <input type="number" step="0.1" data-type="weight" value="${setData.weight}" placeholder="중량" class="w-full p-2.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition text-lg">
+            <span class="font-semibold text-slate-400">kg</span>
+            <input type="number" data-type="reps" value="${setData.reps}" placeholder="횟수" class="w-full p-2.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition text-lg">
+            <span class="font-semibold text-slate-400">회</span>
+            <button class="delete-set-btn text-slate-400 hover:text-red-500 transition text-2xl font-bold">&times;</button>
+        `;
+        container.appendChild(setRow);
+
+        setRow.querySelector('input[data-type="weight"]').addEventListener('change', () => saveAllSets(exerciseName));
+        setRow.querySelector('input[data-type="reps"]').addEventListener('change', () => saveAllSets(exerciseName));
+        setRow.querySelector('.delete-set-btn').addEventListener('click', () => {
+            setRow.remove();
+            container.querySelectorAll('.set-row').forEach((row, index) => {
+                row.querySelector('span:first-child').textContent = `세트 ${index + 1}`;
+            });
+            saveAllSets(exerciseName);
+        });
+    }
+
+    function renderWorkout() {
+        let weekData = workoutPlan[currentWeek];
+        if (!weekData) {
+            const phase = (currentWeek >= 4 && currentWeek <= 6) || (currentWeek >= 10 && currentWeek <= 12) ? '축적 주기' : '강화 주기';
+            const refData = getReferenceData(currentWeek);
+            weekData = { ...refData, phase, method: (phase === '축적 주기' ? '워킹 세트' : '탑/백오프 세트') };
+        }
+        
+        const dayData = weekData[currentDay];
+        if (!dayData) return;
+
+        workoutTitle.textContent = `${currentWeek}주차: ${dayData.name}`;
+        
+        workoutPhaseBadge.textContent = weekData.phase;
+        workoutPhaseBadge.className = `px-4 py-1.5 text-base font-semibold rounded-full self-start sm:self-center ${phaseColors[weekData.phase]}`;
+        workoutPhaseDescription.textContent = phaseDescriptions[weekData.phase];
+
+        workoutList.innerHTML = '';
+        dayData.routine.forEach(exercise => {
+            const sanitizedName = getSanitizedName(exercise.name);
+            const recordForToday = loadRecordForToday(exercise.name);
+            const latestRecord = loadLatestRecord(exercise.name, currentWeek);
+
+            const card = document.createElement('div');
+            card.className = 'bg-white rounded-xl shadow-lg p-5 flex flex-col card-enter';
+            
+            const isMain = exercise.type === '메인';
+            let methodText = exercise.sets;
+            if (weekData.method === '워킹 세트' && isMain) {
+                methodText = '워킹 세트';
+            } else if (weekData.method === '디로딩') {
+                methodText = '디로딩';
+            }
+            
+            let finalTip = exercise.tip;
+            if (isMain) {
+                const weeklyGoal = getWeeklyGoalText(exercise, currentWeek);
+                if (weeklyGoal) {
+                    finalTip = weeklyGoal;
+                }
+            }
+
+            card.innerHTML = `
+                <div class="flex-1">
+                    <div class="flex items-center gap-3">
+                        <span class="text-sm font-bold uppercase py-1 px-3 rounded-full ${
+                            exercise.type.includes('웜업') || exercise.type.includes('선피로') || exercise.type.includes('준비') ? 'bg-amber-100 text-amber-800' :
+                            exercise.type.includes('메인') ? 'bg-blue-100 text-blue-800' :
+                            exercise.type.includes('회복') ? 'bg-sky-100 text-sky-800' :
+                            'bg-slate-100 text-slate-800'
+                        }">${exercise.type}</span>
+                        <h4 class="text-xl font-bold text-slate-900">${exercise.name}</h4>
+                    </div>
+                    <p class="text-slate-600 mt-3 text-base">${finalTip}</p>
+                     <p class="text-base font-semibold text-blue-700 mt-3">훈련 방식: ${methodText}</p>
+                </div>
+                <div id="sets-container-${sanitizedName}" class="space-y-3 mt-4"></div>
+                <button id="add-set-${sanitizedName}" class="mt-4 w-full bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold py-2 px-4 rounded-lg transition">+ 세트 추가</button>
+            `;
+            workoutList.appendChild(card);
+            
+            const setsContainer = card.querySelector(`#sets-container-${sanitizedName}`);
+            const dataToRender = recordForToday ? recordForToday.sets : (latestRecord ? latestRecord.sets : [{weight:'', reps:''}]);
+
+            if (dataToRender.length > 0) {
+                 dataToRender.forEach((set, index) => {
+                    addSetRow(setsContainer, exercise.name, index + 1, set);
+                });
+            } else {
+                 addSetRow(setsContainer, exercise.name, 1);
+            }
+            
+            card.querySelector(`#add-set-${sanitizedName}`).addEventListener('click', () => {
+                const currentSetCount = setsContainer.querySelectorAll('.set-row').length;
+                addSetRow(setsContainer, exercise.name, currentSetCount + 1);
+            });
+        });
+    }
+
+    function updateActiveButtons() {
+        document.querySelectorAll('#week-selector button').forEach(btn => {
+            btn.classList.toggle('week-btn-active', parseInt(btn.dataset.week) === currentWeek);
+            btn.classList.toggle('bg-slate-100', parseInt(btn.dataset.week) !== currentWeek);
+        });
+        document.querySelectorAll('#day-selector button').forEach(btn => {
+            btn.classList.toggle('day-btn-active', btn.dataset.day === currentDay);
+             btn.classList.toggle('bg-slate-100', btn.dataset.day !== currentDay);
+        });
+    }
+    
+    function showView(viewName) {
+        document.getElementById('view-today').classList.toggle('hidden', viewName !== 'today');
+        document.getElementById('view-plan').classList.toggle('hidden', viewName !== 'plan');
+        document.getElementById('view-records').classList.toggle('hidden', viewName !== 'records');
+        
+        document.getElementById('tab-today').classList.toggle('tab-active', viewName === 'today');
+        document.getElementById('tab-plan').classList.toggle('tab-active', viewName === 'plan');
+        document.getElementById('tab-records').classList.toggle('tab-active', viewName === 'records');
+        
+        ['today', 'plan', 'records'].forEach(tab => {
+            document.getElementById(`tab-${tab}`).classList.toggle('text-slate-500', viewName !== tab);
+        });
+
+        if (viewName === 'records') {
+            populateExerciseSelector();
+            renderRecords();
+        }
+    }
+
+    function createPlanTable() {
+        planTableBody.innerHTML = '';
+        for (let i = 1; i <= 13; i++) {
+            let weekData = workoutPlan[i];
+            let referenceWeek = i;
+             if (!weekData) {
+                const phase = (i >= 4 && i <= 6) || (i >= 10 && i <= 12) ? '축적 주기' : '강화 주기';
+                referenceWeek = ((i - 1) % 3) + 1;
+                if (i > 6 && i < 10) { referenceWeek = ((i-1-6) % 3) + 1; } 
+                else if (i > 10 && i < 13) { referenceWeek = ((i-1-9) % 3) + 1; }
+                weekData = { ...workoutPlan[referenceWeek], phase, method: (phase === '축적 주기' ? '워킹 세트' : '탑/백오프 세트') };
+            }
+            
+            const tr = document.createElement('tr');
+            tr.className = 'border-b border-slate-200 hover:bg-slate-50';
+            tr.innerHTML = `
+                <td class="p-4 font-bold text-center">${i}</td>
+                <td class="p-4">${weekData.pull.name}</td>
+                <td class="p-4">${weekData.leg.name}</td>
+                <td class="p-4">${weekData.push.name}</td>
+                <td class="p-4"><span class="px-3 py-1 text-sm font-semibold rounded-full ${phaseColors[weekData.phase]}">${weekData.method}</span></td>
+            `;
+            planTableBody.appendChild(tr);
+        }
+    }
+    
+    function populateExerciseSelector() {
+        const mainExercises = new Set();
+        for (let i = 1; i <= 3; i++) {
+            ['pull', 'leg', 'push'].forEach(day => {
+                workoutPlan[i][day].routine.forEach(ex => {
+                    if (ex.type === '메인') {
+                        mainExercises.add(ex.name);
+                    }
+                });
+            });
+        }
+        
+        const currentSelected = exerciseSelector.value;
+        exerciseSelector.innerHTML = '<option value="">-- 운동 선택 --</option>';
+        Array.from(mainExercises).sort().forEach(ex => {
+            const option = document.createElement('option');
+            option.value = getSanitizedName(ex);
+            option.textContent = ex;
+            exerciseSelector.appendChild(option);
+        });
+        if(currentSelected) {
+          exerciseSelector.value = currentSelected;
+        }
+    }
+
+    function renderRecords() {
+        const selectedExercise = exerciseSelector.value;
+        const allRecords = JSON.parse(localStorage.getItem('workoutRecords')) || {};
+        
+        if (!selectedExercise || !allRecords[selectedExercise] || allRecords[selectedExercise].length === 0) {
+            recordsContent.classList.add('hidden');
+            noRecordsDiv.classList.remove('hidden');
+            if (chartInstance) chartInstance.destroy();
+            return;
+        }
+
+        recordsContent.classList.remove('hidden');
+        noRecordsDiv.classList.add('hidden');
+
+        const exerciseData = allRecords[selectedExercise].sort((a, b) => new Date(a.date) - new Date(b.date));
+        
+        const originalName = Array.from(exerciseSelector.options).find(opt => opt.value === selectedExercise).textContent;
+        chartTitle.textContent = `${originalName} 중량 변화 추이 (Top Set 기준)`;
+        renderProgressChart(exerciseData);
+        renderRecordsTable(exerciseData);
+    }
+    
+    function renderProgressChart(data) {
+        const ctx = document.getElementById('progressChart').getContext('2d');
+        const labels = data.map(d => d.date);
+        const topWeights = data.map(d => d.sets.length > 0 ? Math.max(...d.sets.map(s => s.weight)) : 0);
+
+        if (chartInstance) {
+            chartInstance.destroy();
+        }
+
+        chartInstance = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: labels,
+                datasets: [{
+                    label: '최고 중량(kg)',
+                    data: topWeights,
+                    borderColor: '#3b82f6',
+                    backgroundColor: 'rgba(59, 130, 246, 0.1)',
+                    fill: true,
+                    tension: 0.1,
+                    pointBackgroundColor: '#3b82f6',
+                    pointRadius: 5,
+                    pointHoverRadius: 7,
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    y: {
+                        beginAtZero: false,
+                        title: {
+                            display: true,
+                            text: '중량 (kg)'
+                        }
+                    },
+                    x: {
+                         title: {
+                            display: true,
+                            text: '날짜'
+                        }
+                    }
+                },
+                plugins: {
+                    legend: {
+                        display: false
+                    },
+                    tooltip: {
+                        callbacks: {
+                            title: function(context) {
+                                const record = data[context[0].dataIndex];
+                                return `${record.date} (${record.week}주차, ${record.dayName})`;
+                            },
+                            label: function(context) {
+                                let label = context.dataset.label || '';
+                                if (label) {
+                                    label += ': ';
+                                }
+                                if (context.parsed.y !== null) {
+                                    label += context.parsed.y + 'kg';
+                                }
+                                return label;
+                            },
+                             afterLabel: function(context) {
+                                const record = data[context.dataIndex];
+                                const topSet = record.sets.reduce((max, set) => set.weight > max.weight ? set : max, {weight: 0, reps: 0});
+                                return `${topSet.reps}회 (Top Set)`;
+                            }
+                        }
+                    }
+                }
+            }
+        });
+    }
+
+    function renderRecordsTable(data) {
+        const tableContainer = document.getElementById('records-table-container');
+        tableContainer.innerHTML = '';
+
+        data.forEach(record => {
+            const dayTable = document.createElement('table');
+            dayTable.className = 'w-full text-left border-collapse mb-4';
+            const dayNameMap = {'pull': '풀', 'leg':'하체', 'push':'푸쉬'};
+            const headerHTML = `
+                <thead class="bg-slate-100">
+                    <tr>
+                        <th colspan="3" class="p-3 font-semibold text-slate-800">
+                            ${record.date} (${record.week}주차, ${dayNameMap[record.day] || record.day})
+                        </th>
+                    </tr>
+                    <tr class="text-sm">
+                        <th class="p-3 font-semibold text-slate-600 w-1/3">세트</th>
+                        <th class="p-3 font-semibold text-slate-600 w-1/3">중량(kg)</th>
+                        <th class="p-3 font-semibold text-slate-600 w-1/3">횟수(Reps)</th>
+                    </tr>
+                </thead>
+            `;
+            const body = document.createElement('tbody');
+            body.className = 'text-slate-700';
+            record.sets.forEach((set, index) => {
+                const tr = document.createElement('tr');
+                tr.className = 'border-b border-slate-200 last:border-b-0';
+                tr.innerHTML = `
+                    <td class="p-3">${index + 1}</td>
+                    <td class="p-3 font-semibold text-slate-900">${set.weight}kg</td>
+                    <td class="p-3">${set.reps}회</td>
+                `;
+                body.appendChild(tr);
+            });
+            dayTable.innerHTML = headerHTML;
+            dayTable.appendChild(body);
+            tableContainer.appendChild(dayTable);
+        });
+    }
+    
+    function handleReset() {
+        localStorage.removeItem('workoutRecords');
+        resetModal.classList.add('hidden');
+        currentWeek = 1;
+        currentDay = 'pull';
+        showView('today');
+        renderWorkout();
+        updateActiveButtons();
+        if (chartInstance) chartInstance.destroy();
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+        for (let i = 1; i <= 13; i++) {
+            const weekBtn = document.createElement('button');
+            weekBtn.dataset.week = i;
+            weekBtn.textContent = `${i}주차`;
+            weekBtn.className = 'px-3.5 py-2.5 text-base font-semibold rounded-lg transition duration-200 bg-slate-100 hover:bg-slate-200';
+            weekSelector.appendChild(weekBtn);
+        }
+
+        weekSelector.addEventListener('click', e => {
+            if (e.target.tagName === 'BUTTON') {
+                currentWeek = parseInt(e.target.dataset.week);
+                renderWorkout();
+                updateActiveButtons();
+            }
+        });
+
+        daySelector.addEventListener('click', e => {
+            if (e.target.tagName === 'BUTTON') {
+                currentDay = e.target.dataset.day;
+                renderWorkout();
+                updateActiveButtons();
+            }
+        });
+        
+        exerciseSelector.addEventListener('change', renderRecords);
+
+        resetButton.addEventListener('click', () => {
+            resetModal.classList.remove('hidden');
+        });
+        cancelReset.addEventListener('click', () => {
+            resetModal.classList.add('hidden');
+        });
+        confirmReset.addEventListener('click', handleReset);
+
+        renderWorkout();
+        updateActiveButtons();
+        createPlanTable();
+    });
+
+</script>
+</body>
+</html>
+
