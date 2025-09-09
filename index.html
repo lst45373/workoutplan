@@ -205,8 +205,8 @@
             phase: '강화 주기',
             method: '탑/백오프 세트',
             pull: { name: '풀(Pull) A', routine: [
-                { type: '웜업', name: '노틸러스 풀오버', sets: '2~3세트', tip: '광배근 스트레칭과 혈류 공급에 집중합니다. (LBS 단위) 🔥 목표: 40-60 LBS x 12-15회.'},
-                { type: '웜업', name: '랫풀다운 (가볍게)', sets: '2세트', tip: '견갑을 아래로 누르는 움직임에 집중하여 등을 활성화시킵니다. 🔥 목표: 30-40kg x 12-15회.'},
+                { type: '웜업', name: '노틸러스 풀오버', sets: '2~3세트', tip: '광배근 스트레칭과 혈류 공급에 집중합니다. (LBS 단위)', staticGoal: '🔥 목표: 40-60 LBS x 12-15회.'},
+                { type: '웜업', name: '랫풀다운 (가볍게)', sets: '2세트', tip: '견갑을 아래로 누르는 움직임에 집중하여 등을 활성화시킵니다.', staticGoal: '🔥 목표: 30-40kg x 12-15회.'},
                 { type: '메인', name: '해머스트랭스 래터럴 로우 (T바)', sets: '탑/백오프 세트', tip: '의자를 낮추고 오버그립으로 넓게 잡습니다. 팔꿈치를 90도로 벌려 등 중앙을 강하게 쥐어짜는 느낌으로 당깁니다.', baseTopSet: 50, unit: '한쪽'},
                 { type: '메인', name: '해머스트랭스 하이로우', sets: '탑/백오프 세트', tip: '윗가슴을 패드에 고정하고, 팔꿈치를 대각선 아래 & 등 뒤쪽으로 보내며 등 상부 전체를 수축합니다.', baseTopSet: 45, unit: '한쪽'},
                 { type: '메인', name: '해머스트랭스 로우로우', sets: '탑/백오프 세트', tip: '가슴을 패드에 단단히 붙이고, 팔꿈치를 옆구리 뒤로 보낸다는 느낌으로 등 중앙부의 두께감에 집중합니다.', baseTopSet: 50, unit: '한쪽'},
@@ -357,12 +357,9 @@
         '디로딩 주간': 'bg-sky-100 text-sky-800',
     }
 
-    function getSanitizedName(name, type) {
-        if(typeof name !== 'string' || typeof type !== 'string') return '';
-        const dayData = (workoutPlan[currentWeek] || getReferenceData(currentWeek))[currentDay];
-        if(!dayData) return '';
-        const routineName = dayData.name.charAt(dayData.name.length - 1); // A, B, or C
-        return (name + type + routineName).replace(/\s/g, '').replace(/[^a-zA-Z0-9가-힣]/g, '');
+    function getSanitizedName(exercise) {
+         if(typeof exercise.name !== 'string' || typeof exercise.type !== 'string') return '';
+         return (exercise.name + exercise.type).replace(/\s/g, '').replace(/[^a-zA-Z0-9가-힣]/g, '');
     }
 
     function getTodaysDate() {
@@ -370,7 +367,7 @@
     }
     
     function saveAllSets(exercise) {
-        const sanitizedName = getSanitizedName(exercise.name, exercise.type);
+        const sanitizedName = getSanitizedName(exercise);
         const setsContainer = document.getElementById(`sets-container-${sanitizedName}`);
         if (!setsContainer) return;
 
@@ -393,7 +390,7 @@
         }
 
         const today = getTodaysDate();
-        const recordIndex = records[sanitizedName].findIndex(r => r.date === today && r.week === currentWeek && r.day === currentDay);
+        const recordIndex = records[sanitizedName].findIndex(r => r.date === today);
         
         let dayName = "";
         let weekData = workoutPlan[currentWeek] || getReferenceData(currentWeek);
@@ -425,26 +422,19 @@
     }
     
     function loadRecordForToday(exercise) {
-        const sanitizedName = getSanitizedName(exercise.name, exercise.type);
+        const sanitizedName = getSanitizedName(exercise);
         const records = JSON.parse(localStorage.getItem('workoutRecords')) || {};
         if (!records[sanitizedName]) return null;
         const today = getTodaysDate();
-        return records[sanitizedName].find(r => r.date === today && r.week === currentWeek && r.day === currentDay);
+        return records[sanitizedName].find(r => r.date === today);
     }
 
-    function loadLatestRecord(exercise, forWeek) {
-        const sanitizedName = getSanitizedName(exercise.name, exercise.type);
+    function loadLatestRecord(exercise) {
+        const sanitizedName = getSanitizedName(exercise);
         const records = JSON.parse(localStorage.getItem('workoutRecords')) || {};
         if (!records[sanitizedName] || records[sanitizedName].length === 0) return null;
         
-         const dayData = (workoutPlan[forWeek] || getReferenceData(forWeek))[currentDay];
-        if(!dayData) return null;
-        
-        const relevantRecords = records[sanitizedName]
-            .filter(r => r.dayName === dayData.name && r.date < getTodaysDate())
-            .sort((a, b) => new Date(b.date) - new Date(a.date));
-        
-        return relevantRecords[0] || null;
+        return records[sanitizedName].sort((a, b) => new Date(b.date) - new Date(a.date))[0];
     }
     
     function getReferenceData(week) {
@@ -462,7 +452,7 @@
     function getWeeklyGoalText(exercise, week) {
         if (!exercise.baseTopSet || week > 12) return null;
         
-        const sanitizedName = getSanitizedName(exercise.name, exercise.type);
+        const sanitizedName = getSanitizedName(exercise);
         let records = JSON.parse(localStorage.getItem('workoutRecords')) || {};
         
         const isStrength = [1, 2, 3, 7, 8, 9].includes(week);
@@ -574,9 +564,9 @@
 
         workoutList.innerHTML = '';
         dayData.routine.forEach(exercise => {
-            const sanitizedName = getSanitizedName(exercise.name, exercise.type);
+            const sanitizedName = getSanitizedName(exercise);
             const recordForToday = loadRecordForToday(exercise);
-            const latestRecord = loadLatestRecord(exercise, currentWeek);
+            const latestRecord = loadLatestRecord(exercise);
 
             const card = document.createElement('div');
             card.className = 'bg-white rounded-xl shadow-lg p-5 flex flex-col card-enter';
@@ -596,7 +586,7 @@
                 goalText = exercise.staticGoal;
             }
 
-            const tipHTML = exercise.tip + (goalText ? `<br><span class="font-bold text-red-600">${goalText}</span>` : "");
+            const tipHTML = goalText ? `${exercise.tip} <br><span class="font-bold text-red-600">${goalText}</span>` : exercise.tip;
 
 
             card.innerHTML = `
@@ -693,39 +683,60 @@
     }
     
     function populateExerciseSelector() {
-        const mainExercisesMap = new Map();
-        for (let i = 1; i <= 13; i++) {
-            const weekData = workoutPlan[i] || getReferenceData(i);
+        const exerciseGroupMap = new Map();
+        
+        Object.values(workoutPlan).forEach(weekData => {
             ['pull', 'leg', 'push'].forEach(day => {
-                if (weekData[day]) {
+                if (weekData[day] && weekData[day].routine) {
                     weekData[day].routine.forEach(ex => {
-                         const sanitizedName = getSanitizedName(ex.name, ex.type);
-                         if (!mainExercisesMap.has(sanitizedName)) {
-                             mainExercisesMap.set(sanitizedName, ex.name);
-                         }
+                        const baseName = ex.name;
+                        const sanitizedId = getSanitizedName(ex);
+                        if (!exerciseGroupMap.has(baseName)) {
+                            exerciseGroupMap.set(baseName, { name: baseName, ids: new Set() });
+                        }
+                        exerciseGroupMap.get(baseName).ids.add(sanitizedId);
                     });
                 }
             });
-        }
-        
+        });
+
         const currentSelected = exerciseSelector.value;
         exerciseSelector.innerHTML = '<option value="">-- 운동 선택 --</option>';
-        Array.from(mainExercisesMap.entries()).sort((a, b) => a[1].localeCompare(b[1])).forEach(([key, name]) => {
-            const option = document.createElement('option');
-            option.value = key;
-            option.textContent = name;
-            exerciseSelector.appendChild(option);
-        });
+
+        Array.from(exerciseGroupMap.values())
+            .sort((a, b) => a.name.localeCompare(b.name))
+            .forEach(group => {
+                const option = document.createElement('option');
+                option.value = Array.from(group.ids).join(',');
+                option.textContent = group.name;
+                exerciseSelector.appendChild(option);
+            });
+
         if(currentSelected) {
           exerciseSelector.value = currentSelected;
         }
     }
 
     function renderRecords() {
-        const selectedExercise = exerciseSelector.value;
+        const selectedIdsString = exerciseSelector.value;
+        if (!selectedIdsString) {
+            recordsContent.classList.add('hidden');
+            noRecordsDiv.classList.remove('hidden');
+            if (chartInstance) chartInstance.destroy();
+            return;
+        }
+
+        const selectedIds = selectedIdsString.split(',');
         const allRecords = JSON.parse(localStorage.getItem('workoutRecords')) || {};
+        let combinedData = [];
+
+        selectedIds.forEach(id => {
+            if (allRecords[id]) {
+                combinedData.push(...allRecords[id]);
+            }
+        });
         
-        if (!selectedExercise || !allRecords[selectedExercise] || allRecords[selectedExercise].length === 0) {
+        if (combinedData.length === 0) {
             recordsContent.classList.add('hidden');
             noRecordsDiv.classList.remove('hidden');
             if (chartInstance) chartInstance.destroy();
@@ -735,9 +746,9 @@
         recordsContent.classList.remove('hidden');
         noRecordsDiv.classList.add('hidden');
 
-        const exerciseData = allRecords[selectedExercise].sort((a, b) => new Date(a.date) - new Date(b.date));
+        const exerciseData = combinedData.sort((a, b) => new Date(a.date) - new Date(b.date));
         
-        const originalName = Array.from(exerciseSelector.options).find(opt => opt.value === selectedExercise).textContent;
+        const originalName = Array.from(exerciseSelector.options).find(opt => opt.value === selectedIdsString).textContent;
         chartTitle.textContent = `${originalName} 중량 변화 추이 (Top Set 기준)`;
         renderProgressChart(exerciseData);
         renderRecordsTable(exerciseData);
