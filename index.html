@@ -307,7 +307,7 @@
                 { type: '웜업', name: '해머스트랭스 래터럴 로우', sets: '4세트', tip: '견갑을 안정화시키고 후면을 활성화합니다. (한쪽 20kg 고정) 가볍게 당기며 날개뼈 주변을 예열하세요.' },
                 { type: '웜업', name: '팩덱 플라이', sets: '3세트', tip: '가슴 근육을 선피로시켜 프레스 시 자극을 극대화합니다.' },
                 { type: '메인', name: '해머스트랭스 인클라인 프레스', sets: '탑/백오프 세트', tip: '윗가슴을 채우는 것으로 루틴을 시작합니다. 가슴을 열고 견갑을 패드에 단단히 고정하세요.', baseTopSet: 40, unit: '한쪽'},
-                { type: '메인', name: '너틸러스 체스트 프레스 (뉴트럴)', sets: '탑/백오프 세트', tip: 'V자 그립으로 가슴 중앙부를 강하게 수축시킵니다. 팔꿈치가 너무 벌어지지 않게 주의하세요.', baseTopSet: 70, unit: '총' },
+                { type: '메인', name: '너틸러스 체스트 프레스 (뉴트럴)', sets: '탑/백오프 세트', tip: 'V자 그립로 가슴 중앙부를 강하게 수축시킵니다. 팔꿈치가 너무 벌어지지 않게 주의하세요.', baseTopSet: 70, unit: '총' },
                 { type: '메인', name: '사이드 래터럴 레이즈 머신', sets: '4~5세트', tip: '어깨 측면(측면 삼각근)을 완벽하게 고립하여 어깨 프레임을 넓히는 것이 목표입니다. 팔꿈치로 패드를 들어올린다는 느낌으로 수행하고, 승모근이 으쓱하지 않도록 통제하는 것이 핵심입니다.', baseTopSet: 20, unit: '총'},
                 { type: '보조', name: '딥스 머신', sets: '3~4세트', tip: '아랫가슴과 삼두근에 볼륨을 더합니다. 상체를 숙일수록 아랫가슴에 자극이 집중됩니다.', staticGoal: '🔥 목표: 실패지점까지 x 3-4세트.' },
                 { type: '마무리', name: '뉴텍 암 컬 머신', sets: '3~4세트', tip: '팔을 패드에 완전히 고정하고, 반동 없이 이두근의 힘으로만 핸들을 들어올려 강하게 수축합니다.', staticGoal: '🔥 목표: 25-35kg x 10-15회.' },
@@ -445,6 +445,7 @@
         }
         
         localStorage.setItem('workoutRecords', JSON.stringify(records));
+        renderWorkout(); // Re-render to update goal text if needed
     }
     
     function loadRecordForToday(exercise) {
@@ -489,24 +490,22 @@
             let referenceRecords = [];
             // For the 2nd strength block (w 7-9), look at the 1st block (w 1-3) of the SAME cycle.
             if (strengthCycleBlock === 2) {
-                referenceRecords = exerciseRecords.filter(r => r.cycleId === currentCycleId && [1, 2, 3].includes(r.week) && r.sets.length > 0);
+                referenceRecords = exerciseRecords.filter(r => r.cycleId === currentCycleId && [1, 2, 3].includes(r.week) && r.sets && r.sets.length > 0);
             } 
             // For the 1st strength block of a NEW cycle (cycle > 1), look at ALL records from the previous cycle.
             else if (currentCycleId > 1) {
-                referenceRecords = exerciseRecords.filter(r => r.cycleId === (currentCycleId - 1) && r.sets.length > 0);
+                referenceRecords = exerciseRecords.filter(r => r.cycleId === (currentCycleId - 1) && r.sets && r.sets.length > 0);
             }
 
             let bestSetFromHistory = null;
             if (referenceRecords.length > 0) {
                 bestSetFromHistory = { weight: 0, reps: 0 };
                 referenceRecords.forEach(rec => {
-                    if (rec.sets && rec.sets.length > 0) {
-                        rec.sets.forEach(set => {
-                            if (calculateEpley1RM(set.weight, set.reps) > calculateEpley1RM(bestSetFromHistory.weight, bestSetFromHistory.reps)) {
-                                bestSetFromHistory = set;
-                            }
-                        });
-                    }
+                    rec.sets.forEach(set => {
+                        if (calculateEpley1RM(set.weight, set.reps) > calculateEpley1RM(bestSetFromHistory.weight, bestSetFromHistory.reps)) {
+                            bestSetFromHistory = set;
+                        }
+                    });
                 });
             }
 
@@ -534,24 +533,21 @@
             return `🔥 강화 목표: 탑 ${goalWeight}kg x ${goalReps} / 백오프 ${backoffWeight}kg x 10-12회.`;
 
         } else if (isHypertrophy) {
-            const hypertrophyCycleBlock = week < 10 ? 1 : 2;
             let lastStrengthTopSetWeight = exercise.baseTopSet;
             
+            // The corresponding strength week for this hypertrophy week's exercise type
+            const correspondingStrengthWeek = week - 3; 
+
             if (exerciseRecords.length > 0) {
-                // For hypertrophy block 1 (w 4-6), look at strength block 1 (w 1-3)
-                // For hypertrophy block 2 (w 10-12), look at strength block 2 (w 7-9)
-                const strengthWeeks = hypertrophyCycleBlock === 1 ? [1,2,3] : [7,8,9];
                 const prevStrengthRecords = exerciseRecords
-                    .filter(r => r.cycleId === currentCycleId && strengthWeeks.includes(r.week) && r.sets.length > 0);
+                    .filter(r => r.cycleId === currentCycleId && r.week === correspondingStrengthWeek && r.sets && r.sets.length > 0);
 
                 if (prevStrengthRecords.length > 0) {
                     let maxWeight = 0;
                     prevStrengthRecords.forEach(record => {
-                        if (record.sets && record.sets.length > 0) {
-                            const recordMax = Math.max(...record.sets.map(s => s.weight));
-                            if (recordMax > maxWeight) {
-                                maxWeight = recordMax;
-                            }
+                        const recordMax = Math.max(...record.sets.map(s => s.weight));
+                        if (recordMax > maxWeight) {
+                            maxWeight = recordMax;
                         }
                     });
                     if (maxWeight > 0) {
@@ -561,7 +557,7 @@
             }
             
             let baseWorkingWeight = Math.round((lastStrengthTopSetWeight * 0.75) / 2.5) * 2.5;
-            let weekInCycle = week <= 6 ? week - 4 : week - 10;
+            let weekInCycle = (week - 1) % 3; // 0 for w4, 1 for w5, 2 for w6
             let goalWeight = baseWorkingWeight + (increment * weekInCycle);
             return `🔥 축적 목표: 워킹 세트 ${goalWeight}kg x 8-12회 (3-4세트).`;
         }
@@ -1000,4 +996,3 @@
 </script>
 </body>
 </html>
-
