@@ -409,13 +409,13 @@
             }
         });
 
-        let records = JSON.parse(localStorage.getItem('workoutRecords')) || {};
-        if (!records[sanitizedName]) {
-            records[sanitizedName] = [];
+        let allRecords = JSON.parse(localStorage.getItem('workoutRecords')) || {};
+        if (!allRecords[sanitizedName]) {
+            allRecords[sanitizedName] = {}; // It's an object now
         }
 
         const today = getTodaysDate();
-        const recordIndex = records[sanitizedName].findIndex(r => r.date === today && r.week === currentWeek && r.day === currentDay);
+        const recordKey = `${today}-${currentWeek}-${currentDay}`; // Create a unique key
         
         let dayName = "";
         let weekData = workoutPlan[currentWeek] || getReferenceData(currentWeek);
@@ -423,36 +423,32 @@
             dayName = weekData[currentDay].name;
         }
 
-        const newRecord = {
-            date: today,
-            week: currentWeek,
-            day: currentDay,
-            dayName: dayName,
-            sets: setsData,
-            cycleId: currentCycleId
-        };
-
         if (setsData.length > 0) {
-            if (recordIndex > -1) {
-                records[sanitizedName][recordIndex] = newRecord;
-            } else {
-                records[sanitizedName].push(newRecord);
-            }
+            allRecords[sanitizedName][recordKey] = {
+                date: today,
+                week: currentWeek,
+                day: currentDay,
+                dayName: dayName,
+                sets: setsData,
+                cycleId: currentCycleId
+            };
         } else {
-            if (recordIndex > -1) {
-                records[sanitizedName].splice(recordIndex, 1);
-            }
+            delete allRecords[sanitizedName][recordKey];
         }
         
-        localStorage.setItem('workoutRecords', JSON.stringify(records));
+        localStorage.setItem('workoutRecords', JSON.stringify(allRecords));
     }
     
     function loadRecordForToday(exercise) {
         const sanitizedName = getSanitizedName(exercise);
-        const records = JSON.parse(localStorage.getItem('workoutRecords')) || {};
-        if (!records[sanitizedName]) return null;
+        const allRecords = JSON.parse(localStorage.getItem('workoutRecords')) || {};
+        const exerciseRecords = allRecords[sanitizedName];
+        if (!exerciseRecords) return null;
+        
         const today = getTodaysDate();
-        return records[sanitizedName].find(r => r.date === today && r.week === currentWeek && r.day === currentDay);
+        const recordKey = `${today}-${currentWeek}-${currentDay}`; // Create the unique key
+
+        return exerciseRecords[recordKey] || null; // Directly access the property
     }
 
     function getReferenceData(week) {
@@ -483,7 +479,7 @@
             
             let lastCycleTopSet = null;
             if (currentCycleId > 1 && records[sanitizedName]) {
-                const prevCycleRecords = records[sanitizedName]
+                const prevCycleRecords = Object.values(records[sanitizedName])
                     .filter(r => r.cycleId === (currentCycleId - 1) && r.sets.length > 0)
                     .sort((a,b) => new Date(b.date) - new Date(a.date));
                 
@@ -528,7 +524,7 @@
             
             if(records[sanitizedName]){
                 const strengthWeeks = hypertrophyCycle === 1 ? [1,2,3] : [7,8,9];
-                 const prevStrengthRecords = records[sanitizedName]
+                 const prevStrengthRecords = Object.values(records[sanitizedName])
                     .filter(r => r.cycleId === currentCycleId && strengthWeeks.includes(r.week) && r.sets.length > 0)
                     .sort((a,b) => new Date(b.date) - new Date(a.date));
 
@@ -753,7 +749,7 @@
 
         selectedIds.forEach(id => {
             if (allRecords[id]) {
-                combinedData.push(...allRecords[id]);
+                combinedData.push(...Object.values(allRecords[id]));
             }
         });
         
