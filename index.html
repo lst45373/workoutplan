@@ -206,9 +206,9 @@
                 { type: '웜업', name: '팩덱 플라이', sets: '3세트', tip: '가슴 근육을 선피로시켜 프레스 시 자극을 극대화합니다.', staticGoal: '🔥 목표: 60kg x 10-12회.' },
                 { type: '메인', name: '로우 인클라인 스미스 프레스', sets: '탑/백오프 세트', tip: '벤치 각도를 낮게(약 15-20도) 설정하여 쇄골 바로 아래 윗가슴 상부를 타겟합니다. 팔꿈치를 너무 벌리지 마세요.', baseTopSet: 35, unit: '한쪽'},
                 { type: '메인', name: '해머스트랭스 인클라인 프레스', sets: '탑/백오프 세트', tip: '자연스러운 아크 궤적을 이용해 윗가슴에 새로운 자극을 줍니다. 가슴을 활짝 열고 견갑을 패드에 고정하세요.', baseTopSet: 40, unit: '한쪽'},
-                { type: '메인', name: '해머스트랭스 숄더 프레스', sets: '탑/백오프 세트', tip: '어깨의 전면과 측면을 타겟합니다. 어깨가 으쓱하지 않도록 통제하며 귀 옆으로 밀어 올립니다.', baseTopSet: 40, unit: '한쪽'},
-                { type: '보조', name: '뉴텍 암 컬 머신', sets: '3~4세트', tip: '팔을 패드에 완전히 고정하고, 반동 없이 이두근의 힘으로만 핸들을 들어올려 강하게 수축합니다.', staticGoal: '🔥 목표: 25-35kg x 10-15회.' },
-                { type: '마무리', name: '딥스 머신', sets: '3~4세트', tip: '상체를 앞으로 살짝 숙이면 아랫가슴, 상체를 세우면 삼두근에 더 집중할 수 있습니다.', staticGoal: '🔥 목표: 실패지점까지 x 3-4세트.' },
+                { type: '메인', name: '사이드 래터럴 레이즈 머신', sets: '4~5세트', tip: '어깨 측면(측면 삼각근)을 완벽하게 고립하여 어깨 프레임을 넓히는 것이 목표입니다. 팔꿈치로 패드를 들어올린다는 느낌으로 수행하고, 승모근이 으쓱하지 않도록 통제하는 것이 핵심입니다.', baseTopSet: 20, unit: '총'},
+                { type: '보조', name: '딥스 머신', sets: '3~4세트', tip: '아랫가슴과 삼두근에 볼륨을 더합니다. 상체를 숙일수록 아랫가슴에 자극이 집중됩니다.', staticGoal: '🔥 목표: 실패지점까지 x 3-4세트.' },
+                { type: '마무리', name: '뉴텍 암 컬 머신', sets: '3~4세트', tip: '팔을 패드에 완전히 고정하고, 반동 없이 이두근의 힘으로만 핸들을 들어올려 강하게 수축합니다.', staticGoal: '🔥 목표: 25-35kg x 10-15회.' },
             ]},
         },
         2: {
@@ -379,7 +379,23 @@
         const recordIndex = records[sanitizedName].findIndex(r => r.date === today && r.week === currentWeek && r.day === currentDay && r.cycleId === currentCycleId);
         
         let dayName = "";
-        let weekData = workoutPlan[currentWeek] || getReferenceData(currentWeek);
+        let weekData;
+        const cycleInfo = JSON.parse(localStorage.getItem('workoutCycleInfo')) || { cycleId: 1 };
+        const isBlockPeriodization = cycleInfo.cycleId % 2 === 1;
+        const originalWeekData = workoutPlan[currentWeek] || getReferenceData(currentWeek);
+        if (currentWeek === 13) {
+            weekData = originalWeekData;
+        } else {
+            let phase;
+            if (isBlockPeriodization) {
+                 phase = (currentWeek >= 4 && currentWeek <= 6) || (currentWeek >= 10 && currentWeek <= 12) ? '축적 주기' : '강화 주기';
+            } else {
+                 phase = (currentWeek % 2 === 0) ? '축적 주기' : '강화 주기';
+            }
+            const method = (phase === '축적 주기' ? '워킹 세트' : '탑/백오프 세트');
+            weekData = { ...originalWeekData, phase, method };
+        }
+
         if (weekData && weekData[currentDay]) {
             dayName = weekData[currentDay].name;
         }
@@ -406,7 +422,6 @@
         }
         
         localStorage.setItem('workoutRecords', JSON.stringify(records));
-        renderWorkout(); 
     }
     
     function loadRecordForToday(exercise) {
@@ -432,7 +447,6 @@
     }
 
     function getWeeklyGoalText(exercise, week, phase) {
-        // For Cable X-Raise, we don't show a weight-based goal.
         if (exercise.name === '케이블 X-레이즈') {
             return '🔥 자극 목표: 완벽한 자세로 12-15회 반복. 스트레칭과 지속적인 텐션에 집중하세요.';
         }
@@ -536,7 +550,7 @@
             <span class="font-semibold text-slate-400">kg</span>
             <input type="number" data-type="reps" value="${setData.reps}" placeholder="횟수" class="w-full p-2.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition text-lg">
             <span class="font-semibold text-slate-400">회</span>
-            <button class="delete-set-btn text-slate-400 hover:text-red-500 transition text-2xl font-bold">&times;</button>
+            <button type="button" class="delete-set-btn text-slate-400 hover:text-red-500 transition text-2xl font-bold">&times;</button>
         `;
         container.appendChild(setRow);
 
@@ -637,7 +651,7 @@
                      <p class="text-base font-semibold text-blue-700 mt-3">훈련 방식: ${methodText}</p>
                 </div>
                 <div id="sets-container-${sanitizedName}" class="space-y-3 mt-4"></div>
-                <button id="add-set-${sanitizedName}" class="mt-4 w-full bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold py-2 px-4 rounded-lg transition">+ 세트 추가</button>
+                <button type="button" id="add-set-${sanitizedName}" class="mt-4 w-full bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold py-2 px-4 rounded-lg transition">+ 세트 추가</button>
             `;
             workoutList.appendChild(card);
             
@@ -1009,3 +1023,4 @@
 </script>
 </body>
 </html>
+
