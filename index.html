@@ -424,13 +424,22 @@
         localStorage.setItem('workoutRecords', JSON.stringify(records));
     }
     
-    function loadRecordForToday(exercise) {
+    function loadMostRecentRecordForSession(exercise) {
         const sanitizedName = getSanitizedName(exercise);
         const records = JSON.parse(localStorage.getItem('workoutRecords')) || {};
-        if (!records[sanitizedName]) return null;
-        
-        const today = getTodaysDate();
-        return records[sanitizedName].find(r => r.date === today && r.week === currentWeek && r.day === currentDay && r.cycleId === currentCycleId);
+        const exerciseRecords = records[sanitizedName];
+
+        if (!exerciseRecords || exerciseRecords.length === 0) return null;
+
+        const sessionRecords = exerciseRecords.filter(r => 
+            r.week === currentWeek && 
+            r.day === currentDay && 
+            r.cycleId === currentCycleId
+        );
+
+        if (sessionRecords.length === 0) return null;
+
+        return sessionRecords.sort((a, b) => new Date(b.date) - new Date(a.date))[0];
     }
 
     function getReferenceData(week) {
@@ -613,7 +622,7 @@
             }
 
             const sanitizedName = getSanitizedName(currentExercise);
-            const recordForToday = loadRecordForToday(currentExercise);
+            const recordForSession = loadMostRecentRecordForSession(currentExercise);
             
             const card = document.createElement('div');
             card.className = 'bg-white rounded-xl shadow-lg p-5 flex flex-col card-enter';
@@ -656,7 +665,7 @@
             workoutList.appendChild(card);
             
             const setsContainer = card.querySelector(`#sets-container-${sanitizedName}`);
-            const dataToRender = recordForToday ? recordForToday.sets : [];
+            const dataToRender = recordForSession ? recordForSession.sets : [];
 
             if (dataToRender.length > 0) {
                 dataToRender.forEach((set, index) => {
