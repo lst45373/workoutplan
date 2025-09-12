@@ -198,7 +198,7 @@
                 { type: '메인', name: '싸이벡스 스미스 머신 스쿼트', sets: '탑/백오프 세트', tip: '발을 어깨너비로 벌리고, 허리를 편 상태를 유지하며 깊게 앉습니다. 하체 전반의 힘을 사용하세요.', baseTopSet: 45, unit: '한쪽'},
                 { type: '메인', name: '레그 프레스', sets: '탑/백오프 세트', tip: '발을 발판 중앙, 어깨너비로 둡니다. 발뒤꿈치로 민다는 느낌으로 허벅지 전체에 균형잡힌 부하를 전달합니다.', baseTopSet: 160, unit: '총'},
                 { type: '보조', name: '노틸러스 레그 익스텐션 (보조)', sets: '3~4세트', tip: '다리를 완전히 폈을 때 1~2초간 멈춰 대퇴사두를 강하게 쥐어짭니다. 엉덩이가 뜨지 않도록 주의하세요.', staticGoal: '🔥 목표: 50-60kg x 12-15회.' },
-                { type: '보조', name: '노틸러스 레그 컬', sets: '3~4세트', tip: '뒤꿈치를 엉덩이 쪽으로 당길 때 햄스트링을 강하게 수축하고, 천천히 저항을 느끼며 다리를 폅니다.', staticGoal: '🔥 목표: 40-50kg x 12-15회.' },
+                { type: '보조', name: '노틸러스 레그 컬', sets: '3~4세트', tip: '뒤꿈치를 엉덩이 쪽으로 당길 때 햄스트링을 강하게 수축하고, 천천히 저항을 느끼하며 다리를 폅니다.', staticGoal: '🔥 목표: 40-50kg x 12-15회.' },
                 { type: '마무리', name: '레그 프레스 카프 레이즈', sets: '3~4세트', tip: '발끝을 발판 아래쪽에 두고, 발뒤꿈치를 최대한 이완시켰다가 발끝으로 강하게 밀어 종아리를 수축합니다.', staticGoal: '🔥 목표: 60-80kg x 15-20회.' },
             ]},
             push: { name: '푸쉬(Push) A', routine: [
@@ -379,25 +379,10 @@
         const recordIndex = records[sanitizedName].findIndex(r => r.date === today && r.week === currentWeek && r.day === currentDay && r.cycleId === currentCycleId);
         
         let dayName = "";
-        let weekData;
-        const cycleInfo = JSON.parse(localStorage.getItem('workoutCycleInfo')) || { cycleId: 1 };
-        const isBlockPeriodization = cycleInfo.cycleId % 2 === 1;
-        const originalWeekData = workoutPlan[currentWeek] || getReferenceData(currentWeek);
-        if (currentWeek === 13) {
-            weekData = originalWeekData;
-        } else {
-            let phase;
-            if (isBlockPeriodization) {
-                 phase = (currentWeek >= 4 && currentWeek <= 6) || (currentWeek >= 10 && currentWeek <= 12) ? '축적 주기' : '강화 주기';
-            } else {
-                 phase = (currentWeek % 2 === 0) ? '축적 주기' : '강화 주기';
-            }
-            const method = (phase === '축적 주기' ? '워킹 세트' : '탑/백오프 세트');
-            weekData = { ...originalWeekData, phase, method };
-        }
+        const originalWeekData = workoutPlan[getExerciseTypeForWeek(currentWeek) || 1];
 
-        if (weekData && weekData[currentDay]) {
-            dayName = weekData[currentDay].name;
+        if (originalWeekData && originalWeekData[currentDay]) {
+            dayName = originalWeekData[currentDay].name;
         }
 
         const newRecord = {
@@ -441,13 +426,24 @@
 
         return sessionRecords.sort((a, b) => new Date(b.date) - new Date(a.date))[0];
     }
+    
+    function getExerciseTypeForWeek(week) {
+        const cycleInfo = JSON.parse(localStorage.getItem('workoutCycleInfo')) || { cycleId: 1 };
+        const isBlockPeriodization = cycleInfo.cycleId % 2 === 1;
 
-    function getReferenceData(week) {
-        let referenceWeek = ((week - 1) % 3) + 1;
-        if (week > 6 && week < 10) { referenceWeek = ((week - 1 - 6) % 3) + 1; } 
-        else if (week > 9 && week < 13) { referenceWeek = ((week - 1 - 9) % 3) + 1; }
-        return workoutPlan[referenceWeek];
+        if(isBlockPeriodization) {
+            return (week - 1) % 3 + 1;
+        } else {
+            if (week >= 1 && week <= 2) return 1; // A-Type
+            if (week >= 3 && week <= 4) return 2; // B-Type
+            if (week >= 5 && week <= 6) return 3; // C-Type
+            if (week >= 7 && week <= 8) return 1; // A-Type
+            if (week >= 9 && week <= 10) return 2; // B-Type
+            if (week >= 11 && week <= 12) return 3; // C-Type
+        }
+        return null;
     }
+
 
     function calculateEpley1RM(weight, reps) {
         if (reps < 1) return 0;
@@ -456,6 +452,9 @@
     }
 
     function getWeeklyGoalText(exercise, week, phase) {
+        const cycleInfo = JSON.parse(localStorage.getItem('workoutCycleInfo')) || { cycleId: 1 };
+        const isBlockPeriodization = cycleInfo.cycleId % 2 === 1;
+        
         if (exercise.name === '케이블 X-레이즈') {
             return '🔥 자극 목표: 완벽한 자세로 12-15회 반복. 스트레칭과 지속적인 텐션에 집중하세요.';
         }
@@ -470,20 +469,62 @@
         const smallIncrement = 2.5;
         const bigIncrement = 5;
         const increment = exercise.unit === '한쪽' ? smallIncrement : bigIncrement;
+        
+        let bestSetFromHistory = null;
+        let referenceRecords = [];
+        let lastStrengthTopSetWeight = exercise.baseTopSet;
+
+        if (isBlockPeriodization) { // --- CYCLE 1, 3, 5...: BLOCK PERIODIZATION ---
+            const exerciseType = getExerciseTypeForWeek(week);
+            if (isStrength) {
+                const strengthCycleBlock = week < 7 ? 1 : 2;
+                if (strengthCycleBlock === 2) { // W 7,8,9
+                    referenceRecords = exerciseRecords.filter(r => r.cycleId === currentCycleId && [1, 2, 3].includes(r.week) && r.sets && r.sets.length > 0);
+                } else if (currentCycleId > 1) { // W 1,2,3 of a new block cycle (e.g., Cycle 3)
+                    const prevCycleRecords = exerciseRecords.filter(r => r.cycleId === (currentCycleId - 1) && r.sets && r.sets.length > 0);
+                    const prevCycleStrengthWeeks = [1,3,5,7,9,11];
+                    const prevCycleWeeksForType = prevCycleStrengthWeeks.filter(w => getExerciseTypeForWeek(w) === exerciseType);
+                    referenceRecords = prevCycleRecords.filter(r => prevCycleWeeksForType.includes(r.week));
+                }
+            } else if (isHypertrophy) {
+                const correspondingStrengthWeek = week - 3;
+                const prevStrengthRecords = exerciseRecords.filter(r => r.cycleId === currentCycleId && r.week === correspondingStrengthWeek && r.sets && r.sets.length > 0);
+                if (prevStrengthRecords.length > 0) {
+                    let maxWeight = 0;
+                    prevStrengthRecords.forEach(record => {
+                        const recordMax = Math.max(...record.sets.map(s => s.weight));
+                        if (recordMax > maxWeight) maxWeight = recordMax;
+                    });
+                    if (maxWeight > 0) lastStrengthTopSetWeight = maxWeight;
+                }
+            }
+        } else { // --- CYCLE 2, 4, 6...: WEEKLY UNDULATING PERIODIZATION ---
+            const exerciseType = getExerciseTypeForWeek(week);
+            if (isStrength) {
+                const isFirstStrengthOfTypeInCycle = week < 7;
+                if (isFirstStrengthOfTypeInCycle) {
+                     const prevCycleStrengthWeeks = [1,2,3,7,8,9];
+                     const prevCycleWeeksForType = prevCycleStrengthWeeks.filter(w => getExerciseTypeForWeek(w) === exerciseType);
+                     referenceRecords = exerciseRecords.filter(r => r.cycleId === (currentCycleId - 1) && prevCycleWeeksForType.includes(r.week) && r.sets && r.sets.length > 0);
+                } else {
+                    const previousStrengthWeekForType = week - 6;
+                    referenceRecords = exerciseRecords.filter(r => r.cycleId === currentCycleId && r.week === previousStrengthWeekForType && r.sets && r.sets.length > 0);
+                }
+            } else if (isHypertrophy) {
+                 const previousStrengthWeekForType = week - 1;
+                 const prevStrengthRecords = exerciseRecords.filter(r => r.cycleId === currentCycleId && r.week === previousStrengthWeekForType && r.sets && r.sets.length > 0);
+                 if (prevStrengthRecords.length > 0) {
+                    let maxWeight = 0;
+                    prevStrengthRecords.forEach(record => {
+                        const recordMax = Math.max(...record.sets.map(s => s.weight));
+                        if (recordMax > maxWeight) maxWeight = recordMax;
+                    });
+                    if (maxWeight > 0) lastStrengthTopSetWeight = maxWeight;
+                }
+            }
+        }
 
         if (isStrength) {
-            const strengthCycleBlock = week < 7 ? 1 : 2;
-            const weekInCycle = week <= 3 ? week - 1 : week - 7;
-            
-            let referenceRecords = [];
-            if (strengthCycleBlock === 2) {
-                referenceRecords = exerciseRecords.filter(r => r.cycleId === currentCycleId && [1, 2, 3].includes(r.week) && r.sets && r.sets.length > 0);
-            } 
-            else if (currentCycleId > 1) {
-                referenceRecords = exerciseRecords.filter(r => r.cycleId === (currentCycleId - 1) && r.sets && r.sets.length > 0);
-            }
-
-            let bestSetFromHistory = null;
             if (referenceRecords.length > 0) {
                 bestSetFromHistory = { weight: 0, reps: 0 };
                 referenceRecords.forEach(rec => {
@@ -494,7 +535,6 @@
                     });
                 });
             }
-
             let e1RM;
             if (bestSetFromHistory && bestSetFromHistory.weight > 0) {
                  e1RM = calculateEpley1RM(bestSetFromHistory.weight, bestSetFromHistory.reps);
@@ -504,10 +544,12 @@
             }
             
             let goalWeight, goalReps;
-            if (weekInCycle === 0) {
+            const weekInStrengthCycle = isBlockPeriodization ? (week < 7 ? (week - 1) % 3 : (week - 7) % 3) : 0;
+            
+            if (weekInStrengthCycle === 0) {
                 goalWeight = Math.round((e1RM * 0.80) / 2.5) * 2.5;
                 goalReps = "8회";
-            } else if (weekInCycle === 1) {
+            } else if (weekInStrengthCycle === 1) {
                 goalWeight = Math.round((e1RM * 0.85) / 2.5) * 2.5;
                 goalReps = "6-7회";
             } else {
@@ -515,38 +557,21 @@
                 goalReps = "5회";
             }
 
+            if (!isBlockPeriodization) { // Override for undulating
+                 goalWeight = Math.round((e1RM * 0.85) / 2.5) * 2.5;
+                 goalReps = "5-8회";
+            }
+
             const backoffWeight = Math.round((goalWeight * 0.8) / 2.5) * 2.5;
             return `🔥 강화 목표: 탑 ${goalWeight}kg x ${goalReps} / 백오프 ${backoffWeight}kg x 10-12회.`;
 
         } else if (isHypertrophy) {
-            let lastStrengthTopSetWeight = exercise.baseTopSet;
-            
-            const correspondingStrengthWeek = week < 7 ? week - 3 : week - 3;
-
-            if (exerciseRecords.length > 0) {
-                const prevStrengthRecords = exerciseRecords
-                    .filter(r => r.cycleId === currentCycleId && r.week === correspondingStrengthWeek && r.sets && r.sets.length > 0);
-
-                if (prevStrengthRecords.length > 0) {
-                    let maxWeight = 0;
-                    prevStrengthRecords.forEach(record => {
-                        const recordMax = Math.max(...record.sets.map(s => s.weight));
-                        if (recordMax > maxWeight) {
-                            maxWeight = recordMax;
-                        }
-                    });
-                    if (maxWeight > 0) {
-                       lastStrengthTopSetWeight = maxWeight;
-                    }
-                }
-            }
-            
             let baseWorkingWeight = Math.round((lastStrengthTopSetWeight * 0.75) / 2.5) * 2.5;
-            let weekInCycle = (week - 1) % 3;
+            let weekInCycle = isBlockPeriodization ? (week - 1) % 3 : 0;
+            
             let goalWeight = baseWorkingWeight + (increment * weekInCycle);
             return `🔥 축적 목표: 워킹 세트 ${goalWeight}kg x 8-12회 (3-4세트).`;
         }
-        
         return null;
     }
     
@@ -582,15 +607,22 @@
         cycleInfoBadge.textContent = `(사이클 ${currentCycleId}: ${isBlockPeriodization ? '블록 주기화' : '주간 파동형 주기화'})`;
 
         let weekData;
-        const originalWeekData = workoutPlan[currentWeek] || getReferenceData(currentWeek);
+        let originalWeekData;
+
+        if (isBlockPeriodization) {
+            originalWeekData = workoutPlan[currentWeek] ? workoutPlan[currentWeek] : workoutPlan[(currentWeek-1)%3 + 1];
+        } else {
+            const exerciseType = getExerciseTypeForWeek(currentWeek) || 1;
+            originalWeekData = workoutPlan[exerciseType];
+        }
 
         if (currentWeek === 13) {
-            weekData = originalWeekData;
+            weekData = workoutPlan[13];
         } else {
             let phase;
-            if (isBlockPeriodization) { // Block Periodization
+            if (isBlockPeriodization) {
                  phase = (currentWeek >= 4 && currentWeek <= 6) || (currentWeek >= 10 && currentWeek <= 12) ? '축적 주기' : '강화 주기';
-            } else { // Weekly Undulating Periodization
+            } else {
                  phase = (currentWeek % 2 === 0) ? '축적 주기' : '강화 주기';
             }
             const method = (phase === '축적 주기' ? '워킹 세트' : '탑/백오프 세트');
@@ -721,10 +753,17 @@
 
         for (let i = 1; i <= 13; i++) {
             let weekData;
-            const originalWeekData = workoutPlan[i] || getReferenceData(i);
+            let originalWeekData;
 
+            if (isBlockPeriodization) {
+                 originalWeekData = workoutPlan[i] || workoutPlan[(i - 1) % 3 + 1];
+            } else {
+                const exerciseType = getExerciseTypeForWeek(i) || 1;
+                originalWeekData = workoutPlan[exerciseType];
+            }
+            
             if (i === 13) {
-                weekData = originalWeekData;
+                weekData = workoutPlan[13];
             } else {
                 let phase;
                 if (isBlockPeriodization) {
@@ -1032,4 +1071,3 @@
 </script>
 </body>
 </html>
-
