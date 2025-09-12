@@ -471,14 +471,14 @@
 
         const exerciseType = getExerciseTypeForWeek(week);
 
-        if (isBlockPeriodization) {
+        if (isBlockPeriodization) { // --- CYCLE 1, 3, 5...: BLOCK PERIODIZATION ---
             if (isStrength) {
                 const strengthCycleBlock = week < 7 ? 1 : 2;
-                if (strengthCycleBlock === 2) { 
+                if (strengthCycleBlock === 2) { // W 7,8,9
                     referenceRecords = exerciseRecords.filter(r => r.cycleId === currentCycleId && [1, 2, 3].includes(r.week) && getExerciseTypeForWeekInCycle(r.week, r.cycleId) === exerciseType && r.sets && r.sets.length > 0);
-                } else if (currentCycleId > 1) { 
+                } else if (currentCycleId > 1) { // W 1,2,3 of a new block cycle (e.g., Cycle 3)
                     const prevCycleRecords = exerciseRecords.filter(r => r.cycleId === (currentCycleId - 1));
-                    const prevCycleStrengthWeeks = [1,3,5,7,9,11];
+                    const prevCycleStrengthWeeks = [1,2,3,7,8,9];
                     const prevCycleWeeksForType = prevCycleStrengthWeeks.filter(w => getExerciseTypeForWeekInCycle(w, currentCycleId - 1) === exerciseType);
                     referenceRecords = prevCycleRecords.filter(r => prevCycleWeeksForType.includes(r.week) && r.sets && r.sets.length > 0);
                 }
@@ -494,7 +494,7 @@
                     if (maxWeight > 0) lastStrengthTopSetWeight = maxWeight;
                 }
             }
-        } else { // Weekly Undulating
+        } else { // --- CYCLE 2, 4, 6...: WEEKLY UNDULATING PERIODIZATION ---
             if (isStrength) {
                 const isFirstStrengthOfTypeInCycle = week < 7;
                 if (isFirstStrengthOfTypeInCycle) {
