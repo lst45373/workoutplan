@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>26주 장기 성장 프로그램 | 인터랙티브 플래너 (v2.7 Final)</title>
+    <title>26주 장기 성장 프로그램 | 인터랙티브 플래너 (v2.9 Final)</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
@@ -369,7 +369,7 @@
         return { phase, method, type, originalWeekData };
     }
 
-    // CORE LOGIC: Goal Calculation (v2.7 - FINAL)
+    // CORE LOGIC: Goal Calculation (v2.9 - FINAL)
     function getWeeklyGoalText(exercise, week, cycleId) {
         if (!exercise.baseTopSet) return null;
 
@@ -379,13 +379,14 @@
         const sanitizedName = getSanitizedName(exercise);
         const allRecords = JSON.parse(localStorage.getItem('workoutRecords')) || {};
         const exerciseRecords = allRecords[sanitizedName] || [];
-
+        
         let e1RM = calculateEpley1RM(exercise.baseTopSet, 5);
+        let lastStrengthTopSetWeight = e1RM * 0.9; // Fallback
 
-        // --- Find the most recent, relevant strength performance to set baseline e1RM ---
+        // --- Find the most recent, relevant strength performance ---
         const referenceRecords = exerciseRecords
             .filter(r => (r.cycleId < cycleId || (r.cycleId === cycleId && r.week < week)) && r.phase === '강화 주기' && getWeekInfo(r.week, r.cycleId).type === type)
-            .sort((a,b) => (b.cycleId - a.cycleId) || (b.week - a.week));
+            .sort((a, b) => (b.cycleId - a.cycleId) || (b.week - a.week));
 
         if (referenceRecords.length > 0) {
             const lastPerformance = referenceRecords[0];
@@ -397,6 +398,7 @@
             });
             if (bestSetFromHistory.weight > 0) {
                 e1RM = calculateEpley1RM(bestSetFromHistory.weight, bestSetFromHistory.reps) * 1.025;
+                lastStrengthTopSetWeight = bestSetFromHistory.weight;
             }
         }
         
@@ -418,18 +420,7 @@
             return `🔥 강화 목표: 탑 ${goalWeight}kg x ${goalReps} / 백오프 ${backoffWeight}kg x 8-10회.`;
 
         } else if (phase === '축적 주기') {
-            let lastStrengthTopSetWeight = 0;
-            const refRecords = exerciseRecords
-                .filter(r => (r.cycleId < cycleId || (r.cycleId === cycleId && r.week < week)) && r.phase === '강화 주기' && getWeekInfo(r.week, r.cycleId).type === type)
-                .sort((a, b) => (b.cycleId - a.cycleId) || (b.week - a.week));
-
-            if (refRecords.length > 0) {
-                lastStrengthTopSetWeight = Math.max(0, ...refRecords[0].sets.map(s => s.weight));
-            } else {
-                lastStrengthTopSetWeight = Math.round((e1RM * 0.9) / 2.5) * 2.5;
-            }
-            
-            let goalWeight = Math.round((lastStrengthTopSetWeight * 0.75) / 2.5) * 2.5;
+            const goalWeight = Math.round((lastStrengthTopSetWeight * 0.75) / 2.5) * 2.5;
             return `🔥 축적 목표: 워킹 세트 ${goalWeight}kg x 8-12회 (3-4세트).`;
         }
         return null;
