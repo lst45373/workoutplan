@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>26주 장기 성장 프로그램 | 인터랙티브 플래너 (v2.2 Final)</title>
+    <title>26주 장기 성장 프로그램 | 인터랙티브 플래너 (v2.7 Final)</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
@@ -34,14 +34,14 @@
             </header>
 
             <nav class="flex justify-center mb-10 border-b border-slate-300">
-                <button id="tab-today" class="py-3 px-4 sm:py-4 sm:px-6 font-semibold border-b-2 text-sm sm:text-base tab-active" onclick="showView('today')">오늘의 운동</button>
-                <button id="tab-plan" class="py-3 px-4 sm:py-4 sm:px-6 font-semibold border-b-2 text-sm sm:text-base border-transparent text-slate-500 hover:text-blue-600 transition" onclick="showView('plan')">전체 계획서</button>
-                <button id="tab-records" class="py-3 px-4 sm:py-4 sm:px-6 font-semibold border-b-2 text-sm sm:text-base border-transparent text-slate-500 hover:text-blue-600 transition" onclick="showView('records')">기록 보기</button>
+                <button id="tab-today" class="py-3 px-4 sm:py-4 sm:px-6 font-semibold border-b-2 text-sm sm:text-base tab-active shadow-sm" onclick="showView('today')">오늘의 운동</button>
+                <button id="tab-plan" class="py-3 px-4 sm:py-4 sm:px-6 font-semibold border-b-2 text-sm sm:text-base border-transparent text-slate-500 hover:text-blue-600 transition shadow-sm" onclick="showView('plan')">전체 계획서</button>
+                <button id="tab-records" class="py-3 px-4 sm:py-4 sm:px-6 font-semibold border-b-2 text-sm sm:text-base border-transparent text-slate-500 hover:text-blue-600 transition shadow-sm" onclick="showView('records')">기록 보기</button>
             </nav>
 
             <main id="main-content">
                 <div id="view-today">
-                    <section id="controls" class="mb-8 p-4 sm:p-6 bg-white rounded-xl shadow-md">
+                    <section id="controls" class="mb-8 p-4 sm:p-6 bg-white rounded-xl shadow-lg">
                         <div class="mb-6">
                             <h3 class="font-bold text-lg sm:text-xl mb-4 text-slate-800">1. 주차 선택 (Week)</h3>
                             <div id="week-selector" class="flex flex-wrap gap-2">
@@ -50,9 +50,9 @@
                         <div>
                             <h3 class="font-bold text-lg sm:text-xl mb-4 text-slate-800">2. 요일 선택 (Day)</h3>
                             <div id="day-selector" class="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                                  <button data-day="pull" class="p-3 sm:p-4 rounded-lg font-bold text-base sm:text-lg bg-slate-100 text-slate-700 transition duration-200 hover:bg-slate-200">PULL (당기기)</button>
-                                  <button data-day="push" class="p-3 sm:p-4 rounded-lg font-bold text-base sm:text-lg bg-slate-100 text-slate-700 transition duration-200 hover:bg-slate-200">PUSH (밀기)</button>
-                                  <button data-day="leg" class="p-3 sm:p-4 rounded-lg font-bold text-base sm:text-lg bg-slate-100 text-slate-700 transition duration-200 hover:bg-slate-200">LEG (하체)</button>
+                                  <button data-day="pull" class="p-3 sm:p-4 rounded-lg font-bold text-base sm:text-lg bg-slate-100 text-slate-700 transition duration-200 hover:bg-slate-200 shadow-md">PULL (당기기)</button>
+                                  <button data-day="push" class="p-3 sm:p-4 rounded-lg font-bold text-base sm:text-lg bg-slate-100 text-slate-700 transition duration-200 hover:bg-slate-200 shadow-md">PUSH (밀기)</button>
+                                  <button data-day="leg" class="p-3 sm:p-4 rounded-lg font-bold text-base sm:text-lg bg-slate-100 text-slate-700 transition duration-200 hover:bg-slate-200 shadow-md">LEG (하체)</button>
                             </div>
                         </div>
                     </section>
@@ -65,7 +65,7 @@
                         <div class="flex items-center mb-4 gap-3">
                             <span id="workout-phase-badge" class="px-3 py-1 sm:px-4 sm:py-1.5 text-sm sm:text-base font-semibold rounded-full self-start"></span>
                         </div>
-                        <p id="workout-phase-description" class="p-4 bg-blue-50 border-l-4 border-blue-500 text-blue-900 rounded-r-lg mb-8 text-sm sm:text-base"></p>
+                        <p id="workout-phase-description" class="p-4 bg-blue-50 border-l-4 border-blue-500 text-blue-900 rounded-r-lg mb-8 shadow-sm"></p>
                         <div class="flex items-center justify-center gap-2 text-xs sm:text-sm text-slate-500 mb-6">
                             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-info-circle" viewBox="0 0 16 16"><path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14zm0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16z"/><path d="m8.93 6.588-2.29.287-.082.38.45.083c.294.055.491.206.552.38.062.172.038.397-.04.603-.078.206-.214.394-.383.494-.17.1-.42.15-.66.15-.24.004-.495-.05-.702-.145-.206-.094-.374-.241-.478-.421l-.127-.223-.317.416.127.223c.146.256.358.463.608.583.25.12.532.193.83.232.297.04.61.023.908-.06l.322-.09.303.226c.143.106.323.19.52.247.198.058.42.066.635.034.214-.032.422-.1.616-.208.195-.108.36-.26.486-.444.126-.184.22-.412.27-.66.05-.247.053-.516.01-.78-.043-.263-.153-.521-.33-.742-.176-.22-.422-.405-.71-.524-.287-.12-.62-.19-.97-.24l-.322-.047-.226-.303c-.11-.147-.25-.27-.41-.355-.16-.084-.34-.125-.53-.125-.19.002-.38.044-.56.125-.18.08-.34.2-.47.355l-.127.173.317-.417.127-.173c.147-.197.355-.365.594-.465.24-.1.49-.13.73-.1.24.03.48.1.7.223.22.123.4.295.52.502zM8 4.5a1 1 0 1 1 0-2 1 1 0 0 1 0 2z"/></svg>
                             <span>기록은 자동으로 저장됩니다. 별도의 저장 버튼이 없습니다.</span>
@@ -76,7 +76,7 @@
                 </div>
 
                 <div id="view-plan" class="hidden">
-                     <div class="bg-white p-6 rounded-xl shadow-md overflow-x-auto">
+                     <div class="bg-white p-6 rounded-xl shadow-lg overflow-x-auto">
                          <h2 class="text-2xl font-bold text-slate-900 mb-4">훈련 주기 설명</h2>
                          <div class="space-y-6 text-slate-700">
                              <div>
@@ -111,13 +111,13 @@
                 </div>
 
                 <div id="view-records" class="hidden">
-                    <div class="bg-white p-4 sm:p-6 rounded-xl shadow-md">
+                    <div class="bg-white p-4 sm:p-6 rounded-xl shadow-lg">
                         <h2 class="text-2xl sm:text-3xl font-bold text-slate-900 mb-2">진행 상황 대시보드</h2>
                         <p class="text-slate-600 mb-8 text-base sm:text-lg">메인 운동별 중량 변화를 추적하고 성장 과정을 확인하세요.</p>
                         
                         <div class="mb-8">
                             <label for="exercise-selector" class="block text-base font-medium text-slate-800 mb-2">분석할 운동 종목 선택:</label>
-                            <select id="exercise-selector" class="w-full max-w-md p-2.5 sm:p-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition">
+                            <select id="exercise-selector" class="w-full max-w-md p-2.5 sm:p-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition shadow-md">
                             </select>
                         </div>
 
@@ -128,7 +128,7 @@
                             </div>
                             
                             <h3 class="text-xl sm:text-2xl font-bold text-slate-800 mb-4">상세 기록</h3>
-                            <div id="records-table-container" class="overflow-x-auto rounded-lg border border-slate-200">
+                            <div id="records-table-container" class="overflow-x-auto rounded-lg border border-slate-200 shadow-sm">
                                 
                             </div>
                         </div>
@@ -137,14 +137,14 @@
                             <p class="text-slate-500 mt-2">운동을 선택하고 기록을 확인해주세요.</p>
                         </div>
                         <div class="mt-10 pt-8 border-t border-slate-200 space-y-4">
-                            <button id="new-cycle-button" class="w-full bg-blue-100 text-blue-700 font-bold p-3 sm:p-4 rounded-lg hover:bg-blue-200 transition duration-200 flex items-center justify-center gap-2 text-base sm:text-lg">
+                            <button id="new-cycle-button" class="w-full bg-blue-100 text-blue-700 font-bold p-3 sm:p-4 rounded-lg hover:bg-blue-200 transition duration-200 flex items-center justify-center gap-2 text-base sm:text-lg shadow-md hover:shadow-lg">
                                 <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" class="bi bi-arrow-repeat" viewBox="0 0 16 16">
                                   <path d="M11.534 7h3.932a.25.25 0 0 1 .192.41l-1.966 2.36a.25.25 0 0 1-.384 0l-1.966-2.36a.25.25 0 0 1 .192-.41zm-11 2h3.932a.25.25 0 0 0 .192-.41L2.692 6.23a.25.25 0 0 0-.384 0L.342 8.59A.25.25 0 0 0 .534 9z"></path>
                                   <path fill-rule="evenodd" d="M8 3c-1.552 0-2.94.707-3.857 1.818a.5.5 0 1 1-.771-.636A6.002 6.002 0 0 1 13.917 7H12.9A5.002 5.002 0 0 0 8 3zM3.1 9a5.002 5.002 0 0 0 11.817 1.182.5.5 0 1 1 .771.636A6.002 6.002 0 0 1 2.083 9H3.1z"></path>
                                 </svg>
                                 새로운 13주 사이클 시작 (기록 유지)
                             </button>
-                            <button id="reset-all-button" class="w-full bg-red-100 text-red-700 font-bold p-3 sm:p-4 rounded-lg hover:bg-red-200 transition duration-200 flex items-center justify-center gap-2 text-base sm:text-lg">
+                            <button id="reset-all-button" class="w-full bg-red-100 text-red-700 font-bold p-3 sm:p-4 rounded-lg hover:bg-red-200 transition duration-200 flex items-center justify-center gap-2 text-base sm:text-lg shadow-md hover:shadow-lg">
                                 <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" class="bi bi-trash" viewBox="0 0 16 16"><path d="M5.5 5.5A.5.5 0 0 1 6 6v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5m2.5 0a.5.5 0 0 1 .5.5v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5m3 .5a.5.5 0 0 0-1 0v6a.5.5 0 0 0 1 0z"></path><path d="M14.5 3a1 1 0 0 1-1 1H13v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V4h-.5a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1H6a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1h3.5a1 1 0 0 1 1 1zM4.118 4 4 4.059V13a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1V4.059L11.882 4zM2.5 3h11V2h-11z"></path></svg>
                                 모든 기록 삭제 및 초기화
                             </button>
@@ -159,8 +159,8 @@
                 <h3 class="text-xl sm:text-2xl font-bold mb-4 text-slate-900">모든 기록을 삭제하시겠습니까?</h3>
                 <p class="text-slate-600 mb-8 text-sm sm:text-base">이 작업은 되돌릴 수 없습니다. 모든 운동 기록이 영구적으로 삭제되고, 새로운 사이클을 시작할 수 있도록 앱이 초기화됩니다.</p>
                 <div class="flex justify-end gap-3">
-                    <button id="cancel-reset-all" class="px-4 py-2 sm:px-5 sm:py-2.5 rounded-lg bg-slate-200 text-slate-800 font-bold hover:bg-slate-300 transition">취소</button>
-                    <button id="confirm-reset-all" class="px-4 py-2 sm:px-5 sm:py-2.5 rounded-lg bg-red-600 text-white font-bold hover:bg-red-700 transition">삭제 및 초기화</button>
+                    <button id="cancel-reset-all" class="px-4 py-2 sm:px-5 sm:py-2.5 rounded-lg bg-slate-200 text-slate-800 font-bold hover:bg-slate-300 transition shadow-md">취소</button>
+                    <button id="confirm-reset-all" class="px-4 py-2 sm:px-5 sm:py-2.5 rounded-lg bg-red-600 text-white font-bold hover:bg-red-700 transition shadow-md">삭제 및 초기화</button>
                 </div>
             </div>
         </div>
@@ -170,8 +170,8 @@
                 <h3 class="text-xl sm:text-2xl font-bold mb-4 text-slate-900">새로운 사이클을 시작하시겠습니까?</h3>
                 <p class="text-slate-600 mb-8 text-sm sm:text-base">기존의 모든 운동 기록은 '기록 보기' 탭에 보존됩니다. 1주차부터 새로운 13주 훈련 계획이 시작되며, 목표 중량은 이전 사이클의 성과를 바탕으로 재설정됩니다.</p>
                 <div class="flex justify-end gap-3">
-                    <button id="cancel-new-cycle" class="px-4 py-2 sm:px-5 sm:py-2.5 rounded-lg bg-slate-200 text-slate-800 font-bold hover:bg-slate-300 transition">취소</button>
-                    <button id="confirm-new-cycle" class="px-4 py-2 sm:px-5 sm:py-2.5 rounded-lg bg-blue-600 text-white font-bold hover:bg-blue-700 transition">새 사이클 시작</button>
+                    <button id="cancel-new-cycle" class="px-4 py-2 sm:px-5 sm:py-2.5 rounded-lg bg-slate-200 text-slate-800 font-bold hover:bg-slate-300 transition shadow-md">취소</button>
+                    <button id="confirm-new-cycle" class="px-4 py-2 sm:px-5 sm:py-2.5 rounded-lg bg-blue-600 text-white font-bold hover:bg-blue-700 transition shadow-md">새 사이클 시작</button>
                 </div>
             </div>
         </div>
@@ -301,6 +301,7 @@
     let currentCycleId = 1;
     let chartInstance = null;
     
+    // DOM Elements
     const weekSelector = document.getElementById('week-selector');
     const daySelector = document.getElementById('day-selector');
     const workoutTitle = document.getElementById('workout-title');
@@ -313,12 +314,10 @@
     const recordsContent = document.getElementById('records-content');
     const noRecordsDiv = document.getElementById('no-records');
     const chartTitle = document.getElementById('chart-title');
-    
     const newCycleButton = document.getElementById('new-cycle-button');
     const newCycleModal = document.getElementById('new-cycle-modal');
     const confirmNewCycle = document.getElementById('confirm-new-cycle');
     const cancelNewCycle = document.getElementById('cancel-new-cycle');
-
     const resetAllButton = document.getElementById('reset-all-button');
     const resetAllModal = document.getElementById('reset-all-modal');
     const confirmResetAll = document.getElementById('confirm-reset-all');
@@ -364,13 +363,13 @@
             method = (phase === '축적 주기' ? '워킹 세트' : '탑/백오프 세트');
         }
         
-        const originalWeekKey = ((week-1) % 3) + 1;
+        const originalWeekKey = ((week - 1) % 3) + 1;
         const originalWeekData = workoutPlan[week === 13 ? 13 : originalWeekKey];
 
         return { phase, method, type, originalWeekData };
     }
 
-    // CORE LOGIC: Goal Calculation (ALL BUGS FIXED)
+    // CORE LOGIC: Goal Calculation (v2.7 - FINAL)
     function getWeeklyGoalText(exercise, week, cycleId) {
         if (!exercise.baseTopSet) return null;
 
@@ -381,52 +380,28 @@
         const allRecords = JSON.parse(localStorage.getItem('workoutRecords')) || {};
         const exerciseRecords = allRecords[sanitizedName] || [];
 
-        const isStrength = phase === '강화 주기';
-        const isHypertrophy = phase === '축적 주기';
         let e1RM = calculateEpley1RM(exercise.baseTopSet, 5);
 
-        // --- 1. Set baseline e1RM from previous cycle's BEST strength performance ---
-        if (cycleId > 1) {
-            const prevCycleStrengthRecords = exerciseRecords.filter(r => 
-                r.cycleId === (cycleId - 1) && r.phase === '강화 주기' && getWeekInfo(r.week, r.cycleId).type === type && r.sets?.length > 0
-            );
+        // --- Find the most recent, relevant strength performance to set baseline e1RM ---
+        const referenceRecords = exerciseRecords
+            .filter(r => (r.cycleId < cycleId || (r.cycleId === cycleId && r.week < week)) && r.phase === '강화 주기' && getWeekInfo(r.week, r.cycleId).type === type)
+            .sort((a,b) => (b.cycleId - a.cycleId) || (b.week - a.week));
 
-            if (prevCycleStrengthRecords.length > 0) {
-                let bestSetFromPrevCycle = { weight: 0, reps: 0 };
-                prevCycleStrengthRecords.forEach(rec => {
-                    rec.sets.forEach(set => {
-                        if (calculateEpley1RM(set.weight, set.reps) > calculateEpley1RM(bestSetFromPrevCycle.weight, bestSetFromPrevCycle.reps)) {
-                            bestSetFromPrevCycle = set;
-                        }
-                    });
-                });
-                if (bestSetFromPrevCycle.weight > 0) {
-                    e1RM = calculateEpley1RM(bestSetFromPrevCycle.weight, bestSetFromPrevCycle.reps) * 1.025;
+        if (referenceRecords.length > 0) {
+            const lastPerformance = referenceRecords[0];
+            let bestSetFromHistory = { weight: 0, reps: 0 };
+            lastPerformance.sets?.forEach(set => {
+                if (calculateEpley1RM(set.weight, set.reps) > calculateEpley1RM(bestSetFromHistory.weight, bestSetFromHistory.reps)) {
+                    bestSetFromHistory = set;
                 }
+            });
+            if (bestSetFromHistory.weight > 0) {
+                e1RM = calculateEpley1RM(bestSetFromHistory.weight, bestSetFromHistory.reps) * 1.025;
             }
         }
         
-        // --- 2. Progressive overload within the CURRENT cycle ---
-        if (isStrength) {
-            const previousStrengthWeeksOfType = exerciseRecords
-                .filter(r => r.cycleId === cycleId && r.week < week && getWeekInfo(r.week, cycleId).type === type && r.phase === '강화 주기')
-                .sort((a, b) => b.week - a.week);
-
-            if (previousStrengthWeeksOfType.length > 0) {
-                const lastPerformance = previousStrengthWeeksOfType[0];
-                if(lastPerformance.sets?.length > 0) {
-                    let bestSetFromRef = { weight: 0, reps: 0 };
-                    lastPerformance.sets.forEach(set => {
-                        if (calculateEpley1RM(set.weight, set.reps) > calculateEpley1RM(bestSetFromRef.weight, bestSetFromRef.reps)) {
-                            bestSetFromRef = set;
-                        }
-                    });
-                    if (bestSetFromRef.weight > 0) {
-                        e1RM = Math.max(e1RM, calculateEpley1RM(bestSetFromRef.weight, bestSetFromRef.reps) * 1.025);
-                    }
-                }
-            }
-
+        // --- Calculate goal based on phase ---
+        if (phase === '강화 주기') {
             const weekInMicroCycle = Math.floor(((week - 1) % 6) / 2);
             let goalWeight, goalReps;
             if (weekInMicroCycle === 0) {
@@ -442,15 +417,14 @@
             const backoffWeight = Math.round((goalWeight * 0.8) / 2.5) * 2.5;
             return `🔥 강화 목표: 탑 ${goalWeight}kg x ${goalReps} / 백오프 ${backoffWeight}kg x 8-10회.`;
 
-        } else if (isHypertrophy) {
+        } else if (phase === '축적 주기') {
             let lastStrengthTopSetWeight = 0;
-            const isBlock = cycleId % 2 === 1;
-            const refWeek = isBlock ? week - 3 : week - 1;
+            const refRecords = exerciseRecords
+                .filter(r => (r.cycleId < cycleId || (r.cycleId === cycleId && r.week < week)) && r.phase === '강화 주기' && getWeekInfo(r.week, r.cycleId).type === type)
+                .sort((a, b) => (b.cycleId - a.cycleId) || (b.week - a.week));
 
-            const refRecords = exerciseRecords.filter(r => r.cycleId === cycleId && r.week === refWeek && r.sets?.length > 0);
-            
             if (refRecords.length > 0) {
-                lastStrengthTopSetWeight = Math.max(...refRecords.flatMap(r => r.sets.map(s => s.weight)));
+                lastStrengthTopSetWeight = Math.max(0, ...refRecords[0].sets.map(s => s.weight));
             } else {
                 lastStrengthTopSetWeight = Math.round((e1RM * 0.9) / 2.5) * 2.5;
             }
@@ -468,7 +442,7 @@
         if (!setsContainer) return;
 
         const setRows = setsContainer.querySelectorAll('.set-row');
-        const setsData = setRows.map(row => {
+        const setsData = Array.from(setRows).map(row => {
             const weightInput = row.querySelector('input[data-type="weight"]');
             const repsInput = row.querySelector('input[data-type="reps"]');
             if (weightInput.value && repsInput.value) {
@@ -482,10 +456,6 @@
 
         const today = new Date().toISOString().split('T')[0];
         let recordIndex = records[sanitizedName].findIndex(r => r.week === currentWeek && r.cycleId === currentCycleId && r.day === currentDay);
-        
-        if (recordIndex === -1) { // Fallback for older records saved without day
-             recordIndex = records[sanitizedName].findIndex(r => r.week === currentWeek && r.cycleId === currentCycleId);
-        }
 
         const { phase, originalWeekData } = getWeekInfo(currentWeek, currentCycleId);
         const dayName = originalWeekData[currentDay]?.name || '';
@@ -501,11 +471,8 @@
         };
 
         if (setsData.length > 0) {
-            if (recordIndex > -1) {
-                records[sanitizedName][recordIndex] = newRecord;
-            } else {
-                records[sanitizedName].push(newRecord);
-            }
+            if (recordIndex > -1) records[sanitizedName][recordIndex] = newRecord;
+            else records[sanitizedName].push(newRecord);
         } else if (recordIndex > -1) {
             records[sanitizedName].splice(recordIndex, 1);
         }
@@ -560,7 +527,7 @@
             const recordForSession = loadMostRecentRecordForSession(currentExercise);
             
             const card = document.createElement('div');
-            card.className = 'bg-white rounded-xl shadow-lg p-4 sm:p-5 flex flex-col card-enter';
+            card.className = 'bg-white rounded-xl shadow-lg hover:shadow-xl transition-shadow p-4 sm:p-5 flex flex-col card-enter';
             
             const isMain = currentExercise.type === '메인';
             const methodText = isMain ? method : currentExercise.sets;
@@ -580,7 +547,7 @@
                      <p class="text-sm sm:text-base font-semibold text-slate-500 mt-3">훈련 방식: ${methodText}</p>
                 </div>
                 <div id="sets-container-${sanitizedName}" class="space-y-3 mt-4"></div>
-                <button type="button" class="add-set-btn mt-4 w-full bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold py-2 px-4 rounded-lg transition">+ 세트 추가</button>
+                <button type="button" class="add-set-btn mt-4 w-full bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold py-2 px-4 rounded-lg transition shadow-md">+ 세트 추가</button>
             `;
             workoutList.appendChild(card);
             
@@ -619,10 +586,9 @@
 
         const weightInput = setRow.querySelector('input[data-type="weight"]');
         const repsInput = setRow.querySelector('input[data-type="reps"]');
-        weightInput.addEventListener('change', () => saveAllSets(exercise));
-        repsInput.addEventListener('change', () => saveAllSets(exercise));
-        weightInput.addEventListener('input', () => saveAllSets(exercise));
-        repsInput.addEventListener('input', () => saveAllSets(exercise));
+        const saveThrottled = throttle(() => saveAllSets(exercise), 500);
+        weightInput.addEventListener('input', saveThrottled);
+        repsInput.addEventListener('input', saveThrottled);
 
         setRow.querySelector('.delete-set-btn').addEventListener('click', () => {
             setRow.remove();
@@ -741,6 +707,7 @@
         if (combinedData.length === 0) {
             recordsContent.classList.add('hidden');
             noRecordsDiv.classList.remove('hidden');
+            noRecordsDiv.innerHTML = `<p class="text-slate-500 text-lg">아직 이 운동에 대한 기록이 없습니다.</p><p class="text-slate-500 mt-2">'오늘의 운동' 탭에서 운동을 기록해주세요.</p>`;
             if (chartInstance) chartInstance.destroy();
             return;
         }
@@ -821,10 +788,21 @@
     }
     
     // APP INITIALIZATION & EVENT LISTENERS
+    function throttle(func, limit) {
+        let inThrottle;
+        return function() {
+            const args = arguments;
+            const context = this;
+            if (!inThrottle) {
+                func.apply(context, args);
+                inThrottle = true;
+                setTimeout(() => inThrottle = false, limit);
+            }
+        }
+    }
+
     function confirmAndResetAll() {
-        localStorage.removeItem('workoutRecords');
-        localStorage.removeItem('workoutCycleInfo');
-        localStorage.removeItem('workoutAppState');
+        localStorage.clear();
         resetAllModal.classList.add('hidden');
         initializeApp(true); 
     }
@@ -846,6 +824,7 @@
         if (isReset) {
             currentWeek = 1;
             currentDay = 'pull';
+            localStorage.setItem('workoutAppState', JSON.stringify({ week: currentWeek, day: currentDay }));
         } else {
             let savedState = JSON.parse(localStorage.getItem('workoutAppState'));
             currentWeek = savedState?.week || 1;
@@ -857,13 +836,13 @@
                 const weekBtn = document.createElement('button');
                 weekBtn.dataset.week = i;
                 weekBtn.textContent = `${i}주차`;
-                weekBtn.className = 'px-3.5 py-2.5 text-base font-semibold rounded-lg transition duration-200 bg-slate-100 hover:bg-slate-200';
+                weekBtn.className = 'px-3.5 py-2.5 text-base font-semibold rounded-lg transition duration-200 bg-slate-100 hover:bg-slate-200 shadow-md';
                 weekSelector.appendChild(weekBtn);
             }
         }
         
         weekSelector.onclick = e => {
-            if (e.target.tagName === 'BUTTON') {
+            if (e.target.tagName === 'BUTTON' && e.target.dataset.week) {
                 currentWeek = parseInt(e.target.dataset.week);
                 localStorage.setItem('workoutAppState', JSON.stringify({ week: currentWeek, day: currentDay }));
                 renderWorkout();
@@ -872,7 +851,7 @@
         };
 
         daySelector.onclick = e => {
-            if (e.target.tagName === 'BUTTON') {
+            if (e.target.tagName === 'BUTTON' && e.target.dataset.day) {
                 currentDay = e.target.dataset.day;
                 localStorage.setItem('workoutAppState', JSON.stringify({ week: currentWeek, day: currentDay }));
                 renderWorkout();
@@ -900,3 +879,4 @@
 </script>
 </body>
 </html>
+
