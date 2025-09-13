@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>26주 장기 성장 프로그램 | 인터랙티브 플래너 (v3.8 Corrected)</title>
+    <title>26주 장기 성장 프로그램 | 인터랙티브 플래너 (v3.9 Corrected)</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
@@ -369,7 +369,7 @@
         return { phase, method, type, originalWeekData };
     }
 
-    // CORE LOGIC: Goal Calculation (v3.2 - FINAL)
+    // CORE LOGIC: Goal Calculation (v3.9 - FINAL)
     function getWeeklyGoalText(exercise, week, cycleId) {
         if (!exercise.baseTopSet) return null;
 
@@ -381,9 +381,8 @@
         const exerciseRecords = allRecords[sanitizedName] || [];
         
         let e1RM = calculateEpley1RM(exercise.baseTopSet, 5);
-        let lastStrengthTopSetWeight = e1RM * 0.9; // Fallback for hypertrophy if no record found
+        let lastStrengthTopSetWeight = e1RM * 0.9; 
 
-        // --- Find the most recent, relevant strength performance ---
         const referenceRecords = exerciseRecords
             .filter(r => (r.cycleId < cycleId || (r.cycleId === cycleId && r.week < week)) && r.phase === '강화 주기' && getWeekInfo(r.week, r.cycleId).type === type)
             .sort((a, b) => (b.cycleId - a.cycleId) || (b.week - a.week));
@@ -396,15 +395,34 @@
                     bestSetFromHistory = set;
                 }
             });
+
             if (bestSetFromHistory.weight > 0) {
-                e1RM = calculateEpley1RM(bestSetFromHistory.weight, bestSetFromHistory.reps) * 1.025;
+                let lastStrengthExposureCount = 0;
+                for (let i = 1; i < lastPerformance.week; i++) {
+                    const pastWeekInfo = getWeekInfo(i, lastPerformance.cycleId);
+                    if (pastWeekInfo.type === getWeekInfo(lastPerformance.week, lastPerformance.cycleId).type && pastWeekInfo.phase === '강화 주기') {
+                        lastStrengthExposureCount++;
+                    }
+                }
+                const lastWeekInMicroCycle = lastStrengthExposureCount % 3;
+                
+                let minRepGoal = 0;
+                if (lastWeekInMicroCycle === 0) minRepGoal = 6;
+                else if (lastWeekInMicroCycle === 1) minRepGoal = 5;
+                else minRepGoal = 3;
+
+                const performed1RM = calculateEpley1RM(bestSetFromHistory.weight, bestSetFromHistory.reps);
+                if (bestSetFromHistory.reps >= minRepGoal) {
+                    e1RM = performed1RM * 1.025; 
+                } else {
+                    e1RM = performed1RM; 
+                }
+                
                 lastStrengthTopSetWeight = bestSetFromHistory.weight;
             }
         }
         
-        // --- Calculate goal based on phase ---
         if (phase === '강화 주기') {
-            // [MODIFIED LOGIC] Count previous strength exposures for this specific exercise type
             let strengthExposureCount = 0;
             for (let i = 1; i < week; i++) {
                 const pastWeekInfo = getWeekInfo(i, cycleId);
