@@ -808,6 +808,37 @@
         initializeApp(true);
     }
 
+    
+    function migrateOldRecords() {
+        if (localStorage.getItem('migrationV3_2_Complete')) return;
+        let records = JSON.parse(localStorage.getItem('workoutRecords')) || {};
+        let needsUpdate = false;
+        for (const key in records) {
+            records[key].forEach(r => {
+                if (!r.phase) {
+                    const cycleId = r.cycleId || 1;
+                    const { phase } = getWeekInfo(r.week, cycleId);
+                    r.phase = phase;
+                    needsUpdate = true;
+                }
+            });
+        }
+        if (needsUpdate) {
+            localStorage.setItem('workoutRecords', JSON.stringify(records));
+        }
+        localStorage.setItem('migrationV3_2_Complete', 'true');
+    }
+ 
+ 
+     function initializeApp(isReset = false) {
+     function initializeApp(isReset = false) {
+        migrateOldRecords();
+         let cycleInfo = JSON.parse(localStorage.getItem('workoutCycleInfo')) || { cycleId: 1 };
+         let cycleInfo = JSON.parse(localStorage.getItem('workoutCycleInfo')) || { cycleId: 1 };
+         currentCycleId = cycleInfo.cycleId;
+         currentCycleId = cycleInfo.cycleId;
+ 
+ 
     function initializeApp(isReset = false) {
         let cycleInfo = JSON.parse(localStorage.getItem('workoutCycleInfo')) || { cycleId: 1 };
         currentCycleId = cycleInfo.cycleId;
@@ -870,4 +901,5 @@
 </script>
 </body>
 </html>
+
 
