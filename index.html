@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>26주 장기 성장 프로그램 | 인터랙티브 플래너 (v3.0 Final)</title>
+    <title>26주 장기 성장 프로그램 | 인터랙티브 플래너 (v2.7 Final)</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
@@ -196,7 +196,7 @@
                 { type: '메인', name: '싸이벡스 스미스 머신 스쿼트', sets: '탑/백오프 세트', tip: '발을 어깨너비로 벌리고, 허리를 편 상태를 유지하며 깊게 앉습니다. 하체 전반의 힘을 사용하세요.', baseTopSet: 45, unit: '한쪽'},
                 { type: '메인', name: '레그 프레스', sets: '탑/백오프 세트', tip: '발을 발판 중앙, 어깨너비로 둡니다. 발뒤꿈치로 민다는 느낌으로 허벅지 전체에 균형잡힌 부하를 전달합니다.', baseTopSet: 160, unit: '총'},
                 { type: '보조', name: '노틸러스 레그 익스텐션 (보조)', sets: '3~4세트', tip: '다리를 완전히 폈을 때 1~2초간 멈춰 대퇴사두를 강하게 쥐어짭니다. 엉덩이가 뜨지 않도록 주의하세요.', staticGoal: '🔥 목표: 50-60kg x 12-15회.' },
-                { type: '보조', name: '노틸러스 레그 컬', sets: '3~4세트', tip: '뒤꿈치를 엉덩이 쪽으로 당길 때 햄스트링을 강하게 수축하고, 천천히 저항을 느끼하며 다리를 폅니다.', staticGoal: '🔥 목표: 40-50kg x 12-15회.' },
+                { type: '보조', name: '노틸러스 레그 컬', sets: '3~4세트', tip: '뒤꿈치를 엉덩이 쪽으로 당길 때 햄스트링을 강하게 수축하고, 천천히 저항을 느끼며 다리를 폅니다.', staticGoal: '🔥 목표: 40-50kg x 12-15회.' },
                 { type: '마무리', name: '레그 프레스 카프 레이즈', sets: '3~4세트', tip: '발끝을 발판 아래쪽에 두고, 발뒤꿈치를 최대한 이완시켰다가 발끝으로 강하게 밀어 종아리를 수축합니다.', staticGoal: '🔥 목표: 60-80kg x 15-20회.' },
             ]},
             push: { name: '푸쉬(Push) A', routine: [
@@ -369,7 +369,7 @@
         return { phase, method, type, originalWeekData };
     }
 
-    // CORE LOGIC: Goal Calculation (v3.0 - FINAL)
+    // CORE LOGIC: Goal Calculation (v2.7 - FINAL)
     function getWeeklyGoalText(exercise, week, cycleId) {
         if (!exercise.baseTopSet) return null;
 
@@ -379,14 +379,13 @@
         const sanitizedName = getSanitizedName(exercise);
         const allRecords = JSON.parse(localStorage.getItem('workoutRecords')) || {};
         const exerciseRecords = allRecords[sanitizedName] || [];
-        
-        let e1RM = calculateEpley1RM(exercise.baseTopSet, 5);
-        let lastStrengthTopSetWeight = e1RM * 0.9; // Fallback for hypertrophy if no record found
 
-        // --- Find the most recent, relevant strength performance ---
+        let e1RM = calculateEpley1RM(exercise.baseTopSet, 5);
+
+        // --- Find the most recent, relevant strength performance to set baseline e1RM ---
         const referenceRecords = exerciseRecords
             .filter(r => (r.cycleId < cycleId || (r.cycleId === cycleId && r.week < week)) && r.phase === '강화 주기' && getWeekInfo(r.week, r.cycleId).type === type)
-            .sort((a, b) => (b.cycleId - a.cycleId) || (b.week - a.week));
+            .sort((a,b) => (b.cycleId - a.cycleId) || (b.week - a.week));
 
         if (referenceRecords.length > 0) {
             const lastPerformance = referenceRecords[0];
@@ -398,7 +397,6 @@
             });
             if (bestSetFromHistory.weight > 0) {
                 e1RM = calculateEpley1RM(bestSetFromHistory.weight, bestSetFromHistory.reps) * 1.025;
-                lastStrengthTopSetWeight = bestSetFromHistory.weight;
             }
         }
         
@@ -420,7 +418,18 @@
             return `🔥 강화 목표: 탑 ${goalWeight}kg x ${goalReps} / 백오프 ${backoffWeight}kg x 8-10회.`;
 
         } else if (phase === '축적 주기') {
-            const goalWeight = Math.round((lastStrengthTopSetWeight * 0.75) / 2.5) * 2.5;
+            let lastStrengthTopSetWeight = 0;
+            const refRecords = exerciseRecords
+                .filter(r => (r.cycleId < cycleId || (r.cycleId === cycleId && r.week < week)) && r.phase === '강화 주기' && getWeekInfo(r.week, r.cycleId).type === type)
+                .sort((a, b) => (b.cycleId - a.cycleId) || (b.week - a.week));
+
+            if (refRecords.length > 0) {
+                lastStrengthTopSetWeight = Math.max(0, ...refRecords[0].sets.map(s => s.weight));
+            } else {
+                lastStrengthTopSetWeight = Math.round((e1RM * 0.9) / 2.5) * 2.5;
+            }
+            
+            let goalWeight = Math.round((lastStrengthTopSetWeight * 0.75) / 2.5) * 2.5;
             return `🔥 축적 목표: 워킹 세트 ${goalWeight}kg x 8-12회 (3-4세트).`;
         }
         return null;
@@ -808,37 +817,6 @@
         initializeApp(true);
     }
 
-    
-    function migrateOldRecords() {
-        if (localStorage.getItem('migrationV3_2_Complete')) return;
-        let records = JSON.parse(localStorage.getItem('workoutRecords')) || {};
-        let needsUpdate = false;
-        for (const key in records) {
-            records[key].forEach(r => {
-                if (!r.phase) {
-                    const cycleId = r.cycleId || 1;
-                    const { phase } = getWeekInfo(r.week, cycleId);
-                    r.phase = phase;
-                    needsUpdate = true;
-                }
-            });
-        }
-        if (needsUpdate) {
-            localStorage.setItem('workoutRecords', JSON.stringify(records));
-        }
-        localStorage.setItem('migrationV3_2_Complete', 'true');
-    }
- 
- 
-     function initializeApp(isReset = false) {
-     function initializeApp(isReset = false) {
-        migrateOldRecords();
-         let cycleInfo = JSON.parse(localStorage.getItem('workoutCycleInfo')) || { cycleId: 1 };
-         let cycleInfo = JSON.parse(localStorage.getItem('workoutCycleInfo')) || { cycleId: 1 };
-         currentCycleId = cycleInfo.cycleId;
-         currentCycleId = cycleInfo.cycleId;
- 
- 
     function initializeApp(isReset = false) {
         let cycleInfo = JSON.parse(localStorage.getItem('workoutCycleInfo')) || { cycleId: 1 };
         currentCycleId = cycleInfo.cycleId;
@@ -901,5 +879,4 @@
 </script>
 </body>
 </html>
-
 
