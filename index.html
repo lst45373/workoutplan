@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>26주 장기 성장 프로그램 | 인터랙티브 플래너 (v3.7 Corrected)</title>
+    <title>26주 장기 성장 프로그램 | 인터랙티브 플래너 (v3.8 Corrected)</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
@@ -404,7 +404,16 @@
         
         // --- Calculate goal based on phase ---
         if (phase === '강화 주기') {
-            const weekInMicroCycle = Math.floor(((week - 1) % 6) / 2);
+            // [MODIFIED LOGIC] Count previous strength exposures for this specific exercise type
+            let strengthExposureCount = 0;
+            for (let i = 1; i < week; i++) {
+                const pastWeekInfo = getWeekInfo(i, cycleId);
+                if (pastWeekInfo.type === type && pastWeekInfo.phase === '강화 주기') {
+                    strengthExposureCount++;
+                }
+            }
+            const weekInMicroCycle = strengthExposureCount % 3;
+
             let goalWeight, goalReps;
             if (weekInMicroCycle === 0) {
                 goalWeight = Math.round((e1RM * 0.825) / 2.5) * 2.5;
