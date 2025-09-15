@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>26주 장기 성장 프로그램 | 인터랙티브 플래너 (v4.0 Final)</title>
+    <title>26주 장기 성장 프로그램 | 인터랙티브 플래너 (v5.0 Final)</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
@@ -397,12 +397,18 @@
 
             if (bestSetFromHistory.weight > 0) {
                 let lastStrengthExposureCount = 0;
-                for (let i = 1; i < lastPerformance.week; i++) {
-                    const pastWeekInfo = getWeekInfo(i, lastPerformance.cycleId);
-                    if (pastWeekInfo.type === getWeekInfo(lastPerformance.week, lastPerformance.cycleId).type && pastWeekInfo.phase === '강화 주기') {
-                        lastStrengthExposureCount++;
-                    }
-                }
+                // [BUG FIX] This logic was flawed. Now we need to count across all cycles up to the last performance.
+                const allPreviousStrengthRecordsForLast = exerciseRecords.filter(r => {
+                     const recordDate = new Date(r.date || 0);
+                     const lastPerformanceDate = new Date(lastPerformance.date || 0)
+                     if(recordDate > lastPerformanceDate) return false;
+
+                     const recordInfo = getWeekInfo(r.week, r.cycleId);
+                     return recordInfo.phase === '강화 주기' && recordInfo.type === getWeekInfo(lastPerformance.week, lastPerformance.cycleId).type;
+                });
+
+                lastStrengthExposureCount = allPreviousStrengthRecordsForLast.length -1; // -1 because we are calculating for the *previous* state
+
                 const lastWeekInMicroCycle = lastStrengthExposureCount % 3;
                 
                 let minRepGoal = 0;
@@ -423,12 +429,20 @@
         
         if (phase === '강화 주기') {
             let strengthExposureCount = 0;
-            for (let i = 1; i < week; i++) {
-                const pastWeekInfo = getWeekInfo(i, cycleId);
-                if (pastWeekInfo.type === type && pastWeekInfo.phase === '강화 주기') {
-                    strengthExposureCount++;
-                }
-            }
+            // [BUG FIX 1] Count strength exposures across ALL past cycles, not just the current one.
+            const allPastStrengthRecords = exerciseRecords
+                .filter(r => {
+                    const recordCycle = r.cycleId || 1;
+                    const recordWeek = r.week || 1;
+                    
+                    const isPast = recordCycle < cycleId || (recordCycle === cycleId && recordWeek < week);
+                    if (!isPast) return false;
+
+                    const recordInfo = getWeekInfo(recordWeek, recordCycle);
+                    return recordInfo.phase === '강화 주기' && recordInfo.type === type;
+                });
+            strengthExposureCount = allPastStrengthRecords.length;
+
             const weekInMicroCycle = strengthExposureCount % 3;
 
             let goalWeight, goalReps;
@@ -461,27 +475,28 @@
         const lastRecord = exerciseRecords.sort((a,b) => new Date(b.date) - new Date(a.date))[0];
 
         // 목표 파싱 (정규식 사용)
-        const weightRegex = /(\d+)-(\d+)kg/;
+        const weightRegex = /(\d+(\.\d+)?)-(\d+(\.\d+)?)kg/;
         const repRegex = /(\d+)-(\d+)회/;
         const setRegex = /(\d+)~(\d+)세트/;
 
-        const weightMatch = exercise.staticGoal.match(weightRegex);
-        const repMatch = exercise.staticGoal.match(repRegex);
+        const currentGoalText = lastRecord ? getAssistanceGoalText({ ...exercise, staticGoal: exercise.staticGoal }, { ...allRecords, [sanitizedName]: exerciseRecords.slice(1) }) : exercise.staticGoal;
+
+
+        const weightMatch = currentGoalText.match(weightRegex);
+        const repMatch = currentGoalText.match(repRegex);
         const setMatch = exercise.sets.match(setRegex);
 
         if (!weightMatch || !repMatch || !setMatch || !lastRecord || lastRecord.sets.length === 0) {
             return exercise.staticGoal; // 파싱 실패 또는 기록 없으면 기본값 반환
         }
 
-        const minWeight = parseFloat(weightMatch[1]);
-        const maxWeight = parseFloat(weightMatch[2]);
-        const minReps = parseInt(repMatch[1]);
+        const maxWeight = parseFloat(weightMatch[3]);
         const maxReps = parseInt(repMatch[2]);
         const maxSets = parseInt(setMatch[2]);
         
         // 성공 여부 판정
         if (lastRecord.sets.length < maxSets) {
-            return exercise.staticGoal; // 세트 수 부족
+            return currentGoalText;
         }
 
         const isSuccess = lastRecord.sets.every(set => set.weight >= maxWeight && set.reps >= maxReps);
@@ -491,12 +506,12 @@
             const newIncrement = exercise.increment;
             
             const newMaxWeight = actualMaxWeight + newIncrement;
-            const newMinWeight = newMaxWeight - (maxWeight - minWeight);
+            const newMinWeight = newMaxWeight - (maxWeight - parseFloat(weightMatch[1]));
 
-            return `🔥 목표: ${newMinWeight}-${newMaxWeight}kg x ${minReps}-${maxReps}회.`;
+            return `🔥 목표: ${newMinWeight}-${newMaxWeight}kg x ${parseInt(repMatch[1])}-${maxReps}회.`;
         }
         
-        return exercise.staticGoal;
+        return currentGoalText;
     }
 
 
@@ -579,17 +594,18 @@
         dayData.routine.forEach(exercise => {
             let currentExercise = JSON.parse(JSON.stringify(exercise)); 
 
-            if (currentExercise.name === '사이드 래터럴 레이즈 머신') {
-                if (phase === '축적 주기') {
+            // [BUG FIX 2]
+            if (exercise.name === '사이드 래터럴 레이즈 머신') {
+                 if (phase === '축적 주기') {
                     currentExercise.name = '케이블 X-레이즈';
                     currentExercise.tip = '벤치에 누워, 손목에 스트랩을 걸고 케이블을 X자로 교차하여 수행합니다. 최대 스트레칭과 지속적인 텐션에 집중하세요.';
                     currentExercise.staticGoal = '🔥 목표: 12-15회 반복 가능한 무게로 실패지점까지.';
-                } else {
+                } else { // 강화 주기
                     currentExercise.name = '뉴텍 스탠딩 사이드 레터럴 레이즈';
                     currentExercise.tip = '어깨 관절을 머신의 회전축에 맞추고, 한 손씩 수행하여 측면 삼각근을 완벽하게 고립합니다. 반대 손으로 몸을 지지하여 반동을 통제하세요.';
                 }
             }
-
+            
             const sanitizedName = getSanitizedName(currentExercise);
             const recordForSession = loadMostRecentRecordForSession(currentExercise);
             
@@ -598,8 +614,9 @@
             
             const isMain = currentExercise.type === '메인';
             let goalText;
+
             if (isMain) {
-                goalText = getMainGoalText(exercise, currentWeek, currentCycleId, allRecords);
+                goalText = getMainGoalText(currentExercise, currentWeek, currentCycleId, allRecords);
             } else if (currentExercise.type === '보조' || currentExercise.type === '마무리') {
                 goalText = getAssistanceGoalText(currentExercise, allRecords);
             } else { // 웜업, 선피로 등
