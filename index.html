@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>26주 장기 성장 프로그램 | 인터랙티브 플래너 (v5.2 Final)</title>
+    <title>26주 장기 성장 프로그램 | 인터랙티브 플래너 (v5.5 Final)</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
@@ -21,6 +21,7 @@
         @media (min-width: 640px) {
             .chart-container { height: 40vh; }
         }
+        .prose { max-width: none; }
     </style>
     <link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css" />
 </head>
@@ -77,36 +78,36 @@
 
                 <div id="view-plan" class="hidden">
                      <div class="bg-white p-6 rounded-xl shadow-lg overflow-x-auto">
-                         <h2 class="text-2xl font-bold text-slate-900 mb-4">훈련 주기 설명</h2>
-                         <div class="space-y-6 text-slate-700">
-                             <div>
-                                 <h3 class="font-bold text-xl text-red-700">강화 주기 (고중량 저반복)</h3>
-                                 <p class="mt-1">다룰 수 있는 최대 중량(Strength)을 늘리는 데 모든 것을 집중하는 시기입니다. 메인 운동은 **'탑 세트 / 백오프 세트'** 방식으로 진행하며, 점진적으로 더 무거운 무게에 도전하는 것이 목표입니다.</p>
-                             </div>
-                             <div>
-                                 <h3 class="font-bold text-xl text-green-700">축적 주기 (중중량 고반복)</h3>
-                                 <p class="mt-1">근육의 크기(근비대)를 키우기 위해 충분한 운동량(Volume)을 쌓는 시기입니다. 메인 운동은 **'워킹 세트'** (8~12회 x 3~4세트)로 변경하여 수행합니다. 탑 세트 무게의 75%~85% 무게로, 실패 직전까지만 반복합니다.</p>
-                             </div>
-                             <div>
-                                 <h3 class="font-bold text-xl text-sky-700">디로딩 주간 (전략적 회복)</h3>
-                                 <p class="mt-1">'능동적 회복'을 통해 그동안 쌓인 중추신경계와 관절의 피로를 완전히 해소하고 다음 12주를 준비하는 시기입니다. 평소 워킹 세트 중량의 50%~60%, 세트 수의 절반만 가볍게 수행합니다.</p>
-                             </div>
-                         </div>
-                        
-                         <h2 class="text-2xl font-bold text-slate-900 mt-10 mb-4">현재 사이클 계획표 요약</h2>
-                         <table class="w-full text-left border-collapse">
-                             <thead>
-                                 <tr class="bg-slate-200">
-                                     <th class="p-3 sm:p-4 font-semibold text-slate-800">주차</th>
-                                     <th class="p-3 sm:p-4 font-semibold text-slate-800">월요일 (PULL)</th>
-                                     <th class="p-3 sm:p-4 font-semibold text-slate-800">수요일 (PUSH)</th>
-                                     <th class="p-3 sm:p-4 font-semibold text-slate-800">금요일 (LEG)</th>
-                                     <th class="p-3 sm:p-4 font-semibold text-slate-800">주요 훈련 방식</th>
-                                 </tr>
-                             </thead>
-                             <tbody id="plan-table-body" class="text-slate-700">
-                             </tbody>
-                         </table>
+                          <h2 class="text-2xl font-bold text-slate-900 mb-4">훈련 주기 설명</h2>
+                          <div class="space-y-6 text-slate-700">
+                               <div>
+                                   <h3 class="font-bold text-xl text-red-700">강화 주기 (고중량 저반복)</h3>
+                                   <p class="mt-1">다룰 수 있는 최대 중량(Strength)을 늘리는 데 모든 것을 집중하는 시기입니다. 메인 운동은 **'탑 세트 / 백오프 세트'** 방식으로 진행하며, 점진적으로 더 무거운 무게에 도전하는 것이 목표입니다.</p>
+                               </div>
+                               <div>
+                                   <h3 class="font-bold text-xl text-green-700">축적 주기 (중중량 고반복)</h3>
+                                   <p class="mt-1">근육의 크기(근비대)를 키우기 위해 충분한 운동량(Volume)을 쌓는 시기입니다. 메인 운동은 **'워킹 세트'** (8~12회 x 3~4세트)로 변경하여 수행합니다. 탑 세트 무게의 75%~85% 무게로, 실패 직전까지만 반복합니다.</p>
+                               </div>
+                               <div>
+                                   <h3 class="font-bold text-xl text-sky-700">디로딩 주간 (전략적 회복)</h3>
+                                   <p class="mt-1">'능동적 회복'을 통해 그동안 쌓인 중추신경계와 관절의 피로를 완전히 해소하고 다음 12주를 준비하는 시기입니다. 평소 워킹 세트 중량의 50%~60%, 세트 수의 절반만 가볍게 수행합니다.</p>
+                               </div>
+                          </div>
+                         
+                          <h2 class="text-2xl font-bold text-slate-900 mt-10 mb-4">현재 사이클 계획표 요약</h2>
+                          <table class="w-full text-left border-collapse">
+                               <thead>
+                                   <tr class="bg-slate-200">
+                                       <th class="p-3 sm:p-4 font-semibold text-slate-800">주차</th>
+                                       <th class="p-3 sm:p-4 font-semibold text-slate-800">월요일 (PULL)</th>
+                                       <th class="p-3 sm:p-4 font-semibold text-slate-800">수요일 (PUSH)</th>
+                                       <th class="p-3 sm:p-4 font-semibold text-slate-800">금요일 (LEG)</th>
+                                       <th class="p-3 sm:p-4 font-semibold text-slate-800">주요 훈련 방식</th>
+                                   </tr>
+                               </thead>
+                               <tbody id="plan-table-body" class="text-slate-700">
+                               </tbody>
+                          </table>
                      </div>
                 </div>
 
@@ -114,7 +115,7 @@
                     <div class="bg-white p-4 sm:p-6 rounded-xl shadow-lg">
                         <h2 class="text-2xl sm:text-3xl font-bold text-slate-900 mb-2">진행 상황 대시보드</h2>
                         <p class="text-slate-600 mb-8 text-base sm:text-lg">메인 운동별 중량 변화를 추적하고 성장 과정을 확인하세요.</p>
-                        
+                       
                         <div class="mb-8">
                             <label for="exercise-selector" class="block text-base font-medium text-slate-800 mb-2">분석할 운동 종목 선택:</label>
                             <select id="exercise-selector" class="w-full max-w-md p-2.5 sm:p-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition shadow-md">
@@ -126,10 +127,10 @@
                             <div class="chart-container mb-10">
                                 <canvas id="progressChart"></canvas>
                             </div>
-                            
-                            <h3 class="text-xl sm:text-2xl font-bold text-slate-800 mb-4">상세 기록</h3>
+                           
+                            <h3 class="text-xl sm:text-2xl font-bold text-slate-800 mb-4 mt-10 pt-8 border-t border-slate-200">상세 기록</h3>
                             <div id="records-table-container" class="overflow-x-auto rounded-lg border border-slate-200 shadow-sm">
-                                
+                               
                             </div>
                         </div>
                         <div id="no-records" class="text-center py-16">
@@ -182,7 +183,6 @@
             </div>
         </div>
         
-        <!-- [NEW] Project Archive Modal -->
         <div id="export-modal" class="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center hidden z-50 p-4 modal-enter">
             <div class="bg-white rounded-xl p-6 md:p-8 shadow-2xl max-w-2xl w-full flex flex-col" style="height: 90vh;">
                 <div class="flex-shrink-0">
@@ -200,7 +200,7 @@
     </div>
 
 <script>
-    // [NEW] Universal Context Prompt for Project Archive
+    // [CONTEXT_PROMPT UPDATED in v5.4]
     const CONTEXT_PROMPT = `#################################################################
 ## [1단계] 새로운 대화 시작 시, 아래 내용을 모두 복사하여 첫 메시지로 보내주세요
 #################################################################
@@ -232,10 +232,21 @@
 
 ### [C] AI의 임무
 
-1.  너와 최초 사용자는 위 원칙에 따라 프로그램을 v5.1 Final 버전까지 완성시켰다.
-2.  이제 v6.0 메이저 업데이트를 위해 새로운 대화를 시작했다. 아래에는 너의 구체적인 기억을 되살리기 위한 전체 대화 기록이 제공될 것이다.
+1.  너와 최초 사용자는 위 원칙에 따라 프로그램을 v5.4 Final 버전까지 완성시켰다.
+2.  아래에는 너의 구체적인 기억을 되살리기 위한 전체 대화 기록이 제공될 것이다.
 3.  이 대화 기록을 요약하지 말고, 너의 장기 기억처럼 완전히 흡수하고 이해해야 한다.
-4.  대화 기록 파악이 끝나면, 사용자가 다음 메시지로 전달할 실제 훈련 기록(JSON 데이터)을 분석할 준비를 하고, v6.0 업데이트 계획(슈퍼세트 기능 도입 등)에 대한 논의를 이어가면 된다.
+4.  대화 기록 파악이 끝나면, 사용자가 다음 메시지로 전달할 실제 훈련 기록(JSON 데이터)을 분석할 준비를 하고, 아래 '미해결 과제'에 대한 논의를 이어가면 된다.
+
+### [D] 미해결 과제 및 차기 업데이트 계획 (v6.0+)
+
+v5.4 업데이트를 통해 몇 가지 버그가 수정되었으나, 아래의 핵심적인 개선 과제가 남아있으며 이는 v6.0 메이저 업데이트 시 최우선으로 해결해야 한다.
+
+1.  **데이터 재해석에 따른 '잠재적 불안정성' (심각도: 높음)**
+    * **현상:** 현재 목표 중량 계산 로직(\`getMainGoalText\`)은 과거 기록을 해석할 때마다 \`getWeekInfo\` 함수(현재 버전의 설계도)를 호출하여 재해석함. 이로 인해 향후 \`getWeekInfo\` 로직이 변경되면 모든 과거 기록의 해석이 오염되어 계산 오류를 유발할 수 있음.
+    * **해결 방향 (3단계):**
+        1.  **데이터 저장 강화:** 운동 기록 저장 시 \`phase\`뿐만 아니라 \`type\`('A','B','C')도 명시적으로 함께 저장하여, 모든 기록을 '불변의 완전한 데이터'로 만든다.
+        2.  **계산 로직 단순화:** \`getMainGoalText\`가 더 이상 \`getWeekInfo\`로 과거를 재해석하지 않고, 기록에 저장된 \`phase\`와 \`type\`을 직접 읽어 누적 횟수를 계산하도록 변경한다.
+        3.  **일회성 마이그레이션:** 위 변경사항을 적용하기 위해, 기존 사용자들의 \`type\` 정보가 없는 과거 기록에 \`type\`을 추가해주는 마이그레이션 코드를 반드시 함께 배포해야 한다.
 
 [!! 여기에 이전 대화 내용 전체를 복사하여 붙여넣어 주세요 !!]
 
@@ -245,7 +256,7 @@
 #################################################################
 
 `;
-
+    // [WORKOUT PLAN UPDATED in v5.4]
     const workoutPlan = {
         1: {
             pull: { name: '풀(Pull) A', routine: [
@@ -270,16 +281,16 @@
             push: { name: '푸쉬(Push) A', routine: [
                 { type: '웜업', name: '해머스트랭스 래터럴 로우', sets: '4세트', tip: '견갑을 안정화시키고 후면을 활성화합니다. (한쪽 20kg 고정) 가볍게 당기며 날개뼈 주변을 예열하세요.' },
                 { type: '웜업', name: '팩덱 플라이', sets: '3세트', tip: '가슴 근육을 선피로시켜 프레스 시 자극을 극대화합니다.', staticGoal: '🔥 목표: 60kg x 10-12회.' },
-                { type: '메인', name: '로우 인클라인 스미스 프레스', sets: '탑/백오프 세트', tip: '벤치 각도를 낮게(약 15-20도) 설정하여 쇄골 바로 아래 윗가슴 상부를 타겟합니다. 팔꿈치를 너무 벌리지 마세요.', baseTopSet: 35, unit: '한쪽'},
-                { type: '메인', name: '해머스트랭스 인클라인 프레스', sets: '탑/백오프 세트', tip: '자연스러운 아크 궤적을 이용해 윗가슴에 새로운 자극을 줍니다. 가슴을 활짝 열고 견갑을 패드에 고정하세요.', baseTopSet: 40, unit: '한쪽'},
-                { type: '메인', name: '해머스트랭스 숄더 프레스', sets: '탑/백오프 세트', tip: '어깨의 전면과 측면을 타겟합니다. 어깨가 으쓱하지 않도록 통제하며 귀 옆으로 밀어 올립니다.', baseTopSet: 40, unit: '한쪽'},
-                { type: '보조', name: '딥스 머신', sets: '3~4세트', tip: '아랫가슴과 삼두근에 볼륨을 더합니다. 상체를 숙일수록 아랫가슴에 자극이 집중됩니다.', staticGoal: '🔥 목표: 실패지점까지 x 3-4세트.', increment: 2.5 },
+                { type: '메인', name: '로우 인클라인 스미스 프레스', sets: '탑/백오프 세트', tip: '벤치 각도를 낮게(약 15-20도) 설정하여 윗가슴 상부를 타겟합니다. 등을 패드에 단단히 고정하되, 견갑은 자연스럽게 움직이도록 허용하여 윗가슴의 최대 이완과 수축에 집중하세요.', baseTopSet: 35, unit: '한쪽'},
+                { type: '메인', name: '해머스트랭스 인클라인 프레스', sets: '탑/백오프 세트', tip: '자연스러운 아크 궤적을 이용해 윗가슴에 새로운 자극을 줍니다. 등을 패드에 고정해 안정적인 기반을 만들고, 견갑의 자연스러운 움직임을 통해 윗가슴을 최대로 스트레칭하고 수축시키세요.', baseTopSet: 40, unit: '한쪽'},
+                { type: '메인', name: '해머스트랭스 숄더 프레스', sets: '탑/백오프 세트', tip: '어깨의 전면과 측면을 타겟합니다. 등을 패드에 기대어 몸을 안정시키고, 자연스러운 어깨와 견갑의 리듬을 이용해 어깨 근육을 끝까지 수축하고 이완시키는 것에 집중하세요.', baseTopSet: 40, unit: '한쪽'},
+                { type: '보조', name: '딥스 머신', sets: '3~4세트', tip: '아랫가슴과 삼두근에 볼륨을 더합니다. 상체를 숙일수록 아랫가슴에 자극이 집중됩니다. 이완 시 견갑이 자연스럽게 상승하며 가슴이 최대로 늘어나는 것을 느끼세요.', increment: 2.5 },
                 { type: '마무리', name: '뉴텍 암 컬 머신', sets: '3~4세트', tip: '팔을 패드에 완전히 고정하고, 반동 없이 이두근의 힘으로만 핸들을 들어올려 강하게 수축합니다.', staticGoal: '🔥 목표: 25-35kg x 10-15회.', increment: 5}
             ]}
         },
         2: {
             pull: { name: '풀(Pull) B', routine: [
-                 { type: '웜업', name: '노틸러스 풀오버', sets: '2~3세트', tip: '광배근 스트레칭과 혈류 공급에 집중합니다. (LBS 단위)', staticGoal: '🔥 목표: 40-60 LBS x 12-15회.'},
+                { type: '웜업', name: '노틸러스 풀오버', sets: '2~3세트', tip: '광배근 스트레칭과 혈류 공급에 집중합니다. (LBS 단위)', staticGoal: '🔥 목표: 40-60 LBS x 12-15회.'},
                 { type: '웜업', name: '랫풀다운 (가볍게)', sets: '2세트', tip: '견갑을 아래로 누르는 움직임에 집중하여 등을 활성화시킵니다.', staticGoal: '🔥 목표: 30-40kg x 12-15회.'},
                 { type: '메인', name: '해머스트랭스 D.Y. 로우', sets: '탑/백오프 세트', tip: '언더그립로 광배근 하부를 직접적으로 타겟합니다. 안장을 낮춰 명치에 패드가 오게 하고, 팔꿈치를 옆구리에 붙여 배꼽 쪽으로 당기는 느낌에 집중하세요.', baseTopSet: 40, unit: '한쪽'},
                 { type: '메인', name: '랫풀다운 (맥그립 언더)', sets: '탑/백오프 세트', tip: 'D.Y. 로우와 함께 광배근 하부를 다른 각도(수직)에서 공략합니다. 가슴을 열고 당겨주며, 최대 수축 지점에서 등을 쥐어짜세요.', baseTopSet: 65, unit: '총'},
@@ -299,9 +310,9 @@
             push: { name: '푸쉬(Push) B', routine: [
                 { type: '웜업', name: '해머스트랭스 래터럴 로우', sets: '4세트', tip: '견갑을 안정화시키고 후면을 활성화합니다. (한쪽 20kg 고정) 가볍게 당기며 날개뼈 주변을 예열하세요.' },
                 { type: '웜업', name: '팩덱 플라이', sets: '3세트', tip: '가슴 근육을 선피로시켜 프레스 시 자극을 극대화합니다.', staticGoal: '🔥 목표: 60kg x 10-12회.' },
-                { type: '메인', name: '해머스트랭스 시티드 체스트 프레스', sets: '탑/백오프 세트', tip: '가슴 중앙부의 최대 중량에 도전합니다. 가슴을 패드에서 떼지 말고 견갑을 고정한 채 밀어주세요.', baseTopSet: 30, unit: '한쪽' },
-                { type: '메인', name: '스미스 머신 숄더 프레스', sets: '탑/백오프 세트', tip: '등을 벤치에 완전히 고정하고, 바가 턱 끝이나 쇄골까지 오도록 깊게 내립니다. 고정된 수직 궤적 안에서 어깨 근육의 힘에만 집중하세요.', baseTopSet: 40, unit: '한쪽' },
-                { type: '보조', name: '너틸러스 프레스 (디클라인 응용)', sets: '3~4세트', tip: '아랫가슴 라인을 선명하게 만듭니다. 팔꿈치를 아래쪽으로 내리며 아랫가슴의 스트레칭을 느끼세요.', staticGoal: '🔥 목표: 40-50kg x 12-15회.', increment: 10 },
+                { type: '메인', name: '해머스트랭스 시티드 체스트 프레스', sets: '탑/백오프 세트', tip: '가슴 중앙부의 볼륨감을 키우는 것이 목표입니다. 등을 패드에 완전히 고정하여 안정적인 기반을 만들되, 견갑의 자연스러운 움직임을 허용하여 가슴 근육의 최대 수축과 이완에 집중하세요.', baseTopSet: 30, unit: '한쪽' },
+                { type: '메인', name: '스미스 머신 숄더 프레스', sets: '탑/백오프 세트', tip: '바가 턱 끝이나 쇄골까지 오도록 깊게 내립니다. 등을 벤치에 기대어 안정성을 확보하고, 견갑의 자연스러운 상방회전을 이용해 어깨 근육을 끝까지 쥐어짜는 느낌에 집중하세요.', baseTopSet: 40, unit: '한쪽' },
+                { type: '보조', name: '너틸러스 프레스 (디클라인 응용)', sets: '3~4세트', tip: '아랫가슴 라인을 선명하게 만듭니다. 등을 패드에 단단히 고정하되, 견갑의 움직임을 허용하여 팔꿈치를 아래로 내릴 때 아랫가슴이 최대로 스트레칭되는 느낌에 집중하세요.', staticGoal: '🔥 목표: 40-50kg x 12-15회.', increment: 10 },
                 { type: '보조', name: '케이블 크로스오버', sets: '3~4세트', tip: '가슴 안쪽을 쥐어짜는 느낌에 집중합니다. 팔꿈치를 살짝 구부린 상태로 큰 원을 그리듯 모아주세요.', staticGoal: '🔥 목표: 한쪽 10-15kg x 15-20회.', increment: 2.5 },
                 { type: '마무리', name: '덤벨 이두 컬', sets: '3~4세트', tip: '이두근의 봉우리를 만드는 데 집중합니다. 손목을 살짝 바깥쪽으로 돌려주며 수축하면 더 강한 자극을 줄 수 있습니다.', staticGoal: '🔥 목표: 12-16kg x 10-15회.', increment: 2 }
             ]}
@@ -319,17 +330,17 @@
              leg: { name: '레그(Leg) C', routine: [
                 { type: '웜업', name: '노틸러스 이너 타이', sets: '2세트', tip: '고관절 내전근을 활성화합니다. (LBS 단위)', staticGoal: '🔥 목표: 100-130 LBS x 10-12회.' },
                 { type: '웜업', name: '노틸러스 아웃 타이', sets: '2세트', tip: '고관절 외전근(둔근)을 활성화합니다. (LBS 단위)', staticGoal: '🔥 목표: 100-130 LBS x 10-12회.' },
-                { type: '선피로', name: '노틸러스 레그 컬', sets: '3세트', tip: '가벼운 무게로 햄스트링에 먼저 자극을 줍니다. 펌핑감에 집중하세요.' },
+                { type: '선피로', name: '노틸러스 레그 컬', sets: '3세트', tip: '가벼운 무게로 햄스트링에 먼저 자극을 줍니다. 펌핑감에 집중하세요.', staticGoal: '🔥 목표: 25-35kg x 15-20회.' },
                 { type: '메인', name: '레그 프레스 (햄스트링/둔근 타겟)', sets: '탑/백오프 세트', tip: '발을 발판 위쪽에 넓게 두어 후면 사슬에 자극을 집중시킵니다. 엉덩이가 패드에서 뜨지 않는 깊이까지만 내려가세요.', baseTopSet: 160, unit: '총'},
-                { type: '메인', name: '뉴텍 V스쿼트 (리버스)', sets: '탑/백오프 세트', tip: '패드에 가슴을 대고 수행하여 둔근을 직접적으로 공략합니다. 엉덩이를 뒤로 빼며 깊게 앉고, 발뒤꿈치로 밀어 올라오며 엉덩이를 수축하세요.', baseTopSet: 80, unit: '총' },
+                { type: '메인', name: '뉴텍 V스쿼트 (리버스)', sets: '탑/백오프 세트', tip: '머신을 마주보고 서서 어깨를 고리 모양의 패드에 견착합니다. 발을 넓게 벌리고, 엉덩이를 뒤로 깊게 빼며 앉아 둔근과 햄스트링이 최대로 이완되는 것을 느끼세요. 발뒤꿈치로 강하게 밀어 올라오며 둔근을 수축합니다.', baseTopSet: 80, unit: '총' },
                 { type: '보조', name: '노틸러스 레그 컬', sets: '3~4세트', tip: '무거운 무게로 햄스트링 볼륨을 극대화합니다. 최대 수축 지점에서 1~2초 멈춰주세요.', staticGoal: '🔥 목표: 40-50kg x 12-15회.', increment: 2.5 },
                 { type: '마무리', name: '부티빌더 스탠딩 힙 쓰러스트', sets: '3~4세트', tip: '패드를 골반에 위치시키고, 발뒤꿈치로 강하게 밀어 엉덩이를 최대로 수축합니다. 정점에서 1~2초간 멈춰주세요.', staticGoal: '🔥 목표: 40-60kg x 12-15회.', increment: 5 }
             ]},
             push: { name: '푸쉬(Push) C', routine: [
                 { type: '웜업', name: '해머스트랭스 래터럴 로우', sets: '4세트', tip: '견갑을 안정화시키고 후면을 활성화합니다. (한쪽 20kg 고정) 가볍게 당기며 날개뼈 주변을 예열하세요.' },
                 { type: '웜업', name: '팩덱 플라이', sets: '3세트', tip: '가슴 근육을 선피로시켜 프레스 시 자극을 극대화합니다.' },
-                { type: '메인', name: '해머스트랭스 인클라인 프레스', sets: '탑/백오프 세트', tip: '윗가슴을 채우는 것으로 루틴을 시작합니다. 가슴을 열고 견갑을 패드에 단단히 고정하세요.', baseTopSet: 40, unit: '한쪽'},
-                { type: '메인', name: '너틸러스 체스트 프레스 (뉴트럴)', sets: '탑/백오프 세트', tip: 'V자 그립으로 가슴 중앙부를 강하게 수축시킵니다. 팔꿈치가 너무 벌어지지 않게 주의하세요.', baseTopSet: 70, unit: '총' },
+                { type: '메인', name: '해머스트랭스 인클라인 프레스', sets: '탑/백오프 세트', tip: '윗가슴을 채우는 것으로 루틴을 시작합니다. 등을 패드에 고정해 안정적인 기반을 만들고, 견갑의 자연스러운 움직임을 통해 윗가슴을 최대로 스트레칭하고 수축시키세요.', baseTopSet: 40, unit: '한쪽'},
+                { type: '메인', name: '너틸러스 체스트 프레스 (뉴트럴)', sets: '탑/백오프 세트', tip: 'V자 그립으로 가슴 중앙부를 강하게 수축시킵니다. 등을 패드에 기대 안정성을 확보하고, 프레스 동작 마지막에 견갑을 살짝 전인(내밀어)시켜 가슴 안쪽까지 완전히 쥐어짜주세요.', baseTopSet: 70, unit: '총' },
                 { type: '메인', name: '사이드 래터럴 레이즈 머신', sets: '4~5세트', tip: '어깨 측면(측면 삼각근)을 완벽하게 고립하여 어깨 프레임을 넓히는 것이 목표입니다. 팔꿈치로 패드를 들어올린다는 느낌으로 수행하고, 승모근이 으쓱하지 않도록 통제하는 것이 핵심입니다.', baseTopSet: 20, unit: '총'},
                 { type: '보조', name: '딥스 머신', sets: '3~4세트', tip: '아랫가슴과 삼두근에 볼륨을 더합니다. 상체를 숙일수록 아랫가슴에 자극이 집중됩니다.', staticGoal: '🔥 목표: 실패지점까지 x 3-4세트.', increment: 2.5 },
                 { type: '마무리', name: '뉴텍 암 컬 머신', sets: '3~4세트', tip: '팔을 패드에 완전히 고정하고, 반동 없이 이두근의 힘으로만 핸들을 들어올려 강하게 수축합니다.', staticGoal: '🔥 목표: 25-35kg x 10-15회.', increment: 5}
@@ -390,7 +401,6 @@
     const resetAllModal = document.getElementById('reset-all-modal');
     const confirmResetAll = document.getElementById('confirm-reset-all');
     const cancelResetAll = document.getElementById('cancel-reset-all');
-    // [NEW] Archive Feature Elements
     const exportDataButton = document.getElementById('export-data-button');
     const exportModal = document.getElementById('export-modal');
     const exportDataTextarea = document.getElementById('export-data-textarea');
@@ -421,37 +431,41 @@
         return weight * (1 + reps / 30);
     }
 
-    // [MODIFIED] CORE LOGIC: Get Week Info
+    // [BUG FIXED & REFACTORED in v5.4] CORE LOGIC: Get Week Info
     function getWeekInfo(week, cycleId) {
-        const isBlock = cycleId % 2 === 1;
-        let phase, method;
-        let type;
-
-        if (isBlock) { // 블록 주기화 (홀수 사이클)
-            type = ['A', 'B', 'C'][((week - 1) % 3)];
-        } else { // 파동형 주기화 (짝수 사이클)
-            const typeIndex = Math.floor((week - 1) / 2);
-            type = ['A', 'B', 'C'][typeIndex % 3];
+        // 디로딩 주간은 최우선으로 처리하여 로직을 단순화합니다.
+        if (week === 13) {
+            return {
+                phase: '디로딩 주간',
+                method: '디로딩',
+                type: '종합', // 디로딩은 타입 구분이 무의미하므로 '종합'으로 명시
+                originalWeekData: workoutPlan[13]
+            };
         }
 
-        if (week === 13) {
-            phase = '디로딩 주간';
-            method = '디로딩';
-        } else if (isBlock) {
+        const isBlock = cycleId % 2 === 1; // 홀수 사이클: true, 짝수 사이클: false
+        let phase, method, type;
+        
+        if (isBlock) { // 홀수 사이클 (블록 주기화) - 로직 변경 없음
+            type = ['A', 'B', 'C'][((week - 1) % 3)];
             phase = (week >= 4 && week <= 6) || (week >= 10 && week <= 12) ? '축적 주기' : '강화 주기';
             method = (phase === '축적 주기' ? '워킹 세트' : '탑/백오프 세트');
-        } else {
-            phase = (week % 2 === 0) ? '축적 주기' : '강화 주기';
+        } else { // 짝수 사이클 (주간 파동형 주기화) - [BUG FIXED]
+            const pairIndex = Math.floor((week - 1) / 2); // 1,2주차=0 / 3,4주차=1 ...
+            type = ['A', 'B', 'C'][pairIndex % 3]; // 두 주차마다 타입 변경 (A, A, B, B, ...)
+            
+            const isStrengthWeek = (week % 2) !== 0; // 홀수 주차가 강화주기
+            phase = isStrengthWeek ? '강화 주기' : '축적 주기';
             method = (phase === '축적 주기' ? '워킹 세트' : '탑/백오프 세트');
         }
-        
+
         const originalWeekKey = ['A', 'B', 'C'].indexOf(type) + 1;
-        const originalWeekData = workoutPlan[week === 13 ? 13 : originalWeekKey];
+        const originalWeekData = workoutPlan[originalWeekKey];
 
         return { phase, method, type, originalWeekData };
     }
 
-    // [MODIFIED] CORE LOGIC: Main Exercise Goal Calculation
+    // CORE LOGIC: Main Exercise Goal Calculation
     function getMainGoalText(exercise, week, cycleId, allRecords) {
         if (!exercise.baseTopSet) return null;
 
@@ -482,12 +496,12 @@
                 const allPreviousStrengthRecordsForLast = exerciseRecords.filter(r => {
                     if (!r.date || !lastPerformance.date) return false;
                      const recordDate = new Date(r.date).getTime();
-                     const lastPerformanceDate = new Date(lastPerformance.date).getTime();
-                     if(recordDate > lastPerformanceDate) return false;
+                      const lastPerformanceDate = new Date(lastPerformance.date).getTime();
+                      if(recordDate > lastPerformanceDate) return false;
 
-                     const recordInfo = getWeekInfo(r.week, r.cycleId);
-                     const lastPerformanceInfo = getWeekInfo(lastPerformance.week, lastPerformance.cycleId);
-                     return recordInfo.phase === '강화 주기' && recordInfo.type === lastPerformanceInfo.type;
+                      const recordInfo = getWeekInfo(r.week, r.cycleId);
+                      const lastPerformanceInfo = getWeekInfo(lastPerformance.week, lastPerformance.cycleId);
+                      return recordInfo.phase === '강화 주기' && recordInfo.type === lastPerformanceInfo.type;
                 });
                 
                 let lastStrengthExposureCount = allPreviousStrengthRecordsForLast.length -1;
@@ -646,8 +660,6 @@
         }
         
         localStorage.setItem('workoutRecords', JSON.stringify(records));
-        // [BUG FIX] Removed renderWorkout() to prevent refresh issue.
-        // renderWorkout(); 
     }
     
     function loadMostRecentRecordForSession(exercise) {
@@ -711,7 +723,7 @@
             } else { 
                 goalText = currentExercise.staticGoal;
             }
-            if(!goalText) goalText = currentExercise.staticGoal;
+            if(!goalText && currentExercise.staticGoal) goalText = currentExercise.staticGoal;
 
 
             const methodText = isMain ? method : currentExercise.sets;
@@ -820,14 +832,18 @@
         const cycleInfo = JSON.parse(localStorage.getItem('workoutCycleInfo')) || { cycleId: 1 };
 
         for (let i = 1; i <= 13; i++) {
-            const { phase, method, originalWeekData } = getWeekInfo(i, cycleInfo.cycleId);
+            const { phase, method, originalWeekData, type } = getWeekInfo(i, cycleInfo.cycleId);
+            const pullName = originalWeekData.pull?.name || `${type} 디로딩`;
+            const pushName = originalWeekData.push?.name || `${type} 디로딩`;
+            const legName = originalWeekData.leg?.name || `${type} 디로딩`;
+            
             const tr = document.createElement('tr');
             tr.className = 'border-b border-slate-200 hover:bg-slate-50';
             tr.innerHTML = `
                 <td class="p-4 font-bold text-center">${i}</td>
-                <td class="p-4">${originalWeekData.pull.name}</td>
-                <td class="p-4">${originalWeekData.push.name}</td>
-                <td class="p-4">${originalWeekData.leg.name}</td>
+                <td class="p-4">${pullName}</td>
+                <td class="p-4">${pushName}</td>
+                <td class="p-4">${legName}</td>
                 <td class="p-4"><span class="px-3 py-1 text-sm font-semibold rounded-full ${phaseColors[phase]}">${method}</span></td>
             `;
             planTableBody.appendChild(tr);
@@ -911,7 +927,7 @@
     
     function renderProgressChart(data) {
         const ctx = document.getElementById('progressChart').getContext('2d');
-        const labels = data.map(d => `C${d.cycleId}-W${d.week}`);
+        const labels = data.map(d => `C${d.cycleId || 1}-W${d.week}`);
         const topWeights = data.map(d => Math.max(0, ...(d.sets?.map(s => s.weight) || [])));
 
         if (chartInstance) chartInstance.destroy();
@@ -931,7 +947,7 @@
                 plugins: {
                     legend: { display: false },
                     tooltip: { callbacks: {
-                        title: (c) => { const d = data[c[0].dataIndex]; return `${d.date} (사이클 ${d.cycleId}, ${d.week}주차)`; },
+                        title: (c) => { const d = data[c[0].dataIndex]; return `${d.date} (사이클 ${d.cycleId || 1}, ${d.week}주차)`; },
                         label: (c) => `최고 중량: ${c.parsed.y}kg`,
                         afterLabel: (c) => {
                             const d = data[c[0].dataIndex];
@@ -952,7 +968,7 @@
             const dayTable = document.createElement('table');
             dayTable.className = 'w-full text-left border-collapse mb-4';
             const dayNameMap = {'pull': '풀', 'leg':'하체', 'push':'푸쉬'};
-            const cycleText = record.cycleId ? ` (사이클 ${record.cycleId})` : '';
+            const cycleText = record.cycleId ? ` (사이클 ${record.cycleId})` : ` (사이클 1)`;
             dayTable.innerHTML = `
                 <thead class="bg-slate-100">
                     <tr><th colspan="3" class="p-3 font-semibold text-slate-800">${record.date} (${record.week}주차, ${dayNameMap[record.day] || record.day})${cycleText}</th></tr>
@@ -997,7 +1013,7 @@
     }
     
     function migrateOldRecords() {
-        if (localStorage.getItem('migrationV3_2_Complete')) return;
+        if (localStorage.getItem('migrationV5_2_Complete')) return; // Renamed for clarity
         let records = JSON.parse(localStorage.getItem('workoutRecords')) || {};
         let needsUpdate = false;
         for (const key in records) {
@@ -1013,16 +1029,15 @@
         if (needsUpdate) {
             localStorage.setItem('workoutRecords', JSON.stringify(records));
         }
-        localStorage.setItem('migrationV3_2_Complete', 'true');
+        localStorage.setItem('migrationV5_2_Complete', 'true');
     }
 
-    // [NEW] Archive Function
     function handleExportData() {
         const workoutRecords = JSON.parse(localStorage.getItem('workoutRecords')) || {};
         const cycleInfo = JSON.parse(localStorage.getItem('workoutCycleInfo')) || { cycleId: 1 };
 
         const archiveData = {
-            programVersion: "v7.1 Final",
+            programVersion: "v5.4 Final",
             exportDate: new Date().toISOString().split('T')[0],
             cycleInfo,
             workoutRecords
@@ -1084,7 +1099,6 @@
         cancelNewCycle.onclick = () => newCycleModal.classList.add('hidden');
         confirmNewCycle.onclick = confirmAndStartNewCycle;
 
-        // [NEW] Archive Listeners
         exportDataButton.onclick = handleExportData;
         closeExportModalButton.onclick = () => exportModal.classList.add('hidden');
         copyExportDataButton.onclick = () => {
