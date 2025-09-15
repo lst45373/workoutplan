@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>26주 장기 성장 프로그램 | 인터랙티브 플래너 (v5.2 Final)</title>
+    <title>26주 장기 성장 프로그램 | 인터랙티브 플래너 (v8.0 Final)</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
@@ -21,6 +21,7 @@
         @media (min-width: 640px) {
             .chart-container { height: 40vh; }
         }
+        .prose { max-width: none; }
     </style>
     <link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css" />
 </head>
@@ -126,8 +127,28 @@
                             <div class="chart-container mb-10">
                                 <canvas id="progressChart"></canvas>
                             </div>
+
+                            <div class="text-center mb-8">
+                               <button id="ai-analysis-button" class="hidden bg-gradient-to-r from-purple-500 to-indigo-600 text-white font-bold py-3 px-6 rounded-lg hover:from-purple-600 hover:to-indigo-700 transition duration-300 shadow-lg text-lg flex items-center justify-center gap-2 mx-auto">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" class="bi bi-stars" viewBox="0 0 16 16">
+                                        <path d="M7.657 6.247c.11-.33.576-.33.686 0l.645 1.937a2.89 2.89 0 0 0 1.829 1.828l1.936.645c.33.11.33.576 0 .686l-1.937.645a2.89 2.89 0 0 0-1.828 1.829l-.645 1.936a.361.361 0 0 1-.686 0l-.645-1.937a2.89 2.89 0 0 0-1.828-1.828l-1.937-.645a.361.361 0 0 1 0-.686l1.937-.645a2.89 2.89 0 0 0 1.828-1.828l.645-1.937zM3.794 1.148a.217.217 0 0 1 .412 0l.387 1.162c.173.518.579.924 1.097 1.097l1.162.387a.217.217 0 0 1 0 .412l-1.162.387A1.734 1.734 0 0 0 4.868 6.14l-.387 1.162a.217.217 0 0 1-.412 0L3.48 6.14A1.734 1.734 0 0 0 1.954 4.568L.792 4.181a.217.217 0 0 1 0-.412l1.162-.387A1.734 1.734 0 0 0 3.48 1.815l.387-1.162zM10.863.099a.145.145 0 0 1 .274 0l.258.774c.115.346.386.617.732.732l.774.258a.145.145 0 0 1 0 .274l-.774.258a1.156 1.156 0 0 0-.732.732l-.258.774a.145.145 0 0 1-.274 0l-.258-.774a1.156 1.156 0 0 0-.732-.732l-.774-.258a.145.145 0 0 1 0-.274l.774-.258c.346-.115.617-.386.732-.732L10.863.1z"/>
+                                    </svg>
+                                    ✨ AI 코치에게 분석 요청하기
+                                </button>
+                            </div>
                             
-                            <h3 class="text-xl sm:text-2xl font-bold text-slate-800 mb-4">상세 기록</h3>
+                            <div id="ai-analysis-result" class="hidden mt-10 pt-8 border-t border-slate-200">
+                                <h3 class="text-xl sm:text-2xl font-bold text-slate-800 mb-4 text-center">✨ AI 코치의 분석 리포트</h3>
+                                <div id="ai-analysis-content" class="text-slate-700 space-y-4 prose p-6 bg-slate-50 rounded-xl shadow-inner">
+                                    <!-- AI response will be injected here -->
+                                </div>
+                                <div id="ai-loading-indicator" class="hidden text-center p-8">
+                                    <p class="text-lg font-semibold text-slate-600">AI 코치가 당신의 기록을 분석 중입니다...</p>
+                                    <p class="text-sm text-slate-500 mt-2">잠시만 기다려 주세요.</p>
+                                </div>
+                            </div>
+                            
+                            <h3 class="text-xl sm:text-2xl font-bold text-slate-800 mb-4 mt-10 pt-8 border-t border-slate-200">상세 기록</h3>
                             <div id="records-table-container" class="overflow-x-auto rounded-lg border border-slate-200 shadow-sm">
                                 
                             </div>
@@ -281,7 +302,7 @@
             pull: { name: '풀(Pull) B', routine: [
                  { type: '웜업', name: '노틸러스 풀오버', sets: '2~3세트', tip: '광배근 스트레칭과 혈류 공급에 집중합니다. (LBS 단위)', staticGoal: '🔥 목표: 40-60 LBS x 12-15회.'},
                 { type: '웜업', name: '랫풀다운 (가볍게)', sets: '2세트', tip: '견갑을 아래로 누르는 움직임에 집중하여 등을 활성화시킵니다.', staticGoal: '🔥 목표: 30-40kg x 12-15회.'},
-                { type: '메인', name: '해머스트랭스 D.Y. 로우', sets: '탑/백오프 세트', tip: '언더그립으로 광배근 하부를 직접적으로 타겟합니다. 안장을 낮춰 명치에 패드가 오게 하고, 팔꿈치를 옆구리에 붙여 배꼽 쪽으로 당기는 느낌에 집중하세요.', baseTopSet: 40, unit: '한쪽'},
+                { type: '메인', name: '해머스트랭스 D.Y. 로우', sets: '탑/백오프 세트', tip: '언더그립로 광배근 하부를 직접적으로 타겟합니다. 안장을 낮춰 명치에 패드가 오게 하고, 팔꿈치를 옆구리에 붙여 배꼽 쪽으로 당기는 느낌에 집중하세요.', baseTopSet: 40, unit: '한쪽'},
                 { type: '메인', name: '랫풀다운 (맥그립 언더)', sets: '탑/백오프 세트', tip: 'D.Y. 로우와 함께 광배근 하부를 다른 각도(수직)에서 공략합니다. 가슴을 열고 당겨주며, 최대 수축 지점에서 등을 쥐어짜세요.', baseTopSet: 65, unit: '총'},
                 { type: '메인', name: '해머스트랭스 프론트 풀다운', sets: '탑/백오프 세트', tip: '광배근의 최대 이완에 집중하여 너비감을 만듭니다. 팔을 완전히 펴서 광배근이 최대로 늘어나는 것을 느끼고, 팔꿈치로 당겨오세요.', baseTopSet: 40, unit: '한쪽'},
                 { type: '보조', name: '해머스트랭스 래터럴 로우 (원핸드 뉴트럴)', sets: '3~4세트', tip: "등 전체의 '덩어리감'과 볼륨을 채워줍니다. 팔꿈치로 등 중앙을 깊게 찍는다는 느낌으로 당깁니다.", staticGoal: '🔥 목표: 한쪽 30-40kg x 10-12회.', increment: 10},
@@ -421,11 +442,18 @@
         return weight * (1 + reps / 30);
     }
 
-    // CORE LOGIC: Get Week Info
+    // [MODIFIED] CORE LOGIC: Get Week Info
     function getWeekInfo(week, cycleId) {
         const isBlock = cycleId % 2 === 1;
         let phase, method;
-        const type = ['A', 'B', 'C'][((week - 1) % 3)];
+        let type;
+
+        if (isBlock) { // 블록 주기화 (홀수 사이클)
+            type = ['A', 'B', 'C'][((week - 1) % 3)];
+        } else { // 파동형 주기화 (짝수 사이클)
+            const typeIndex = Math.floor((week - 1) / 2);
+            type = ['A', 'B', 'C'][typeIndex % 3];
+        }
 
         if (week === 13) {
             phase = '디로딩 주간';
@@ -438,13 +466,13 @@
             method = (phase === '축적 주기' ? '워킹 세트' : '탑/백오프 세트');
         }
         
-        const originalWeekKey = ((week - 1) % 3) + 1;
+        const originalWeekKey = ['A', 'B', 'C'].indexOf(type) + 1;
         const originalWeekData = workoutPlan[week === 13 ? 13 : originalWeekKey];
 
         return { phase, method, type, originalWeekData };
     }
 
-    // CORE LOGIC: Main Exercise Goal Calculation (v5.1)
+    // [MODIFIED] CORE LOGIC: Main Exercise Goal Calculation
     function getMainGoalText(exercise, week, cycleId, allRecords) {
         if (!exercise.baseTopSet) return null;
 
@@ -473,11 +501,10 @@
             if (bestSetFromHistory.weight > 0) {
                 
                 const allPreviousStrengthRecordsForLast = exerciseRecords.filter(r => {
-                     const recordDate = new Date(r.date || 0).getTime();
-                     const lastPerformanceDate = new Date(lastPerformance.date || 0).getTime();
+                    if (!r.date || !lastPerformance.date) return false;
+                     const recordDate = new Date(r.date).getTime();
+                     const lastPerformanceDate = new Date(lastPerformance.date).getTime();
                      if(recordDate > lastPerformanceDate) return false;
-                     if(r.cycleId === lastPerformance.cycleId && r.week === lastPerformance.week && r.day === lastPerformance.day) return true;
-
 
                      const recordInfo = getWeekInfo(r.week, r.cycleId);
                      const lastPerformanceInfo = getWeekInfo(lastPerformance.week, lastPerformance.cycleId);
@@ -547,7 +574,6 @@
         const sanitizedName = getSanitizedName(exercise);
         const exerciseRecords = allRecords[sanitizedName] || [];
 
-        // 재귀적으로 과거 기록을 탐색하여 현재 목표를 결정
         function findCurrentGoal(records, baseGoal, baseSets) {
             if (records.length === 0) {
                 return baseGoal;
@@ -641,7 +667,8 @@
         }
         
         localStorage.setItem('workoutRecords', JSON.stringify(records));
-        renderWorkout(); // Re-render to update dynamic goals
+        // [BUG FIX] Removed renderWorkout() to prevent refresh issue.
+        // renderWorkout(); 
     }
     
     function loadMostRecentRecordForSession(exercise) {
@@ -763,16 +790,16 @@
 
         const weightInput = setRow.querySelector('input[data-type="weight"]');
         const repsInput = setRow.querySelector('input[data-type="reps"]');
-        const saveThrottled = throttle(() => saveAllSets(currentExercise), 500);
-        weightInput.addEventListener('input', saveThrottled);
-        repsInput.addEventListener('input', saveThrottled);
+        const saveDebounced = debounce(() => saveAllSets(exercise), 500);
+        weightInput.addEventListener('input', saveDebounced);
+        repsInput.addEventListener('input', saveDebounced);
 
         setRow.querySelector('.delete-set-btn').addEventListener('click', () => {
             setRow.remove();
             container.querySelectorAll('.set-row').forEach((row, index) => {
                 row.querySelector('span:first-child').textContent = `세트 ${index + 1}`;
             });
-            saveAllSets(currentExercise);
+            saveAllSets(exercise);
         });
     }
     
@@ -965,17 +992,13 @@
     }
     
     // APP INITIALIZATION & EVENT LISTENERS
-    function throttle(func, limit) {
-        let inThrottle;
-        return function() {
-            const args = arguments;
+    function debounce(func, delay) {
+        let timeout;
+        return function(...args) {
             const context = this;
-            if (!inThrottle) {
-                func.apply(context, args);
-                inThrottle = true;
-                setTimeout(() => inThrottle = false, limit);
-            }
-        }
+            clearTimeout(timeout);
+            timeout = setTimeout(() => func.apply(context, args), delay);
+        };
     }
 
     function confirmAndResetAll() {
@@ -1020,7 +1043,7 @@
         const cycleInfo = JSON.parse(localStorage.getItem('workoutCycleInfo')) || { cycleId: 1 };
 
         const archiveData = {
-            programVersion: "v5.2 Final",
+            programVersion: "v7.1 Final",
             exportDate: new Date().toISOString().split('T')[0],
             cycleInfo,
             workoutRecords
