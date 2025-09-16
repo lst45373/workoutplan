@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>26주 장기 성장 프로그램 | 인터랙티브 플래너 (v5.11 Final)</title>
+    <title>26주 장기 성장 프로그램 | 인터랙티브 플래너 (v6.1 Final)</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
@@ -94,7 +94,6 @@
                                </div>
                           </div>
 
-                          <!-- [NEW SECTION in v5.11 Final] -->
                           <div class="mt-10 pt-8 border-t border-slate-200">
                             <h2 class="text-2xl font-bold text-slate-900 mb-4">핵심 훈련 방식 상세</h2>
                             <div class="space-y-8 text-slate-700 prose">
@@ -246,10 +245,31 @@
             </div>
         </div>
 
+        <!-- [NEW] Record Popup Modal in v6.0 -->
+        <div id="record-popup-modal" class="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center hidden z-50 p-4 modal-enter">
+            <div class="bg-white rounded-xl p-6 md:p-8 shadow-2xl max-w-4xl w-full flex flex-col" style="height: 90vh;">
+                <div class="flex-shrink-0 flex justify-between items-center mb-4">
+                    <h3 id="record-popup-title" class="text-xl sm:text-2xl font-bold text-slate-900"></h3>
+                    <button id="close-record-popup-button" class="p-2 text-slate-500 hover:text-slate-800 transition">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" class="bi bi-x-lg" viewBox="0 0 16 16">
+                            <path d="M2.146 2.854a.5.5 0 1 1 .708-.708L8 7.293l5.146-5.147a.5.5 0 0 1 .708.708L8.707 8l5.147 5.146a.5.5 0 0 1-.708.708L8 8.707l-5.146 5.147a.5.5 0 0 1-.708-.708L7.293 8 2.146 2.854Z"/>
+                        </svg>
+                    </button>
+                </div>
+                <div class="flex-grow overflow-y-auto pr-2">
+                    <div class="chart-container mb-10">
+                        <canvas id="record-popup-chart"></canvas>
+                    </div>
+                    <h4 class="text-lg sm:text-xl font-bold text-slate-800 mb-4 mt-6 pt-6 border-t border-slate-200">상세 기록</h4>
+                    <div id="record-popup-table-container" class="overflow-x-auto rounded-lg border border-slate-200 shadow-sm">
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
 
 <script>
-    // [CONTEXT_PROMPT UPDATED in v5.11 Final]
+    // [CONTEXT_PROMPT UPDATED in v6.0 Final]
     const CONTEXT_PROMPT = `#################################################################
 ## [1단계] 새로운 대화 시작 시, 아래 내용을 모두 복사하여 첫 메시지로 보내주세요
 #################################################################
@@ -281,14 +301,14 @@
 
 ### [C] AI의 임무
 
-1.  너와 최초 사용자는 위 원칙에 따라 프로그램을 v5.11 Final 버전까지 완성시켰다.
+1.  너와 최초 사용자는 위 원칙에 따라 프로그램을 v6.0 Final 버전까지 완성시켰다.
 2.  아래에는 너의 구체적인 기억을 되살리기 위한 전체 대화 기록이 제공될 것이다.
 3.  이 대화 기록을 요약하지 말고, 너의 장기 기억처럼 완전히 흡수하고 이해해야 한다.
 4.  대화 기록 파악이 끝나면, 사용자가 다음 메시지로 전달할 실제 훈련 기록(JSON 데이터)을 분석할 준비를 하고, 아래 '미해결 과제'에 대한 논의를 이어가면 된다.
 
 ### [D] 미해결 과제 및 차기 업데이트 계획 (v6.0+)
 
-v5.11 업데이트를 통해 프로그램의 디테일과 정확성이 향상되었으나, 아래의 핵심적인 개선 과제가 남아있으며 이는 v6.0 메이저 업데이트 시 최우선으로 해결해야 한다.
+v6.0 업데이트를 통해 프로그램의 디테일과 정확성이 향상되었으나, 아래의 핵심적인 개선 과제가 남아있으며 이는 다음 메이저 업데이트 시 최우선으로 해결해야 한다.
 
 1.  **데이터 재해석에 따른 '잠재적 불안정성' (심각도: 높음)**
     * **현상:** 현재 목표 중량 계산 로직(\`getMainGoalText\`)은 과거 기록을 해석할 때마다 \`getWeekInfo\` 함수(현재 버전의 설계도)를 호출하여 재해석함. 이로 인해 향후 \`getWeekInfo\` 로직이 변경되면 모든 과거 기록의 해석이 오염되어 계산 오류를 유발할 수 있음.
@@ -305,7 +325,7 @@ v5.11 업데이트를 통해 프로그램의 디테일과 정확성이 향상되
 #################################################################
 
 `;
-    // [WORKOUT PLAN UPDATED in v5.9 Final] -> Corrected to v5.11 as this is a text-only update
+    // [WORKOUT PLAN UPDATED in v6.0 Final]
     const workoutPlan = {
         1: {
             pull: { name: '풀(Pull) A', routine: [
@@ -428,6 +448,7 @@ v5.11 업데이트를 통해 프로그램의 디테일과 정확성이 향상되
     let currentDay = 'pull';
     let currentCycleId = 1;
     let chartInstance = null;
+    let popupChartInstance = null;
     
     // DOM Elements
     const weekSelector = document.getElementById('week-selector');
@@ -455,6 +476,8 @@ v5.11 업데이트를 통해 프로그램의 디테일과 정확성이 향상되
     const exportDataTextarea = document.getElementById('export-data-textarea');
     const copyExportDataButton = document.getElementById('copy-export-data-button');
     const closeExportModalButton = document.getElementById('close-export-modal-button');
+    const recordPopupModal = document.getElementById('record-popup-modal');
+    const closeRecordPopupButton = document.getElementById('close-record-popup-button');
 
 
     const phaseDescriptions = {
@@ -609,6 +632,7 @@ v5.11 업데이트를 통해 프로그램의 디테일과 정확성이 향상되
         return null;
     }
     
+    // [BUG FIXED in v6.1]
     function getAssistanceGoalText(exercise, allRecords) {
         if (!exercise.staticGoal || !exercise.increment) return exercise.staticGoal;
 
@@ -624,19 +648,25 @@ v5.11 업데이트를 통해 프로그램의 디테일과 정확성이 향상되
             const remainingRecords = records.slice(1);
             const parentGoal = findCurrentGoal(remainingRecords, baseGoal, baseSets);
 
-            const weightRegex = /(\d+(\.\d+)?)-(\d+(\.\d+)?)kg/;
             const repRegex = /(\d+)-(\d+)회/;
             const setRegex = /(\d+)~(\d+)세트/;
 
-            const weightMatch = parentGoal.match(weightRegex);
             const repMatch = parentGoal.match(repRegex);
             const setMatch = baseSets.match(setRegex);
+            
+            const numbersInGoal = parentGoal.match(/(\d[\d.]*)/g);
 
-            if (!weightMatch || !repMatch || !setMatch || !lastRecord || !lastRecord.sets || lastRecord.sets.length === 0) {
+            if (!repMatch || !setMatch || !lastRecord || !lastRecord.sets || lastRecord.sets.length === 0) {
                 return parentGoal;
             }
 
-            const maxWeight = parseFloat(weightMatch[3]);
+            let maxWeight = 0;
+            let minWeight = 0;
+            if (numbersInGoal) {
+                maxWeight = parseFloat(numbersInGoal[numbersInGoal.length - 1]);
+                minWeight = numbersInGoal.length > 1 ? parseFloat(numbersInGoal[0]) : maxWeight;
+            }
+            
             const maxReps = parseInt(repMatch[2]);
             const maxSets = parseInt(setMatch[2]);
 
@@ -644,17 +674,23 @@ v5.11 업데이트를 통해 프로그램의 디테일과 정확성이 향상되
                 return parentGoal;
             }
 
-            const isSuccess = lastRecord.sets.every(set => set.weight >= maxWeight && set.reps >= maxReps);
+            const isSuccess = lastRecord.sets.every(set => (maxWeight > 0 ? set.weight >= maxWeight : true) && set.reps >= maxReps);
 
             if (isSuccess) {
-                const actualMaxWeight = Math.max(...lastRecord.sets.map(s => s.weight));
+                const actualMaxWeight = Math.max(0, ...lastRecord.sets.map(s => s.weight));
                 const newIncrement = exercise.increment;
-                const weightRange = maxWeight - parseFloat(weightMatch[1]);
                 
-                const newMaxWeight = actualMaxWeight + newIncrement;
+                const newMaxWeight = (maxWeight === 0 ? 0 : actualMaxWeight) + newIncrement;
+                const weightRange = maxWeight - minWeight;
                 const newMinWeight = newMaxWeight - weightRange;
 
-                return `🔥 목표: ${newMinWeight}-${newMaxWeight}kg x ${parseInt(repMatch[1])}-${maxReps}회.`;
+                const newRepString = `${parseInt(repMatch[1])}-${maxReps}회`;
+                
+                if (newMinWeight < newMaxWeight) {
+                     return `🔥 목표: ${newMinWeight}-${newMaxWeight}kg x ${newRepString}.`;
+                } else {
+                     return `🔥 목표: ${newMaxWeight}kg x ${newRepString}.`;
+                }
             }
 
             return parentGoal;
@@ -724,6 +760,32 @@ v5.11 업데이트를 통해 프로그램의 디테일과 정확성이 향상되
         return sessionRecords.sort((a, b) => new Date(b.date) - new Date(a.date))[0] || null;
     }
 
+    function openRecordPopup(sanitizedName, exerciseName) {
+        const allRecords = JSON.parse(localStorage.getItem('workoutRecords')) || {};
+        const exerciseData = (allRecords[sanitizedName] || []).sort((a, b) => {
+            if ((a.cycleId || 1) !== (b.cycleId || 1)) return (a.cycleId || 1) - (b.cycleId || 1);
+            return a.week - b.week;
+        });
+
+        const modal = document.getElementById('record-popup-modal');
+        const modalTitle = document.getElementById('record-popup-title');
+
+        modalTitle.textContent = `${exerciseName} 기록`;
+
+        if (exerciseData.length > 0) {
+            renderProgressChart(exerciseData, 'record-popup-chart');
+            renderRecordsTable(exerciseData, 'record-popup-table-container');
+        } else {
+            const chartCanvas = document.getElementById('record-popup-chart');
+            const chartCtx = chartCanvas.getContext('2d');
+            if (popupChartInstance) popupChartInstance.destroy();
+            chartCtx.clearRect(0, 0, chartCanvas.width, chartCanvas.height);
+            document.getElementById('record-popup-table-container').innerHTML = `<p class="p-4 text-center text-slate-500">이 운동에 대한 기록이 아직 없습니다.</p>`;
+        }
+
+        modal.classList.remove('hidden');
+    }
+
     // UI RENDERING
     function renderWorkout() {
         const { phase, method, originalWeekData } = getWeekInfo(currentWeek, currentCycleId);
@@ -791,12 +853,24 @@ v5.11 업데이트를 통해 프로그램의 디테일과 정확성이 향상되
 
             card.innerHTML = `
                 <div class="flex-1">
-                    <div class="flex items-center gap-3 mb-3">
-                        <span class="text-xs sm:text-sm font-bold uppercase py-1 px-3 rounded-full ${
-                            currentExercise.type.includes('웜업') || currentExercise.type.includes('선피로') ? 'bg-amber-100 text-amber-800' :
-                            isMain ? 'bg-blue-100 text-blue-800' : 'bg-slate-100 text-slate-800'
-                        }">${currentExercise.type}</span>
-                        <h4 class="text-lg sm:text-xl font-bold text-slate-900">${currentExercise.name}</h4>
+                    <div class="flex items-start gap-3 mb-3">
+                        <div class="flex-grow">
+                             <div class="flex items-center gap-3">
+                                <span class="text-xs sm:text-sm font-bold uppercase py-1 px-3 rounded-full ${
+                                    currentExercise.type.includes('웜업') || currentExercise.type.includes('선피로') ? 'bg-amber-100 text-amber-800' :
+                                    isMain ? 'bg-blue-100 text-blue-800' : 'bg-slate-100 text-slate-800'
+                                }">${currentExercise.type}</span>
+                                <h4 class="text-lg sm:text-xl font-bold text-slate-900">${currentExercise.name}</h4>
+                            </div>
+                        </div>
+                        <button class="show-record-popup-btn flex-shrink-0 p-2 text-slate-400 hover:text-blue-600 transition" 
+                               data-sanitized-name="${sanitizedName}" 
+                               data-exercise-name="${currentExercise.name}"
+                               title="${currentExercise.name} 기록 보기">
+                             <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" class="bi bi-bar-chart-line-fill" viewBox="0 0 16 16">
+                                 <path d="M11 2a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1v12h.5a.5.5 0 0 1 0 1H.5a.5.5 0 0 1 0-1H1v-3a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1v3h1V7a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1v7h1V2z"/>
+                             </svg>
+                         </button>
                     </div>
                     <p class="text-slate-600 text-sm sm:text-base">${tipHTML}</p>
                      <p class="text-sm sm:text-base font-semibold text-slate-500 mt-3">훈련 방식: ${methodText}</p>
@@ -818,6 +892,15 @@ v5.11 업데이트를 통해 프로그램의 디테일과 정확성이 향상되
             card.querySelector('.add-set-btn').addEventListener('click', () => {
                 const currentSetCount = setsContainer.querySelectorAll('.set-row').length;
                 addSetRow(setsContainer, currentExercise, currentSetCount + 1);
+            });
+        });
+        
+        document.querySelectorAll('.show-record-popup-btn').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                const targetBtn = e.currentTarget;
+                const sanitizedName = targetBtn.dataset.sanitizedName;
+                const exerciseName = targetBtn.dataset.exerciseName;
+                openRecordPopup(sanitizedName, exerciseName);
             });
         });
     }
@@ -976,24 +1059,34 @@ v5.11 업데이트를 통해 프로그램의 디테일과 정확성이 향상되
         noRecordsDiv.classList.add('hidden');
 
         const exerciseData = combinedData.sort((a, b) => {
-            if (a.cycleId !== b.cycleId) return a.cycleId - b.cycleId;
+            if ((a.cycleId || 1) !== (b.cycleId || 1)) return (a.cycleId || 1) - (b.cycleId || 1);
             return a.week - b.week;
         });
         
         const originalName = Array.from(exerciseSelector.options).find(opt => opt.value === selectedIdsString).textContent;
         chartTitle.textContent = `${originalName} 중량 변화 추이 (Top Set 기준)`;
-        renderProgressChart(exerciseData);
-        renderRecordsTable(exerciseData);
+        renderProgressChart(exerciseData, 'progressChart');
+        renderRecordsTable(exerciseData, 'records-table-container');
     }
     
-    function renderProgressChart(data) {
-        const ctx = document.getElementById('progressChart').getContext('2d');
+    // [REFACTORED in v6.0]
+    function renderProgressChart(data, canvasId) {
+        const chartCanvas = document.getElementById(canvasId);
+        if (!chartCanvas) return;
+        const ctx = chartCanvas.getContext('2d');
         const labels = data.map(d => `C${d.cycleId || 1}-W${d.week}`);
         const topWeights = data.map(d => Math.max(0, ...(d.sets?.map(s => s.weight) || [])));
 
-        if (chartInstance) chartInstance.destroy();
+        let targetChartInstance = null;
+        if (canvasId === 'progressChart') {
+            if (chartInstance) chartInstance.destroy();
+            targetChartInstance = chartInstance;
+        } else if (canvasId === 'record-popup-chart') {
+            if (popupChartInstance) popupChartInstance.destroy();
+            targetChartInstance = popupChartInstance;
+        }
 
-        chartInstance = new Chart(ctx, {
+        const newChart = new Chart(ctx, {
             type: 'line',
             data: { labels, datasets: [{
                 label: '최고 중량(kg)', data: topWeights, borderColor: '#3b82f6', backgroundColor: 'rgba(59, 130, 246, 0.1)',
@@ -1020,10 +1113,18 @@ v5.11 업데이트를 통해 프로그램의 디테일과 정확성이 향상되
                 }
             }
         });
+
+        if (canvasId === 'progressChart') {
+            chartInstance = newChart;
+        } else {
+            popupChartInstance = newChart;
+        }
     }
 
-    function renderRecordsTable(data) {
-        const tableContainer = document.getElementById('records-table-container');
+    // [REFACTORED in v6.0]
+    function renderRecordsTable(data, containerId) {
+        const tableContainer = document.getElementById(containerId);
+        if(!tableContainer) return;
         tableContainer.innerHTML = '';
         data.slice().reverse().forEach(record => {
             const dayTable = document.createElement('table');
@@ -1098,7 +1199,7 @@ v5.11 업데이트를 통해 프로그램의 디테일과 정확성이 향상되
         const cycleInfo = JSON.parse(localStorage.getItem('workoutCycleInfo')) || { cycleId: 1 };
 
         const archiveData = {
-            programVersion: "v5.9 Final",
+            programVersion: "v6.0 Final",
             exportDate: new Date().toISOString().split('T')[0],
             cycleInfo,
             workoutRecords
@@ -1170,6 +1271,9 @@ v5.11 업데이트를 통해 프로그램의 디테일과 정확성이 향상되
                 copyExportDataButton.textContent = "전체 복사";
             }, 2000);
         };
+
+        // [NEW in v6.0]
+        closeRecordPopupButton.onclick = () => recordPopupModal.classList.add('hidden');
 
         renderWorkout();
         updateActiveButtons();
