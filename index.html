@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>26주 장기 성장 프로그램 | 인터랙티브 플래너 (v7.0.7 Final)</title>
+    <title>26주 장기 성장 프로그램 | 인터랙티브 플래너 (v7.0.8 Final)</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
@@ -289,6 +289,9 @@
         <div id="rpe-modal" class="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center hidden z-50 p-4 modal-enter">
             <div class="bg-white rounded-xl p-6 md:p-8 shadow-2xl max-w-lg w-full">
                 <h3 id="rpe-modal-title" class="text-xl sm:text-2xl font-bold mb-4 text-slate-900"></h3>
+                <div id="rpe-guidance-container" class="mb-4">
+                    <p id="rpe-guidance" class="p-3 bg-blue-50 border-l-4 border-blue-400 text-blue-800 rounded-r-lg text-sm font-semibold"></p>
+                </div>
                 <div class="mb-6 space-y-2">
                     <p class="text-slate-600">오늘 운동의 마지막 세트는 얼마나 힘드셨나요?</p>
                 </div>
@@ -825,9 +828,23 @@ v7.0을 통해 프로그램의 지능이 크게 향상되었으나, 아래의 �
         modal.classList.remove('hidden');
     }
 
-    // [NEW in v7.0.2] RPE Modal Logic
+    // [NEW in v7.0.8] RPE Modal Logic with dynamic guidance
     function openRpeModal(sanitizedName, exerciseName) {
         rpeModalTitle.textContent = `${exerciseName} RPE 기록`;
+        
+        const { phase } = getWeekInfo(currentWeek, currentCycleId);
+        const guidanceEl = document.getElementById('rpe-guidance');
+        const guidanceContainer = document.getElementById('rpe-guidance-container');
+
+        if (phase === '강화 주기') {
+            guidanceEl.innerHTML = `<strong>[강화 주기]</strong> 오늘의 가장 무거웠던 <strong>'탑 세트'</strong>를 기준으로 RPE를 선택해주세요.`;
+            guidanceContainer.classList.remove('hidden');
+        } else if (phase === '축적 주기') {
+            guidanceEl.innerHTML = `<strong>[축적 주기]</strong> 모든 워킹 세트를 마친 후, 가장 힘들었던 <strong>'마지막 세트'</strong>를 기준으로 RPE를 선택해주세요.`;
+            guidanceContainer.classList.remove('hidden');
+        } else {
+            guidanceContainer.classList.add('hidden');
+        }
 
         const records = JSON.parse(localStorage.getItem('workoutRecords')) || {};
         const exerciseRecords = records[sanitizedName] || [];
