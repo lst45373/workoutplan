@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>26주 장기 성장 프로그램 | 인터랙티브 플래너 (v6.4.3 Bugfix)</title>
+    <title>26주 장기 성장 프로그램 | 인터랙티브 플래너 (v6.4.4 Final)</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
@@ -325,7 +325,7 @@ v6.0 업데이트를 통해 프로그램의 디테일과 정확성이 향상되�
 #################################################################
 
 `;
-    // [WORKOUT PLAN UPDATED in v6.0 Final]
+    // [WORKOUT PLAN UPDATED in v6.4.4]
     const workoutPlan = {
         1: {
             pull: { name: '풀(Pull) A', routine: [
@@ -365,7 +365,7 @@ v6.0 업데이트를 통해 프로그램의 디테일과 정확성이 향상되�
                 { type: '메인', name: '랫풀다운 (맥그립 언더)', sets: '탑/백오프 세트', tip: 'D.Y. 로우와 함께 광배근 하부를 다른 각도(수직)에서 공략합니다. 가슴을 열고 당겨주며, 최대 수축 지점에서 등을 쥐어짜세요.', baseTopSet: 65, unit: '총', alternatives: ['어시스트 친업', '언더그립 바벨 로우']},
                 { type: '메인', name: '해머스트랭스 프론트 풀다운', sets: '탑/백오프 세트', tip: '광배근을 최대 이완시켜 너비감을 극대화하는 것이 목표입니다. 상체를 살짝 뒤로 젖혀 가슴을 열고, 팔이 벌어지는 궤적을 따라 광배근 바깥쪽이 최대로 늘어나는 것을 느끼고, 명치 쪽으로 강하게 당겨 수축하세요.', baseTopSet: 40, unit: '한쪽', alternatives: ['와이드 그립 풀업', '와이드 그립 랫풀다운']},
                 { type: '보조', name: '해머스트랭스 래터럴 로우 (원핸드 뉴트럴)', sets: '3~4세트', tip: "등 전체의 '덩어리감'과 볼륨을 채워줍니다. 팔꿈치로 등 중앙을 깊게 찍는다는 느낌으로 당깁니다.", staticGoal: '🔥 목표: 한쪽 30-40kg x 10-12회.', increment: 10, alternatives: ['원 암 덤벨 로우', '원 암 시티드 케이블 로우']},
-                { type: '마무리', name: '라잉 트라이셉스 익스텐션', sets: '3~4세트', tip: '삼두근의 가장 큰 부위(장두)를 타겟합니다. 팔꿈치를 고정한 채 이마나 정수리 쪽으로 바를 내립니다.', staticGoal: '🔥 목표: 20-30kg (EZ바) x 10-15회.', increment: 2.5, alternatives: ['케이블 오버헤드 익스텐션', '덤벨 오버헤드 익스텐션']}
+                { type: '마무리', name: '라잉 트라이셉스 익스텐션', sets: '3~4세트', tip: '삼두근의 가장 큰 부위(장두)를 타겟합니다. 팔꿈치를 고정한 채 이마나 정수리 쪽으로 바를 내립니다. EZ바 사용을 권장합니다.', staticGoal: '🔥 목표: 20-30kg x 10-15회.', increment: 2.5, alternatives: ['케이블 오버헤드 익스텐션', '덤벨 오버헤드 익스텐션']}
             ]},
             leg: { name: '레그(Leg) B', routine: [
                 { type: '웜업', name: '노틸러스 이너 타이', sets: '2세트', tip: '고관절 내전근을 활성화합니다. (LBS 단위)', staticGoal: '🔥 목표: 100-130 LBS x 10-12회.', alternatives: ['케이블 어덕션', '코펜하겐 플랭크'] },
@@ -394,7 +394,7 @@ v6.0 업데이트를 통해 프로그램의 디테일과 정확성이 향상되�
                 { type: '메인', name: '원 암 시티드 케이블 로우', sets: '탑/백오프 세트', tip: '케이블의 지속적인 장력으로 광배근을 고립합니다. 당기면서 상체를 살짝 회전시켜 수축감을 극대화하고, 이완 시에는 최대한 늘려주세요.', baseTopSet: 40, unit: '한쪽', alternatives: ['원 암 덤벨 로우', 'T-바 로우 (원 암)']},
                 { type: '메인', name: '해머스트랭스 프론트 풀다운 (파나타 스타일)', sets: '탑/백오프 세트', tip: '광배근을 최대 이완시켜 너비감을 극대화하는 것이 목표입니다. 상체를 살짝 뒤로 젖혀 가슴을 열고, 팔이 벌어지는 궤적을 따라 광배근 바깥쪽이 최대로 늘어나는 것을 느끼고, 명치 쪽으로 강하게 당겨 수축하세요.', baseTopSet: 30, unit: '한쪽', alternatives: ['와이드 그립 풀업', '와이드 그립 랫풀다운']},
                 { type: '보조', name: '백 익스텐션', sets: '3~4세트', tip: '허리 라인의 선명함과 깊이감을 만듭니다. 엉덩이와 등의 힘으로 상체를 들어올리고, 허리가 과하게 꺾이지 않도록 주의합니다.', staticGoal: '🔥 목표: 맨몸 또는 10kg 원판 x 15-20회.', increment: 2.5, alternatives: ['굿모닝 (가볍게)', '리버스 하이퍼익스텐션']},
-                { type: '마무리', name: '뉴텍 오버헤드 트라이셉스 익스텐션', sets: '2~3세트', tip: '시작 저항이 매우 강한 머신입니다. 처음에는 원판 없이 시작하여 자극에 적응하세요. 팔꿈치를 고정하고, 천천히 이완하며 삼두근 장두가 최대로 늘어나는 것을 느끼는 것이 핵심입니다.', staticGoal: '🔥 목표: 빈 머신 x 8-10회.', increment: 2.5, alternatives: ['케이블 오버헤드 익스텐션 (로프)', '덤벨 오버헤드 익스텐션']}
+                { type: '마무리', name: '뉴텍 오버헤드 트라이셉스 익스텐션', sets: '2~3세트', tip: '시작 저항이 매우 강한 머신입니다. 처음에는 원판 없이 시작하여 자극에 적응하세요. 팔꿈치를 고정하고, 천천히 이완하며 삼두근 장두가 최대로 늘어나는 것을 느끼는 것이 핵심입니다.', staticGoal: '🔥 목표: 0kg x 8-10회.', increment: 2.5, alternatives: ['케이블 오버헤드 익스텐션 (로프)', '덤벨 오버헤드 익스텐션']}
             ]},
              leg: { name: '레그(Leg) C', routine: [
                 { type: '웜업', name: '노틸러스 이너 타이', sets: '2세트', tip: '고관절 내전근을 활성화합니다. (LBS 단위)', staticGoal: '🔥 목표: 100-130 LBS x 10-12회.', alternatives: ['케이블 어덕션', '코펜하겐 플랭크'] },
@@ -1194,7 +1194,7 @@ v6.0 업데이트를 통해 프로그램의 디테일과 정확성이 향상되�
         const cycleInfo = JSON.parse(localStorage.getItem('workoutCycleInfo')) || { cycleId: 1 };
 
         const archiveData = {
-            programVersion: "v6.4.3 Bugfix",
+            programVersion: "v6.4.4 Final",
             exportDate: new Date().toISOString().split('T')[0],
             cycleInfo,
             workoutRecords
