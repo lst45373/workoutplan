@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>26주 장기 성장 프로그램 | 인터랙티브 플래너 (v7.0.9 Final)</title>
+    <title>26주 장기 성장 프로그램 | 인터랙티브 플래너 (v10.0.2 Final)</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
@@ -22,9 +22,6 @@
             .chart-container { height: 40vh; }
         }
         .prose { max-width: none; }
-        /* RPE Slider Customization */
-        input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; appearance: none; width: 24px; height: 24px; background: #3b82f6; cursor: pointer; border-radius: 50%; box-shadow: 0 0 5px rgba(0,0,0,0.2); }
-        input[type=range]::-moz-range-thumb { width: 24px; height: 24px; background: #3b82f6; cursor: pointer; border-radius: 50%; box-shadow: 0 0 5px rgba(0,0,0,0.2); }
     </style>
     <link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css" />
 </head>
@@ -84,12 +81,12 @@
                           <h2 class="text-2xl font-bold text-slate-900 mb-4">훈련 주기 설명</h2>
                           <div class="space-y-6 text-slate-700">
                                <div>
-                                   <h3 class="font-bold text-xl text-red-700">강화 주기 (고중량 저반복)</h3>
-                                   <p class="mt-1">다룰 수 있는 최대 중량(Strength)을 늘리는 데 모든 것을 집중하는 시기입니다. 메인 운동은 **'탑 세트 / 백오프 세트'** 방식으로 진행하며, 점진적으로 더 무거운 무게에 도전하는 것이 목표입니다.</p>
+                                   <h3 class="font-bold text-xl text-red-700">강화 주기 (고강도 훈련)</h3>
+                                   <p class="mt-1">실패 지점까지 수행하는 단 한 번의 **'탑 세트'**를 통해 근육에 최대 강도의 자극을 주는 시기입니다. 목표는 '지난번보다 단 1kg, 단 1회라도 더' 입니다.</p>
                                </div>
                                <div>
-                                   <h3 class="font-bold text-xl text-green-700">축적 주기 (중중량 고반복)</h3>
-                                   <p class="mt-1">근육의 크기(근비대)를 키우기 위해 충분한 운동량(Volume)을 쌓는 시기입니다. 메인 운동은 **'워킹 세트'** (8~12회 x 3~4세트)로 변경하여 수행합니다. 탑 세트 무게의 75%~85% 무게로, 실패 직전까지만 반복합니다.</p>
+                                   <h3 class="font-bold text-xl text-green-700">축적 주기 (볼륨 훈련)</h3>
+                                   <p class="mt-1">근육의 크기(근비대)를 키우기 위해 충분한 운동량(Volume)을 쌓는 시기입니다. 강화 주기 성과를 바탕으로 자동 계산된 무게로 **'워킹 세트'** (8~12회 x 3~4세트)를 수행합니다.</p>
                                </div>
                                <div>
                                    <h3 class="font-bold text-xl text-sky-700">디로딩 주간 (전략적 회복)</h3>
@@ -103,7 +100,7 @@
                                 <div>
                                     <h4 class="font-bold text-xl text-red-700">🚀 탑 세트 / 백오프 세트 (Top Set / Back-off Set)</h4>
                                     <p class="mt-2">
-                                        <strong>'강화 주기'</strong>에 사용하는 방식으로, 다룰 수 있는 최대 중량(근력)을 점진적으로 늘리는 데 모든 것을 집중하는 고강도 훈련법입니다.
+                                        <strong>'강화 주기'</strong>에 사용하는 방식으로, H.I.T.(고강도 훈련) 철학에 따라 실패 지점까지의 단 한 세트를 통해 최대의 근성장 자극을 이끌어내는 것을 목표로 합니다.
                                     </p>
                                     <div class="mt-3">
                                         <p class="font-semibold">수행 방법:</p>
@@ -114,11 +111,11 @@
                                             </li>
                                             <li>
                                                 <strong>탑 세트 (Top Set):</strong>
-                                                <p class="pl-5 text-slate-600"><strong>오늘의 단 한 번뿐인 가장 중요한 세트</strong>입니다. 앱이 제시하는 <strong>'🔥 강화 목표'</strong> 중량으로 목표 횟수 범위 내에서 수행 가능한 최대 횟수에 도전합니다. <strong>완벽한 자세</strong>와 <strong>템포</strong>를 유지하는 선에서, 실패 직전(마지막 1~2회는 더 이상 반복할 수 없다는 느낌)까지만 수행하는 것이 핵심입니다. 수행이 끝나면, <strong>실제 성공한 횟수</strong>를 정확히 기록해 주세요. 이 기록이 다음 훈련의 무게를 결정하는 가장 중요한 데이터가 됩니다.</p>
+                                                <p class="pl-5 text-slate-600"><strong>오늘의 단 한 번뿐인 가장 중요한 세트</strong>입니다. 앱이 제시하는 <strong>'🔥 강화 목표'</strong> 중량으로 **실패 지점(Failure)까지 가능한 최대 횟수(AMRAP)**에 도전합니다. <strong>완벽한 자세</strong>와 <strong>템포</strong>를 유지하는 선에서, 더 이상 단 1회도 반복할 수 없을 때까지 수행하는 것이 핵심입니다. 수행이 끝나면, **실제 성공한 횟수**를 정확히 기록해 주세요. 이 기록이 다음 훈련의 무게를 결정하는 가장 중요한 데이터가 됩니다.</p>
                                             </li>
                                             <li>
                                                 <strong>백오프 세트 (Back-off Set):</strong>
-                                                <p class="pl-5 text-slate-600">탑 세트가 끝나면, 중량을 <strong>약 15~20%</strong> 낮춥니다. (예: 100kg -> 80kg) 낮춰진 무게로 <strong>8~10회</strong> 반복 가능한 세트를 1~2회 추가 수행하여, 근성장에 필요한 추가적인 볼륨(운동량)과 펌핑감을 확보하며 마무리합니다.</p>
+                                                <p class="pl-5 text-slate-600">탑 세트가 끝나면, 중량을 <strong>약 20%</strong> 낮춥니다. 앱이 자동으로 계산해준 무게로 **8~10회** 반복 가능한 세트를 1~2회 추가 수행하여, 근성장에 필요한 추가적인 볼륨(운동량)과 펌핑감을 확보하며 마무리합니다.</p>
                                             </li>
                                         </ol>
                                     </div>
@@ -167,7 +164,6 @@
                         <h2 class="text-2xl sm:text-3xl font-bold text-slate-900 mb-2">진행 상황 대시보드</h2>
                         <p class="text-slate-600 mb-8 text-base sm:text-lg">과거 기록을 바탕으로 훈련 성과와 신체 균형을 분석합니다.</p>
                         
-                        <!-- [NEW in v7.0.5] Movement Pattern Analysis -->
                         <div id="movement-pattern-analysis" class="mb-10">
                             <h3 class="text-xl sm:text-2xl font-bold text-slate-800 mb-4 text-center">움직임 패턴 분석</h3>
                             <div class="chart-container mb-6">
@@ -284,35 +280,10 @@
                 </div>
             </div>
         </div>
-
-        <!-- [NEW in v7.0.2] RPE Modal -->
-        <div id="rpe-modal" class="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center hidden z-50 p-4 modal-enter">
-            <div class="bg-white rounded-xl p-6 md:p-8 shadow-2xl max-w-lg w-full">
-                <h3 id="rpe-modal-title" class="text-xl sm:text-2xl font-bold mb-4 text-slate-900"></h3>
-                <div id="rpe-guidance-container" class="mb-4">
-                    <p id="rpe-guidance" class="p-3 bg-blue-50 border-l-4 border-blue-400 text-blue-800 rounded-r-lg text-sm font-semibold"></p>
-                </div>
-                <div class="mb-6 space-y-2">
-                    <p class="text-slate-600">오늘 운동의 마지막 세트는 얼마나 힘드셨나요?</p>
-                </div>
-                <div class="flex items-center gap-4 mb-4">
-                    <input id="rpe-slider" type="range" min="6" max="10" value="8" step="0.5" class="w-full h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer">
-                    <span id="rpe-value-display" class="text-2xl font-bold text-blue-600 w-16 text-center">8.0</span>
-                </div>
-                <div class="text-center h-10 flex items-center justify-center mb-6">
-                    <p id="rpe-description" class="text-sm text-slate-500"></p>
-                </div>
-                 <div class="flex justify-end gap-3">
-                    <button id="cancel-rpe" class="px-4 py-2 sm:px-5 sm:py-2.5 rounded-lg bg-slate-200 text-slate-800 font-bold hover:bg-slate-300 transition shadow-md">취소</button>
-                    <button id="save-rpe" class="px-4 py-2 sm:px-5 sm:py-2.5 rounded-lg bg-blue-600 text-white font-bold hover:bg-blue-700 transition shadow-md">RPE 저장</button>
-                </div>
-            </div>
-        </div>
-
     </div>
 
 <script>
-    // [CONTEXT_PROMPT UPDATED in v7.0.0]
+    // [CONTEXT_PROMPT UPDATED in v10.0.0]
     const CONTEXT_PROMPT = `#################################################################
 ## [1단계] 새로운 대화 시작 시, 아래 내용을 모두 복사하여 첫 메시지로 보내주세요
 #################################################################
@@ -329,24 +300,24 @@
 ### [B] 핵심 프로그램 설계 원칙 (헌법)
 
 1.  **지능형 주기화 모델:** PPL 3분할을 기반으로, 홀수/짝수 사이클에 따라 '블록 주기화'와 '주간 파동형 주기화'를 자동으로 전환한다.
-2.  **RPE 기반 자동 조절 (Auto-regulation):**
-    * **메인 운동:** 목표 횟수 성공과 RPE 8.5 이하를 모두 만족할 때만 1RM 기반 +2.5% 증량을 적용한다. RPE가 9 이상이면 중량을 유지하여 오버트레이닝을 방지한다.
-    * **보조 운동:** 더블 프로그레션 성공과 RPE 8.5 이하를 모두 만족할 때만 증량한다.
+2.  **성과 기반 자동 조절 (Performance-Based Auto-regulation):**
+    * **강화 주기:** '탑 세트'에서 실패 지점까지의 최대 반복수(AMRAP)를 기록한다. 이 기록을 7단계로 세분화된 '다단계 증량 테이블'에 대입하여 다음 목표 중량을 정밀하게 조절한다.
+    * **축적 주기:** 강화 주기 AMRAP 성과로 재계산된 e1RM의 70%를 워킹 세트 중량으로 설정하여, 두 주기의 성장이 유기적으로 연결된다.
 3.  **움직임 패턴 기반 균형 분석:** '수평/수직 밀기/당기기', '스쿼트', '힙 힌지' 등 6대 움직임 패턴의 볼륨을 주기적으로 분석하여 사용자에게 불균형에 대한 피드백을 제공한다.
-4.  **훈련 철학:** \`4-0-1-0\` 템포를 기반으로 한 '마인드-머슬 커넥션'을 최우선으로 한다.
+4.  **훈련 철학:** \`4-0-1-0\` 템포를 기반으로 한 '마인드-머슬 커넥션'과 H.I.T.(고강도 훈련) 철학을 결합한다.
 
 ### [C] AI의 임무
 
-1.  너와 최초 사용자는 위 원칙에 따라 프로그램을 v7.0 Final 버전까지 완성시켰다.
-2.  이 프로그램은 이제 단순한 플래너를 넘어, 사용자의 주관적인 컨디션(RPE)을 이해하고 훈련의 균형을 분석하는 '지능형 가상 코치'의 역할을 수행한다.
+1.  너와 최초 사용자는 위 원칙에 따라 프로그램을 v10.0 Final 버전까지 완성시켰다.
+2.  이 프로그램은 이제 사용자의 객관적인 수행 능력(AMRAP)을 정밀하게 분석하여 스스로 성장 계획을 재설계하는 '지능형 H.I.T. 코치'의 역할을 수행한다.
 3.  이전 대화 기록과 아래 최종 훈련 데이터(JSON)를 너의 장기 기억으로 완전히 흡수하고, 사용자와의 다음 대화를 준비하라.
 
-### [D] 차기 업데이트 계획 (v8.0+)
+### [D] 차기 업데이트 계획 (v11.0+)
 
-v7.0을 통해 프로그램의 지능이 크게 향상되었으나, 아래의 개선 과제가 남아있으며 이는 다음 메이저 업데이트 시 논의될 수 있다.
+v10.0을 통해 프로그램의 핵심 성장 엔진이 완성되었으나, 아래의 개선 과제가 남아있으며 이는 다음 메이저 업데이트 시 논의될 수 있다.
 
 1.  **데이터 저장 구조 고도화:** 현재 로직은 과거 기록을 재해석하는 불안정성을 내포하고 있다. 기록 저장 시 \`type\`('A','B','C')을 명시적으로 함께 저장하여 모든 기록을 '불변의 데이터'로 만드는 것을 최우선으로 고려해야 한다.
-2.  **회복 관리 시스템 도입:** 심박변이도(HRV)나 수면 데이터 등 외부 건강 데이터를 연동하여, 객관적인 회복 상태에 따라 그날의 훈련 강도를 동적으로 조절하는 기능을 도입할 수 있다.
+2.  **회복 관리 시스템 도입:** 웨어러블 기기 API를 연동하여 수면, HRV 등 객관적인 회복 지표를 수집하고, 이를 훈련 강도 조절에 반영하는 기능을 도입할 수 있다.
 
 [!! 여기에 이전 대화 내용 전체를 복사하여 붙여넣어 주세요 !!]
 
@@ -392,7 +363,7 @@ v7.0을 통해 프로그램의 지능이 크게 향상되었으나, 아래의 �
             pull: { name: '풀(Pull) B', routine: [
                 { type: '웜업', name: '노틸러스 풀오버', sets: '2~3세트', tip: '광배근 스트레칭과 혈류 공급에 집중합니다. (LBS 단위)', staticGoal: '🔥 목표: 40-60 LBS x 12-15회.', alternatives: ['덤벨 풀오버', '스트레이트 암 케이블 푸쉬다운'], movement_pattern: 'isolation_back'},
                 { type: '웜업', name: '랫풀다운 (가볍게)', sets: '2세트', tip: '견갑을 아래로 누르는 움직임에 집중하여 등을 활성화시킵니다.', staticGoal: '🔥 목표: 30-40kg x 12-15회.', alternatives: ['어시스트 풀업', '가벼운 케이블 로우'], movement_pattern: 'vertical_pull'},
-                { type: '메인', name: '해머스트랭스 D.Y. 로우', sets: '탑/백오프 세트', tip: '언더그립로 광배근 하부를 완벽하게 고립하여 타겟합니다. 안장을 낮춰 명치에 패드가 오게 하고, 팔꿈치를 옆구리에 붙여 배꼽 쪽으로 당기는 느낌에 집중하세요.', baseTopSet: 40, unit: '한쪽', alternatives: ['원 암 덤벨 로우 (광배 하부 타겟)', '시티드 케이블 로우 (언더 그립)'], movement_pattern: 'horizontal_pull'},
+                { type: '메인', name: '해머스트랭스 D.Y. 로우', sets: '탑/백오프 세트', tip: '언더그립으로 광배근 하부를 완벽하게 고립하여 타겟합니다. 안장을 낮춰 명치에 패드가 오게 하고, 팔꿈치를 옆구리에 붙여 배꼽 쪽으로 당기는 느낌에 집중하세요.', baseTopSet: 40, unit: '한쪽', alternatives: ['원 암 덤벨 로우 (광배 하부 타겟)', '시티드 케이블 로우 (언더 그립)'], movement_pattern: 'horizontal_pull'},
                 { type: '메인', name: '랫풀다운 (맥그립 언더)', sets: '탑/백오프 세트', tip: 'D.Y. 로우와 함께 광배근 하부를 다른 각도(수직)에서 공략합니다. 가슴을 열고 당겨주며, 최대 수축 지점에서 등을 쥐어짜세요.', baseTopSet: 65, unit: '총', alternatives: ['어시스트 친업', '언더그립 바벨 로우'], movement_pattern: 'vertical_pull'},
                 { type: '메인', name: '해머스트랭스 프론트 풀다운', sets: '탑/백오프 세트', tip: '광배근을 최대 이완시켜 너비감을 극대화하는 것이 목표입니다. 상체를 살짝 뒤로 젖혀 가슴을 열고, 팔이 벌어지는 궤적을 따라 광배근 바깥쪽이 최대로 늘어나는 것을 느끼고, 명치 쪽으로 강하게 당겨 수축하세요.', baseTopSet: 40, unit: '한쪽', alternatives: ['와이드 그립 풀업', '와이드 그립 랫풀다운'], movement_pattern: 'vertical_pull'},
                 { type: '보조', name: '해머스트랭스 래터럴 로우 (원핸드 뉴트럴)', sets: '3~4세트', tip: "등 전체의 '덩어리감'과 볼륨을 채워줍니다. 팔꿈치로 등 중앙을 깊게 찍는다는 느낌으로 당깁니다.", staticGoal: '🔥 목표: 한쪽 30-40kg x 10-12회.', increment: 10, alternatives: ['원 암 덤벨 로우', '원 암 시티드 케이블 로우'], movement_pattern: 'horizontal_pull'},
@@ -481,7 +452,6 @@ v7.0을 통해 프로그램의 지능이 크게 향상되었으나, 아래의 �
     let chartInstance = null;
     let popupChartInstance = null;
     let movementPatternChart = null;
-    let rpeTrendChart = null;
     
     // DOM Elements
     const weekSelector = document.getElementById('week-selector');
@@ -511,25 +481,6 @@ v7.0을 통해 프로그램의 지능이 크게 향상되었으나, 아래의 �
     const closeExportModalButton = document.getElementById('close-export-modal-button');
     const recordPopupModal = document.getElementById('record-popup-modal');
     const closeRecordPopupButton = document.getElementById('close-record-popup-button');
-    const rpeModal = document.getElementById('rpe-modal');
-    const rpeModalTitle = document.getElementById('rpe-modal-title');
-    const rpeSlider = document.getElementById('rpe-slider');
-    const rpeValueDisplay = document.getElementById('rpe-value-display');
-    const rpeDescription = document.getElementById('rpe-description');
-    const saveRpeButton = document.getElementById('save-rpe');
-    const cancelRpeButton = document.getElementById('cancel-rpe');
-
-    const RPE_DESCRIPTIONS = {
-        "10": "실패 지점. 더 이상 반복 불가능.",
-        "9.5": "마지막 반복이 매우 느렸음.",
-        "9": "1회 정도 더 반복 가능.",
-        "8.5": "1~2회 더 반복 가능.",
-        "8": "2회 더 반복 가능.",
-        "7.5": "2~3회 더 반복 가능.",
-        "7": "3회 더 반복 가능.",
-        "6.5": "3-4회 더 반복 가능.",
-        "6": "4회 이상 더 반복 가능 (웜업 수준)."
-    };
 
     const phaseDescriptions = {
         '강화 주기': '최대 근력(Strength) 증진. 메인 운동은 \'탑/백오프 세트\' 방식으로 진행하며, 점진적으로 더 무거운 무게에 도전하는 것이 목표입니다.',
@@ -552,6 +503,11 @@ v7.0을 통해 프로그램의 지능이 크게 향상되었으나, 아래의 �
         if (reps < 1) return 0;
         if (reps === 1) return weight;
         return weight * (1 + reps / 30);
+    }
+    
+    // [NEW in v10.0] Aggressive Rounding to nearest 2.5kg
+    function roundToNearest2point5(number) {
+        return Math.round(number / 2.5) * 2.5;
     }
 
     // CORE LOGIC: Get Week Info (Stable since v5.5)
@@ -587,7 +543,7 @@ v7.0을 통해 프로그램의 지능이 크게 향상되었으나, 아래의 �
         return { phase, method, type, originalWeekData };
     }
 
-    // [UPDATED in v7.0.4] RPE-based Progression Logic
+    // [UPDATED in v10.0] Performance-Based Multi-Stage Progression
     function getMainGoalText(exercise, week, cycleId, allRecords) {
         if (!exercise.baseTopSet) return null;
 
@@ -597,8 +553,8 @@ v7.0을 통해 프로그램의 지능이 크게 향상되었으나, 아래의 �
         const sanitizedName = getSanitizedName(exercise);
         const exerciseRecords = allRecords[sanitizedName] || [];
         
-        let e1RM = calculateEpley1RM(exercise.baseTopSet, 5);
-        let lastStrengthTopSetWeight = e1RM * 0.9; 
+        let previousWeight = exercise.baseTopSet;
+        let e1RM = calculateEpley1RM(exercise.baseTopSet, 6); // Default e1RM based on 6 reps
 
         const referenceRecords = exerciseRecords
             .filter(r => (r.cycleId < cycleId || (r.cycleId === cycleId && r.week < week)) && r.phase === '강화 주기' && getWeekInfo(r.week, r.cycleId).type === type)
@@ -606,85 +562,40 @@ v7.0을 통해 프로그램의 지능이 크게 향상되었으나, 아래의 �
 
         if (referenceRecords.length > 0) {
             const lastPerformance = referenceRecords[0];
-            let bestSetFromHistory = { weight: 0, reps: 0 };
+            let topSet = { weight: 0, reps: 0 };
             lastPerformance.sets?.forEach(set => {
-                if (calculateEpley1RM(set.weight, set.reps) > calculateEpley1RM(bestSetFromHistory.weight, bestSetFromHistory.reps)) {
-                    bestSetFromHistory = set;
+                if (set.weight > topSet.weight) {
+                    topSet = set;
                 }
             });
 
-            if (bestSetFromHistory.weight > 0) {
+            if (topSet.weight > 0) {
+                let percentageChange = 0;
+                if (topSet.reps > 10) percentageChange = 1.05;      // +5.0%
+                else if (topSet.reps >= 8) percentageChange = 1.025;   // +2.5%
+                else if (topSet.reps >= 6) percentageChange = 1.0125;  // +1.25%
+                else if (topSet.reps === 5) percentageChange = 1.0;     // +0%
+                else if (topSet.reps === 4) percentageChange = 0.975;  // -2.5%
+                else if (topSet.reps === 3) percentageChange = 0.95;   // -5.0%
+                else percentageChange = 0.90;                        // -10.0%
                 
-                const allPreviousStrengthRecordsForLast = exerciseRecords.filter(r => {
-                    if (!r.date || !lastPerformance.date) return false;
-                     const recordDate = new Date(r.date).getTime();
-                      const lastPerformanceDate = new Date(lastPerformance.date).getTime();
-                      if(recordDate > lastPerformanceDate) return false;
-
-                      const recordInfo = getWeekInfo(r.week, r.cycleId);
-                      const lastPerformanceInfo = getWeekInfo(lastPerformance.week, lastPerformance.cycleId);
-                      return recordInfo.phase === '강화 주기' && recordInfo.type === lastPerformanceInfo.type;
-                });
-                
-                let lastStrengthExposureCount = allPreviousStrengthRecordsForLast.length -1;
-                const lastWeekInMicroCycle = lastStrengthExposureCount % 3;
-                
-                let minRepGoal = 0;
-                if (lastWeekInMicroCycle === 0) minRepGoal = 6;
-                else if (lastWeekInMicroCycle === 1) minRepGoal = 5;
-                else minRepGoal = 3;
-
-                const performed1RM = calculateEpley1RM(bestSetFromHistory.weight, bestSetFromHistory.reps);
-                const lastRPE = lastPerformance.rpe === null ? 8.0 : lastPerformance.rpe;
-
-                if (bestSetFromHistory.reps >= minRepGoal && lastRPE <= 8.5) {
-                    e1RM = performed1RM * 1.025; // Success & Room to grow -> Increment
-                } else {
-                    e1RM = performed1RM; // Failure or Success at limit -> Maintain
-                }
-                
-                lastStrengthTopSetWeight = bestSetFromHistory.weight;
+                previousWeight = topSet.weight * percentageChange;
+                e1RM = calculateEpley1RM(topSet.weight, topSet.reps);
             }
         }
         
         if (phase === '강화 주기') {
-            const allPastStrengthRecords = exerciseRecords
-                .filter(r => {
-                    const recordCycle = r.cycleId || 1;
-                    const recordWeek = r.week || 1;
-                    
-                    const isPast = recordCycle < cycleId || (recordCycle === cycleId && recordWeek < week);
-                    if (!isPast) return false;
-
-                    const recordInfo = getWeekInfo(recordWeek, recordCycle);
-                    return recordInfo.phase === '강화 주기' && recordInfo.type === type;
-                });
-            const strengthExposureCount = allPastStrengthRecords.length;
-
-            const weekInMicroCycle = strengthExposureCount % 3;
-
-            let goalWeight, goalReps;
-            if (weekInMicroCycle === 0) {
-                goalWeight = Math.round((e1RM * 0.825) / 2.5) * 2.5;
-                goalReps = "6-7회";
-            } else if (weekInMicroCycle === 1) {
-                goalWeight = Math.round((e1RM * 0.875) / 2.5) * 2.5;
-                goalReps = "5회";
-            } else {
-                goalWeight = Math.round((e1RM * 0.925) / 2.5) * 2.5;
-                goalReps = "3-4회";
-            }
-            const backoffWeight = Math.round((goalWeight * 0.8) / 2.5) * 2.5;
-            return `🔥 강화 목표: 탑 ${goalWeight}kg x ${goalReps} / 백오프 ${backoffWeight}kg x 8-10회.`;
-
+            const goalWeight = roundToNearest2point5(previousWeight);
+            const backoffWeight = roundToNearest2point5(goalWeight * 0.8);
+            return `🔥 강화 목표: 탑 ${goalWeight}kg x 최대 반복 / 백오프 ${backoffWeight}kg x 8-10회.`;
         } else if (phase === '축적 주기') {
-            const goalWeight = Math.round((lastStrengthTopSetWeight * 0.75) / 2.5) * 2.5;
+            const goalWeight = roundToNearest2point5(e1RM * 0.7);
             return `🔥 축적 목표: 워킹 세트 ${goalWeight}kg x 8-12회 (3-4세트).`;
         }
         return null;
     }
     
-    // [UPDATED in v7.0.4] RPE-based Progression Logic
+    // [UPDATED in v10.0] RPE logic removed
     function getAssistanceGoalText(exercise, allRecords) {
         if (!exercise.staticGoal || !exercise.increment) {
             return exercise.staticGoal;
@@ -718,9 +629,8 @@ v7.0을 통해 프로그램의 지능이 크게 향상되었으나, 아래의 �
             }
 
             const isSuccess = record.sets.every(set => set.weight >= maxWeightGoal && set.reps >= maxReps);
-            const lastRPE = record.rpe === null ? 8.0 : record.rpe;
 
-            if (isSuccess && lastRPE <= 8.5) {
+            if (isSuccess) {
                 const actualMaxWeight = Math.max(0, ...record.sets.map(s => s.weight));
                 const newIncrement = exercise.increment;
                 const newMaxWeight = actualMaxWeight + newIncrement;
@@ -737,7 +647,7 @@ v7.0을 통해 프로그램의 지능이 크게 향상되었으나, 아래의 �
                 }
             }
 
-            return currentGoal; // Maintain goal if success at high RPE or failure
+            return currentGoal;
         }, exercise.staticGoal);
     }
 
@@ -758,7 +668,7 @@ v7.0을 통해 프로그램의 지능이 크게 향상되었으나, 아래의 �
             const dayName = originalWeekData[currentDay]?.name || '';
             currentRecord = {
                 date: today, week: currentWeek, day: currentDay, dayName: dayName,
-                phase: phase, sets: [], cycleId: currentCycleId, rpe: null
+                phase: phase, sets: [], cycleId: currentCycleId
             };
         }
 
@@ -778,12 +688,12 @@ v7.0을 통해 프로그램의 지능이 크게 향상되었으나, 아래의 �
 
         if (recordIndex > -1) {
             records[sanitizedName][recordIndex] = currentRecord;
-        } else {
+        } else if (currentRecord.sets.length > 0) {
             records[sanitizedName].push(currentRecord);
         }
 
-        if (currentRecord.sets.length === 0 && currentRecord.rpe === null) {
-            records[sanitizedName] = records[sanitizedName].filter(r => r !== currentRecord);
+        if (currentRecord.sets.length === 0 && recordIndex > -1) {
+            records[sanitizedName].splice(recordIndex, 1);
         }
 
         localStorage.setItem('workoutRecords', JSON.stringify(records));
@@ -827,73 +737,6 @@ v7.0을 통해 프로그램의 지능이 크게 향상되었으나, 아래의 �
         }
 
         modal.classList.remove('hidden');
-    }
-
-    // [NEW in v7.0.8] RPE Modal Logic with dynamic guidance
-    function openRpeModal(sanitizedName, exerciseName) {
-        rpeModalTitle.textContent = `${exerciseName} RPE 기록`;
-        
-        const { phase } = getWeekInfo(currentWeek, currentCycleId);
-        const guidanceEl = document.getElementById('rpe-guidance');
-        const guidanceContainer = document.getElementById('rpe-guidance-container');
-
-        if (phase === '강화 주기') {
-            guidanceEl.innerHTML = `<strong>[강화 주기]</strong> 오늘의 가장 무거웠던 <strong>'탑 세트'</strong>를 기준으로 RPE를 선택해주세요.`;
-            guidanceContainer.classList.remove('hidden');
-        } else if (phase === '축적 주기') {
-            guidanceEl.innerHTML = `<strong>[축적 주기]</strong> 모든 워킹 세트를 마친 후, 가장 힘들었던 <strong>'마지막 세트'</strong>를 기준으로 RPE를 선택해주세요.`;
-            guidanceContainer.classList.remove('hidden');
-        } else {
-            guidanceContainer.classList.add('hidden');
-        }
-
-        const records = JSON.parse(localStorage.getItem('workoutRecords')) || {};
-        const exerciseRecords = records[sanitizedName] || [];
-        const recordForSession = exerciseRecords.find(r => r.week === currentWeek && r.cycleId === currentCycleId && r.day === currentDay);
-
-        const currentRpe = recordForSession?.rpe || 8;
-        rpeSlider.value = currentRpe;
-        rpeValueDisplay.textContent = parseFloat(currentRpe).toFixed(1);
-
-        rpeSlider.oninput = () => {
-            const value = rpeSlider.value;
-            rpeValueDisplay.textContent = parseFloat(value).toFixed(1);
-            rpeDescription.textContent = RPE_DESCRIPTIONS[value] || "";
-        };
-        rpeSlider.dispatchEvent(new Event('input'));
-        
-        saveRpeButton.onclick = () => {
-            const newRpe = parseFloat(rpeSlider.value);
-            
-            let allRecords = JSON.parse(localStorage.getItem('workoutRecords')) || {};
-            if (!allRecords[sanitizedName]) allRecords[sanitizedName] = [];
-            let exerciseRecords = allRecords[sanitizedName];
-            let recordIndex = exerciseRecords.findIndex(r => r.week === currentWeek && r.cycleId === currentCycleId && r.day === currentDay);
-
-            if (recordIndex === -1) {
-                 const { phase, originalWeekData } = getWeekInfo(currentWeek, currentCycleId);
-                 const dayName = originalWeekData[currentDay]?.name || '';
-                 const newRecord = {
-                    date: new Date().toISOString().split('T')[0],
-                    week: currentWeek, day: currentDay, dayName: dayName,
-                    phase: phase, sets: [], cycleId: currentCycleId, rpe: newRpe
-                };
-                exerciseRecords.push(newRecord);
-            } else {
-                exerciseRecords[recordIndex].rpe = newRpe;
-            }
-            
-            allRecords[sanitizedName] = exerciseRecords;
-            localStorage.setItem('workoutRecords', JSON.stringify(allRecords));
-            rpeModal.classList.add('hidden');
-            renderWorkout(); 
-        };
-
-        cancelRpeButton.onclick = () => {
-            rpeModal.classList.add('hidden');
-        };
-
-        rpeModal.classList.remove('hidden');
     }
 
     // UI RENDERING
@@ -948,7 +791,7 @@ v7.0을 통해 프로그램의 지능이 크게 향상되었으나, 아래의 �
 
 
             const methodText = (isMain && exercise.name !== '사이드 래터럴 레이즈 머신') ? method : currentExercise.sets;
-            const tipHTML = goalText ? `${currentExercise.tip} <br><span class="font-bold text-red-600">${goalText}</span>` : currentExercise.tip;
+            const tipHTML = goalText ? `${currentExercise.tip} <br><span class="font-bold text-red-600">${goalText.replace("최대 반복", "최대 반복(AMRAP)")}</span>` : currentExercise.tip;
 
             let alternativesHTML = '';
             if (currentExercise.alternatives && currentExercise.alternatives.length > 0) {
@@ -958,27 +801,6 @@ v7.0을 통해 프로그램의 지능이 크게 향상되었으나, 아래의 �
                         <ul class="list-disc list-inside text-sm text-slate-600 space-y-1">
                             ${currentExercise.alternatives.map(alt => `<li>${alt}</li>`).join('')}
                         </ul>
-                    </div>
-                `;
-            }
-
-            const rpeButtonText = recordForSession && recordForSession.rpe ? `RPE: ${recordForSession.rpe} (기록됨)` : '오늘의 RPE 기록';
-            const rpeButtonClass = recordForSession && recordForSession.rpe ? 'bg-green-100 text-green-800 hover:bg-green-200' : 'bg-indigo-100 text-indigo-700 hover:bg-indigo-200';
-            
-            // [NEW in v7.0.9] Conditionally render buttons
-            const isRpeRelevant = !['웜업', '선피로', '회복'].some(type => currentExercise.type.includes(type));
-            let buttonsHTML = '';
-            if (isRpeRelevant) {
-                buttonsHTML = `
-                    <div class="mt-4 grid grid-cols-2 gap-3">
-                        <button type="button" class="add-set-btn w-full bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold py-2 px-4 rounded-lg transition shadow-md">+ 세트 추가</button>
-                        <button type="button" class="record-rpe-btn w-full ${rpeButtonClass} font-semibold py-2 px-4 rounded-lg transition shadow-md" data-sanitized-name="${sanitizedName}" data-exercise-name="${currentExercise.name}">${rpeButtonText}</button>
-                    </div>
-                `;
-            } else {
-                buttonsHTML = `
-                    <div class="mt-4">
-                        <button type="button" class="add-set-btn w-full bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold py-2 px-4 rounded-lg transition shadow-md">+ 세트 추가</button>
                     </div>
                 `;
             }
@@ -1012,7 +834,9 @@ v7.0을 통해 프로그램의 지능이 크게 향상되었으나, 아래의 �
                      ${alternativesHTML}
                 </div>
                 <div id="sets-container-${sanitizedName}" class="space-y-3 mt-4"></div>
-                ${buttonsHTML}
+                <div class="mt-4">
+                    <button type="button" class="add-set-btn w-full bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold py-2 px-4 rounded-lg transition shadow-md">+ 세트 추가</button>
+                </div>
             `;
             workoutList.appendChild(card);
             
@@ -1036,15 +860,6 @@ v7.0을 통해 프로그램의 지능이 크게 향상되었으나, 아래의 �
                 const sanitizedName = targetBtn.dataset.sanitizedName;
                 const exerciseName = targetBtn.dataset.exerciseName;
                 openRecordPopup(sanitizedName, exerciseName);
-            });
-        });
-
-        document.querySelectorAll('.record-rpe-btn').forEach(btn => {
-            btn.addEventListener('click', (e) => {
-                const targetBtn = e.currentTarget;
-                const sanitizedName = targetBtn.dataset.sanitizedName;
-                const exerciseName = targetBtn.dataset.exerciseName;
-                openRpeModal(sanitizedName, exerciseName);
             });
         });
     }
@@ -1274,7 +1089,6 @@ v7.0을 통해 프로그램의 지능이 크게 향상되었으나, 아래의 �
         document.getElementById('ai-feedback-text').textContent = feedback;
     }
 
-
     // RECORDS VIEW LOGIC
     function populateExerciseSelector() {
         const exerciseGroupMap = new Map();
@@ -1352,221 +1166,226 @@ v7.0을 통해 프로그램의 지능이 크게 향상되었으나, 아래의 �
     
     function renderProgressChart(data, canvasId) {
         const chartCanvas = document.getElementById(canvasId);
-        if (!chartCanvas) return;
         const ctx = chartCanvas.getContext('2d');
-        const labels = data.map(d => `C${d.cycleId || 1}-W${d.week}`);
-        const topWeights = data.map(d => Math.max(0, ...(d.sets?.map(s => s.weight) || [])));
-
+        
         let targetChartInstance = null;
         if (canvasId === 'progressChart') {
             if (chartInstance) chartInstance.destroy();
-            targetChartInstance = chartInstance;
         } else if (canvasId === 'record-popup-chart') {
             if (popupChartInstance) popupChartInstance.destroy();
-            targetChartInstance = popupChartInstance;
         }
+
+        const labels = data.map(d => `C${d.cycleId || 1}-${d.week}주`);
+        const topSetData = data.map(d => {
+            if (!d.sets || d.sets.length === 0) return null;
+            const topSet = d.sets.reduce((max, set) => set.weight > max.weight ? set : max, { weight: 0 });
+            return topSet.weight > 0 ? topSet.weight : null;
+        });
+
+        const e1RMData = data.map(d => {
+            if (!d.sets || d.sets.length === 0) return null;
+            const topSet = d.sets.reduce((max, set) => set.weight > max.weight ? set : max, { weight: 0 });
+            return topSet.weight > 0 ? calculateEpley1RM(topSet.weight, topSet.reps) : null;
+        });
 
         const newChart = new Chart(ctx, {
             type: 'line',
-            data: { labels, datasets: [{
-                label: '최고 중량(kg)', data: topWeights, borderColor: '#3b82f6', backgroundColor: 'rgba(59, 130, 246, 0.1)',
-                fill: true, tension: 0.1, pointBackgroundColor: '#3b82f6', pointRadius: 5, pointHoverRadius: 7,
-            }]},
+            data: {
+                labels: labels,
+                datasets: [
+                    {
+                        label: 'Top Set 중량 (kg)',
+                        data: topSetData,
+                        borderColor: '#3b82f6',
+                        backgroundColor: '#3b82f6',
+                        tension: 0.1,
+                        yAxisID: 'y'
+                    },
+                    {
+                        label: '추정 1RM (kg)',
+                        data: e1RMData,
+                        borderColor: '#ef4444',
+                        backgroundColor: '#ef4444',
+                        tension: 0.1,
+                        borderDash: [5, 5],
+                        yAxisID: 'y'
+                    }
+                ]
+            },
             options: {
-                responsive: true, maintainAspectRatio: false,
+                responsive: true,
+                maintainAspectRatio: false,
                 scales: {
-                    y: { beginAtZero: false, title: { display: true, text: '중량 (kg)' }},
-                    x: { title: { display: true, text: '사이클-주차' }}
+                    y: {
+                        beginAtZero: true,
+                        title: {
+                            display: true,
+                            text: '중량 (kg)'
+                        }
+                    }
                 },
                 plugins: {
-                    legend: { display: false },
-                    tooltip: { callbacks: {
-                        title: (c) => { const d = data[c[0].dataIndex]; return `${d.date} (사이클 ${d.cycleId || 1}, ${d.week}주차)`; },
-                        label: (c) => `최고 중량: ${c.parsed.y}kg`,
-                        afterLabel: (c) => {
-                            const d = data[c[0].dataIndex];
-                            if (!d.sets?.length) return '';
-                            const topSet = d.sets.reduce((max, set) => set.weight > max.weight ? set : max, {weight: 0});
-                            return `${topSet.reps}회 (Top Set)`;
+                    tooltip: {
+                        callbacks: {
+                            afterBody: function(context) {
+                                const dataIndex = context[0].dataIndex;
+                                const record = data[dataIndex];
+                                if (!record || !record.sets) return '';
+                                const topSet = record.sets.reduce((max, set) => set.weight > max.weight ? set : max, { weight: 0, reps: 0 });
+                                return `Top Set: ${topSet.weight}kg x ${topSet.reps}회`;
+                            }
                         }
-                    }}
+                    }
                 }
             }
         });
-
+        
         if (canvasId === 'progressChart') {
             chartInstance = newChart;
-        } else {
+        } else if (canvasId === 'record-popup-chart') {
             popupChartInstance = newChart;
         }
     }
 
     function renderRecordsTable(data, containerId) {
-        const tableContainer = document.getElementById(containerId);
-        if(!tableContainer) return;
-        tableContainer.innerHTML = '';
-        data.slice().reverse().forEach(record => {
-            const dayTable = document.createElement('table');
-            dayTable.className = 'w-full text-left border-collapse mb-4';
-            const dayNameMap = {'pull': '풀', 'leg':'하체', 'push':'푸쉬'};
-            const cycleText = record.cycleId ? ` (사이클 ${record.cycleId})` : ` (사이클 1)`;
-            const rpeText = record.rpe ? ` (RPE ${record.rpe})` : '';
-            dayTable.innerHTML = `
-                <thead class="bg-slate-100">
-                    <tr><th colspan="3" class="p-3 font-semibold text-slate-800">${record.date} (${record.week}주차, ${dayNameMap[record.day] || record.day})${cycleText}${rpeText}</th></tr>
-                    <tr class="text-sm">
-                        <th class="p-3 font-semibold text-slate-600 w-1/3">세트</th><th class="p-3 font-semibold text-slate-600 w-1/3">중량(kg)</th><th class="p-3 font-semibold text-slate-600 w-1/3">횟수(Reps)</th>
+        const container = document.getElementById(containerId);
+        if (!data || data.length === 0) {
+            container.innerHTML = `<p class="p-4 text-center text-slate-500">기록이 없습니다.</p>`;
+            return;
+        }
+
+        const table = document.createElement('table');
+        table.className = 'w-full text-left border-collapse';
+        table.innerHTML = `
+            <thead class="bg-slate-100">
+                <tr>
+                    <th class="p-3 font-semibold text-slate-700 text-sm">날짜</th>
+                    <th class="p-3 font-semibold text-slate-700 text-sm">사이클</th>
+                    <th class="p-3 font-semibold text-slate-700 text-sm">주차</th>
+                    <th class="p-3 font-semibold text-slate-700 text-sm">요일</th>
+                    <th class="p-3 font-semibold text-slate-700 text-sm">세트 상세</th>
+                </tr>
+            </thead>
+            <tbody class="text-sm">
+                ${data.map(record => `
+                    <tr class="border-b border-slate-200">
+                        <td class="p-3 text-slate-600 whitespace-nowrap">${record.date}</td>
+                        <td class="p-3 text-slate-600">${record.cycleId || 1}</td>
+                        <td class="p-3 text-slate-600">${record.week}</td>
+                        <td class="p-3 text-slate-600">${record.dayName} (${record.phase})</td>
+                        <td class="p-3 text-slate-600">${(record.sets || []).map(set => `${set.weight}kg x ${set.reps}회`).join('<br>')}</td>
                     </tr>
-                </thead>
-                <tbody class="text-slate-700">
-                    ${record.sets?.map((set, index) => `
-                        <tr class="border-b border-slate-200 last:border-b-0">
-                            <td class="p-3">${index + 1}</td><td class="p-3 font-semibold text-slate-900">${set.weight}kg</td><td class="p-3">${set.reps}회</td>
-                        </tr>`).join('') || ''}
-                </tbody>`;
-            tableContainer.appendChild(dayTable);
-        });
+                `).join('')}
+            </tbody>
+        `;
+        container.innerHTML = '';
+        container.appendChild(table);
     }
     
-    // APP INITIALIZATION & EVENT LISTENERS
-    function debounce(func, delay) {
+    function debounce(func, wait) {
         let timeout;
-        return function(...args) {
-            const context = this;
+        return function executedFunction(...args) {
+            const later = () => {
+                clearTimeout(timeout);
+                func(...args);
+            };
             clearTimeout(timeout);
-            timeout = setTimeout(() => func.apply(context, args), delay);
+            timeout = setTimeout(later, wait);
         };
     }
 
-    function confirmAndResetAll() {
-        localStorage.clear();
-        resetAllModal.classList.add('hidden');
-        initializeApp(true); 
-    }
-
-    function confirmAndStartNewCycle() {
-        let cycleInfo = JSON.parse(localStorage.getItem('workoutCycleInfo')) || { cycleId: 1 };
-        cycleInfo.cycleId++;
-        localStorage.setItem('workoutCycleInfo', JSON.stringify(cycleInfo));
-        newCycleModal.classList.add('hidden');
+    // INITIALIZATION & EVENT LISTENERS
+    function initApp() {
+        const savedState = JSON.parse(localStorage.getItem('workoutState')) || {};
+        currentWeek = savedState.currentWeek || 1;
+        currentDay = savedState.currentDay || 'pull';
         
-        localStorage.setItem('workoutAppState', JSON.stringify({ week: 1, day: 'pull' }));
-        initializeApp(true);
-    }
-    
-    function migrateOldRecords() {
-        if (localStorage.getItem('migrationV7_alpha_Complete')) return;
-        let records = JSON.parse(localStorage.getItem('workoutRecords')) || {};
-        let needsUpdate = false;
-        for (const key in records) {
-            records[key].forEach(r => {
-                if (!r.phase) { // For migration from versions before v5.2
-                    const cycleId = r.cycleId || 1;
-                    const { phase } = getWeekInfo(r.week, cycleId);
-                    r.phase = phase;
-                    needsUpdate = true;
-                }
-                if (typeof r.rpe === 'undefined') { // For migration to v7
-                    r.rpe = null;
-                    needsUpdate = true;
-                }
-            });
-        }
-        if (needsUpdate) {
-            localStorage.setItem('workoutRecords', JSON.stringify(records));
-        }
-        localStorage.setItem('migrationV7_alpha_Complete', 'true');
-    }
-
-    function handleExportData() {
-        const workoutRecords = JSON.parse(localStorage.getItem('workoutRecords')) || {};
         const cycleInfo = JSON.parse(localStorage.getItem('workoutCycleInfo')) || { cycleId: 1 };
-
-        const archiveData = {
-            programVersion: "v7.0.8 Final",
-            exportDate: new Date().toISOString().split('T')[0],
-            cycleInfo,
-            workoutRecords
-        };
-
-        const fullArchiveText = CONTEXT_PROMPT + JSON.stringify(archiveData, null, 2);
-        exportDataTextarea.value = fullArchiveText;
-        exportModal.classList.remove('hidden');
-    }
-
-    function initializeApp(isReset = false) {
-        migrateOldRecords();
-        let cycleInfo = JSON.parse(localStorage.getItem('workoutCycleInfo')) || { cycleId: 1 };
         currentCycleId = cycleInfo.cycleId;
 
-        if (isReset) {
-            currentWeek = 1;
-            currentDay = 'pull';
-            localStorage.setItem('workoutAppState', JSON.stringify({ week: currentWeek, day: currentDay }));
-        } else {
-            let savedState = JSON.parse(localStorage.getItem('workoutAppState'));
-            currentWeek = savedState?.week || 1;
-            currentDay = savedState?.day || 'pull';
+        weekSelector.innerHTML = '';
+        for (let i = 1; i <= 13; i++) {
+            const button = document.createElement('button');
+            button.textContent = `${i}주`;
+            button.dataset.week = i;
+            button.className = 'p-2 px-4 rounded-lg font-semibold text-sm sm:text-base transition duration-200 hover:bg-slate-200 flex-grow text-center shadow-md';
+            weekSelector.appendChild(button);
         }
-        
-        if (weekSelector.childElementCount === 0) {
-            for (let i = 1; i <= 13; i++) {
-                const weekBtn = document.createElement('button');
-                weekBtn.dataset.week = i;
-                weekBtn.textContent = `${i}주차`;
-                weekBtn.className = 'px-3.5 py-2.5 text-base font-semibold rounded-lg transition duration-200 bg-slate-100 hover:bg-slate-200 shadow-md';
-                weekSelector.appendChild(weekBtn);
-            }
-        }
-        
-        weekSelector.onclick = e => {
-            if (e.target.tagName === 'BUTTON' && e.target.dataset.week) {
+
+        weekSelector.addEventListener('click', (e) => {
+            if (e.target.tagName === 'BUTTON') {
                 currentWeek = parseInt(e.target.dataset.week);
-                localStorage.setItem('workoutAppState', JSON.stringify({ week: currentWeek, day: currentDay }));
+                localStorage.setItem('workoutState', JSON.stringify({ currentWeek, currentDay }));
                 renderWorkout();
                 updateActiveButtons();
             }
-        };
+        });
 
-        daySelector.onclick = e => {
+        daySelector.addEventListener('click', (e) => {
             if (e.target.tagName === 'BUTTON' && e.target.dataset.day) {
                 currentDay = e.target.dataset.day;
-                localStorage.setItem('workoutAppState', JSON.stringify({ week: currentWeek, day: currentDay }));
+                localStorage.setItem('workoutState', JSON.stringify({ currentWeek, currentDay }));
                 renderWorkout();
                 updateActiveButtons();
             }
-        };
-        
-        exerciseSelector.onchange = renderRecords;
-        resetAllButton.onclick = () => resetAllModal.classList.remove('hidden');
-        cancelResetAll.onclick = () => resetAllModal.classList.add('hidden');
-        confirmResetAll.onclick = confirmAndResetAll;
-        newCycleButton.onclick = () => newCycleModal.classList.remove('hidden');
-        cancelNewCycle.onclick = () => newCycleModal.classList.add('hidden');
-        confirmNewCycle.onclick = confirmAndStartNewCycle;
+        });
 
-        exportDataButton.onclick = handleExportData;
-        closeExportModalButton.onclick = () => exportModal.classList.add('hidden');
-        copyExportDataButton.onclick = () => {
+        exerciseSelector.addEventListener('change', renderRecords);
+        
+        resetAllButton.addEventListener('click', () => resetAllModal.classList.remove('hidden'));
+        cancelResetAll.addEventListener('click', () => resetAllModal.classList.add('hidden'));
+        confirmResetAll.addEventListener('click', () => {
+            localStorage.removeItem('workoutRecords');
+            localStorage.removeItem('workoutState');
+            localStorage.removeItem('workoutCycleInfo');
+            currentWeek = 1;
+            currentDay = 'pull';
+            currentCycleId = 1;
+            initApp();
+            showView('today');
+            resetAllModal.classList.add('hidden');
+        });
+
+        newCycleButton.addEventListener('click', () => newCycleModal.classList.remove('hidden'));
+        cancelNewCycle.addEventListener('click', () => newCycleModal.classList.add('hidden'));
+        confirmNewCycle.addEventListener('click', () => {
+            currentCycleId++;
+            currentWeek = 1;
+            currentDay = 'pull';
+            localStorage.setItem('workoutCycleInfo', JSON.stringify({ cycleId: currentCycleId }));
+            localStorage.setItem('workoutState', JSON.stringify({ currentWeek, currentDay }));
+            initApp();
+            showView('today');
+            newCycleModal.classList.add('hidden');
+        });
+        
+        exportDataButton.addEventListener('click', () => {
+            const dataToExport = {
+                contextPrompt: CONTEXT_PROMPT,
+                workoutRecords: JSON.parse(localStorage.getItem('workoutRecords') || '{}'),
+                workoutState: JSON.parse(localStorage.getItem('workoutState') || '{}'),
+                workoutCycleInfo: JSON.parse(localStorage.getItem('workoutCycleInfo') || '{}'),
+            };
+            exportDataTextarea.value = JSON.stringify(dataToExport, null, 2);
+            exportModal.classList.remove('hidden');
+        });
+        copyExportDataButton.addEventListener('click', () => {
             exportDataTextarea.select();
             document.execCommand('copy');
-            copyExportDataButton.textContent = "복사 완료!";
-            setTimeout(() => {
-                copyExportDataButton.textContent = "전체 복사";
-            }, 2000);
-        };
+            copyExportDataButton.textContent = '복사 완료!';
+            setTimeout(() => { copyExportDataButton.textContent = '전체 복사'; }, 2000);
+        });
+        closeExportModalButton.addEventListener('click', () => exportModal.classList.add('hidden'));
+        
+        closeRecordPopupButton.addEventListener('click', () => recordPopupModal.classList.add('hidden'));
 
-        closeRecordPopupButton.onclick = () => recordPopupModal.classList.add('hidden');
-
-        renderWorkout();
         updateActiveButtons();
+        renderWorkout();
         showView('today');
     }
 
-    document.addEventListener('DOMContentLoaded', () => {
-        initializeApp();
-    });
-
+    document.addEventListener('DOMContentLoaded', initApp);
 </script>
+
 </body>
 </html>
