@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>26주 장기 성장 프로그램 | 인터랙티브 플래너 (v6.4.4 Final)</title>
+    <title>26주 장기 성장 프로그램 | 인터랙티브 플래너 (v7.0.7 Final)</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
@@ -22,6 +22,9 @@
             .chart-container { height: 40vh; }
         }
         .prose { max-width: none; }
+        /* RPE Slider Customization */
+        input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; appearance: none; width: 24px; height: 24px; background: #3b82f6; cursor: pointer; border-radius: 50%; box-shadow: 0 0 5px rgba(0,0,0,0.2); }
+        input[type=range]::-moz-range-thumb { width: 24px; height: 24px; background: #3b82f6; cursor: pointer; border-radius: 50%; box-shadow: 0 0 5px rgba(0,0,0,0.2); }
     </style>
     <link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css" />
 </head>
@@ -162,10 +165,25 @@
                 <div id="view-records" class="hidden">
                     <div class="bg-white p-4 sm:p-6 rounded-xl shadow-lg">
                         <h2 class="text-2xl sm:text-3xl font-bold text-slate-900 mb-2">진행 상황 대시보드</h2>
-                        <p class="text-slate-600 mb-8 text-base sm:text-lg">메인 운동별 중량 변화를 추적하고 성장 과정을 확인하세요.</p>
+                        <p class="text-slate-600 mb-8 text-base sm:text-lg">과거 기록을 바탕으로 훈련 성과와 신체 균형을 분석합니다.</p>
+                        
+                        <!-- [NEW in v7.0.5] Movement Pattern Analysis -->
+                        <div id="movement-pattern-analysis" class="mb-10">
+                            <h3 class="text-xl sm:text-2xl font-bold text-slate-800 mb-4 text-center">움직임 패턴 분석</h3>
+                            <div class="chart-container mb-6">
+                                <canvas id="movementPatternChart"></canvas>
+                            </div>
+                            <div id="ai-feedback" class="p-4 bg-gray-100 rounded-lg">
+                                <h4 class="font-bold text-gray-800 mb-2 flex items-center gap-2">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" class="bi bi-robot" viewBox="0 0 16 16"><path d="M6 12.5a.5.5 0 0 1 .5-.5h3a.5.5 0 0 1 0 1h-3a.5.5 0 0 1-.5-.5ZM3 8.062C3 6.76 4.235 5.765 5.53 5.886a26.58 26.58 0 0 0 4.94 0C11.765 5.765 13 6.76 13 8.062v1.157a.933.933 0 0 1-.765.935c-.845.147-2.34.346-4.235.346-1.895 0-3.39-.2-4.235-.346A.933.933 0 0 1 3 9.219V8.062Zm4.542-.827a.25.25 0 0 0-.217.068l-.92.9a24.767 24.767 0 0 1-1.871-.183.25.25 0 0 0-.068.495c.55.076 1.232.149 2.02.193a.25.25 0 0 0 .189-.071l.754-.736.847 1.71a.25.25 0 0 0 .404.062l.932-.932a.25.25 0 0 0-.192-.41l-1.004.232c-.596-.57-1.23-.926-1.92-1.107a.25.25 0 0 0-.217-.068Z"/><path d="M8 1a7 7 0 1 0 0 14A7 7 0 0 0 8 1ZM2.5 7.542c.157-.884 1.12-1.64 2.572-1.789a25.614 25.614 0 0 1 5.856 0c1.452.149 2.415.905 2.572 1.79v1.645a1.933 1.933 0 0 1-1.57.98c-1.043.183-2.658.372-4.43.372s-3.387-.189-4.43-.372A1.933 1.933 0 0 1 2.5 9.187V7.542Z"/></svg>
+                                    AI 코치 피드백
+                                </h4>
+                                <p id="ai-feedback-text" class="text-gray-700 text-sm sm:text-base"></p>
+                            </div>
+                        </div>
                        
-                        <div class="mb-8">
-                            <label for="exercise-selector" class="block text-base font-medium text-slate-800 mb-2">분석할 운동 종목 선택:</label>
+                        <div class="mb-8 pt-8 border-t border-slate-200">
+                            <label for="exercise-selector" class="block text-base font-medium text-slate-800 mb-2">운동별 상세 기록 분석:</label>
                             <select id="exercise-selector" class="w-full max-w-md p-2.5 sm:p-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition shadow-md">
                             </select>
                         </div>
@@ -266,10 +284,32 @@
                 </div>
             </div>
         </div>
+
+        <!-- [NEW in v7.0.2] RPE Modal -->
+        <div id="rpe-modal" class="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center hidden z-50 p-4 modal-enter">
+            <div class="bg-white rounded-xl p-6 md:p-8 shadow-2xl max-w-lg w-full">
+                <h3 id="rpe-modal-title" class="text-xl sm:text-2xl font-bold mb-4 text-slate-900"></h3>
+                <div class="mb-6 space-y-2">
+                    <p class="text-slate-600">오늘 운동의 마지막 세트는 얼마나 힘드셨나요?</p>
+                </div>
+                <div class="flex items-center gap-4 mb-4">
+                    <input id="rpe-slider" type="range" min="6" max="10" value="8" step="0.5" class="w-full h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer">
+                    <span id="rpe-value-display" class="text-2xl font-bold text-blue-600 w-16 text-center">8.0</span>
+                </div>
+                <div class="text-center h-10 flex items-center justify-center mb-6">
+                    <p id="rpe-description" class="text-sm text-slate-500"></p>
+                </div>
+                 <div class="flex justify-end gap-3">
+                    <button id="cancel-rpe" class="px-4 py-2 sm:px-5 sm:py-2.5 rounded-lg bg-slate-200 text-slate-800 font-bold hover:bg-slate-300 transition shadow-md">취소</button>
+                    <button id="save-rpe" class="px-4 py-2 sm:px-5 sm:py-2.5 rounded-lg bg-blue-600 text-white font-bold hover:bg-blue-700 transition shadow-md">RPE 저장</button>
+                </div>
+            </div>
+        </div>
+
     </div>
 
 <script>
-    // [CONTEXT_PROMPT UPDATED in v6.0 Final]
+    // [CONTEXT_PROMPT UPDATED in v7.0.0]
     const CONTEXT_PROMPT = `#################################################################
 ## [1단계] 새로운 대화 시작 시, 아래 내용을 모두 복사하여 첫 메시지로 보내주세요
 #################################################################
@@ -285,37 +325,25 @@
 
 ### [B] 핵심 프로그램 설계 원칙 (헌법)
 
-1.  훈련 분할: PPL(Push/Pull/Legs) 3분할을 기본 구조로 하며, 각 분할은 다시 A, B, C 세 가지 타입으로 순환하여 다양한 자극을 제공한다.
-2.  주기화 모델: 홀수 사이클(1, 3...)은 '블록 주기화'(강화 블록 → 축적 블록)를, 짝수 사이클(2, 4...)은 '주간 파동형 주기화'(매주 강화/축적 순환)를 자동으로 적용한다.
-3.  점진적 과부하 (메인 운동):
-    * '강화 주기'의 성과만을 기준으로 다음 목표를 설정한다.
-    * 과거 동일 타입(A/B/C)의 강화 훈련에서 '최소 목표 횟수'를 성공했는지를 판정한다.
-    * 성공 시: 실제 수행 기록 기반 1RM에 +2.5% 증량 보너스를 적용한다.
-    * 실패 시: 증량 보너스 없이, 실패한 실제 기록을 기준으로 다음 목표를 설정하여 자동 디로딩한다.
-4.  점진적 과부하 (보조 운동):
-    * '더블 프로그레션' 원리를 따른다.
-    * '최대 목표 세트, 무게, 횟수'를 모두 완벽히 성공했을 때만, 각 운동별로 지정된 '지능형 증량 단위(increment)'만큼 다음 목표를 상향 조정한다.
-5.  훈련 철학 (매우 중요):
-    * 모든 운동은 \`4-0-1-0\` 템포를 기본으로 한다. (4초 이완 - 0초 정지 - 1초 수축 - 0초 정지)
-    * 단순히 무게를 드는 것이 아닌, '점진적 이완'과 '마인드-머슬 커넥션'을 최우선으로 하는 보디빌딩식 훈련을 수행한다.
+1.  **지능형 주기화 모델:** PPL 3분할을 기반으로, 홀수/짝수 사이클에 따라 '블록 주기화'와 '주간 파동형 주기화'를 자동으로 전환한다.
+2.  **RPE 기반 자동 조절 (Auto-regulation):**
+    * **메인 운동:** 목표 횟수 성공과 RPE 8.5 이하를 모두 만족할 때만 1RM 기반 +2.5% 증량을 적용한다. RPE가 9 이상이면 중량을 유지하여 오버트레이닝을 방지한다.
+    * **보조 운동:** 더블 프로그레션 성공과 RPE 8.5 이하를 모두 만족할 때만 증량한다.
+3.  **움직임 패턴 기반 균형 분석:** '수평/수직 밀기/당기기', '스쿼트', '힙 힌지' 등 6대 움직임 패턴의 볼륨을 주기적으로 분석하여 사용자에게 불균형에 대한 피드백을 제공한다.
+4.  **훈련 철학:** \`4-0-1-0\` 템포를 기반으로 한 '마인드-머슬 커넥션'을 최우선으로 한다.
 
 ### [C] AI의 임무
 
-1.  너와 최초 사용자는 위 원칙에 따라 프로그램을 v6.0 Final 버전까지 완성시켰다.
-2.  아래에는 너의 구체적인 기억을 되살리기 위한 전체 대화 기록이 제공될 것이다.
-3.  이 대화 기록을 요약하지 말고, 너의 장기 기억처럼 완전히 흡수하고 이해해야 한다.
-4.  대화 기록 파악이 끝나면, 사용자가 다음 메시지로 전달할 실제 훈련 기록(JSON 데이터)을 분석할 준비를 하고, 아래 '미해결 과제'에 대한 논의를 이어가면 된다.
+1.  너와 최초 사용자는 위 원칙에 따라 프로그램을 v7.0 Final 버전까지 완성시켰다.
+2.  이 프로그램은 이제 단순한 플래너를 넘어, 사용자의 주관적인 컨디션(RPE)을 이해하고 훈련의 균형을 분석하는 '지능형 가상 코치'의 역할을 수행한다.
+3.  이전 대화 기록과 아래 최종 훈련 데이터(JSON)를 너의 장기 기억으로 완전히 흡수하고, 사용자와의 다음 대화를 준비하라.
 
-### [D] 미해결 과제 및 차기 업데이트 계획 (v6.0+)
+### [D] 차기 업데이트 계획 (v8.0+)
 
-v6.0 업데이트를 통해 프로그램의 디테일과 정확성이 향상되었으나, 아래의 핵심적인 개선 과제가 남아있으며 이는 다음 메이저 업데이트 시 최우선으로 해결해야 한다.
+v7.0을 통해 프로그램의 지능이 크게 향상되었으나, 아래의 개선 과제가 남아있으며 이는 다음 메이저 업데이트 시 논의될 수 있다.
 
-1.  **데이터 재해석에 따른 '잠재적 불안정성' (심각도: 높음)**
-    * **현상:** 현재 목표 중량 계산 로직(\`getMainGoalText\`)은 과거 기록을 해석할 때마다 \`getWeekInfo\` 함수(현재 버전의 설계도)를 호출하여 재해석함. 이로 인해 향후 \`getWeekInfo\` 로직이 변경되면 모든 과거 기록의 해석이 오염되어 계산 오류를 유발할 수 있음.
-    * **해결 방향 (3단계):**
-        1.  **데이터 저장 강화:** 운동 기록 저장 시 \`phase\`뿐만 아니라 \`type\`('A','B','C')도 명시적으로 함께 저장하여, 모든 기록을 '불변의 완전한 데이터'로 만든다.
-        2.  **계산 로직 단순화:** \`getMainGoalText\`가 더 이상 \`getWeekInfo\`로 과거를 재해석하지 않고, 기록에 저장된 \`phase\`와 \`type\`을 직접 읽어 누적 횟수를 계산하도록 변경한다.
-        3.  **일회성 마이그레이션:** 위 변경사항을 적용하기 위해, 기존 사용자들의 \`type\` 정보가 없는 과거 기록에 \`type\`을 추가해주는 마이그레이션 코드를 반드시 함께 배포해야 한다.
+1.  **데이터 저장 구조 고도화:** 현재 로직은 과거 기록을 재해석하는 불안정성을 내포하고 있다. 기록 저장 시 \`type\`('A','B','C')을 명시적으로 함께 저장하여 모든 기록을 '불변의 데이터'로 만드는 것을 최우선으로 고려해야 한다.
+2.  **회복 관리 시스템 도입:** 심박변이도(HRV)나 수면 데이터 등 외부 건강 데이터를 연동하여, 객관적인 회복 상태에 따라 그날의 훈련 강도를 동적으로 조절하는 기능을 도입할 수 있다.
 
 [!! 여기에 이전 대화 내용 전체를 복사하여 붙여넣어 주세요 !!]
 
@@ -325,122 +353,121 @@ v6.0 업데이트를 통해 프로그램의 디테일과 정확성이 향상되�
 #################################################################
 
 `;
-    // [WORKOUT PLAN UPDATED in v6.4.4]
+    // [WORKOUT PLAN UPDATED in v7.0.1]
     const workoutPlan = {
         1: {
             pull: { name: '풀(Pull) A', routine: [
-                { type: '웜업', name: '노틸러스 풀오버', sets: '2~3세트', tip: '광배근 스트레칭과 혈류 공급에 집중합니다. (LBS 단위)', staticGoal: '🔥 목표: 40-60 LBS x 12-15회.', alternatives: ['덤벨 풀오버', '스트레이트 암 케이블 푸쉬다운']},
-                { type: '웜업', name: '랫풀다운 (가볍게)', sets: '2세트', tip: '견갑을 아래로 누르는 움직임에 집중하여 등을 활성화시킵니다.', staticGoal: '🔥 목표: 30-40kg x 12-15회.', alternatives: ['어시스트 풀업', '가벼운 케이블 로우']},
-                { type: '메인', name: '해머스트랭스 래터럴 로우 (T바)', sets: '탑/백오프 세트', tip: '등 상부 전체(후면 삼각근, 능형근, 중부 승모근)의 분리도와 선명도를 높이는 것이 목표입니다. 의자를 낮춰 거의 서는 자세를 만들고, 팔꿈치를 90도로 높게 벌린 T자 형태를 유지하며 견갑골(날개뼈)을 강하게 쥐어짜주세요.', baseTopSet: 50, unit: '한쪽', alternatives: ['T-바 로우', '덤벨 실(Seal) 로우']},
-                { type: '메인', name: '해머스트랭스 하이로우', sets: '탑/백오프 세트', tip: '등 상부 전체, 특히 승모근과 능형근의 볼륨감을 키웁니다. 윗가슴을 패드에 고정하고, 팔꿈치를 대각선 아래 & 뒤쪽으로 당기며 등 상부를 최대한 수축하세요.', baseTopSet: 45, unit: '한쪽', alternatives: ['하이 케이블 로우 (와이드 그립)', '펜들레이 로우']},
-                { type: '메인', name: '해머스트랭스 로우로우', sets: '탑/백오프 세트', tip: '등 상부 전체, 특히 승모근과 능형근의 종합적인 발달을 위한 운동입니다. 이 머신은 당기는 동작 후반부에 자연스러운 상승 궤적을 그립니다. 이 궤적을 따라 견갑골을 강하게 모으면서 자연스럽게 으쓱해준다는 느낌으로 끝까지 당겨주면, 등 중앙부는 물론 상부 승모근까지 완벽하게 자극할 수 있습니다.', baseTopSet: 50, unit: '한쪽', alternatives: ['인클라인 덤벨 로우', '메도우 로우(Meadows Row)']},
-                { type: '보조', name: '리어 델트 머신', sets: '3~4세트', tip: '가슴을 패드에 붙이고, 팔을 편 상태를 유지하며 어깨 뒤쪽 근육의 힘으로만 핸들을 벌려줍니다.', staticGoal: '🔥 목표: 30-40kg x 12-15회.', increment: 2, alternatives: ['벤트오버 덤벨 레터럴 레이즈', '페이스 풀']},
-                { type: '마무리', name: '케이블 푸쉬 다운', sets: '3~4세트', tip: '팔꿈치를 옆구리에 고정한 채, 삼두근 바깥쪽의 힘으로 바를 아래로 눌러줍니다. 상체 반동을 최소화하세요.', staticGoal: '🔥 목표: 35-45kg x 10-15회.', increment: 5, alternatives: ['케이블 오버헤드 익스텐션', '덤벨 킥백']}
+                { type: '웜업', name: '노틸러스 풀오버', sets: '2~3세트', tip: '광배근 스트레칭과 혈류 공급에 집중합니다. (LBS 단위)', staticGoal: '🔥 목표: 40-60 LBS x 12-15회.', alternatives: ['덤벨 풀오버', '스트레이트 암 케이블 푸쉬다운'], movement_pattern: 'isolation_back'},
+                { type: '웜업', name: '랫풀다운 (가볍게)', sets: '2세트', tip: '견갑을 아래로 누르는 움직임에 집중하여 등을 활성화시킵니다.', staticGoal: '🔥 목표: 30-40kg x 12-15회.', alternatives: ['어시스트 풀업', '가벼운 케이블 로우'], movement_pattern: 'vertical_pull'},
+                { type: '메인', name: '해머스트랭스 래터럴 로우 (T바)', sets: '탑/백오프 세트', tip: '등 상부 전체(후면 삼각근, 능형근, 중부 승모근)의 분리도와 선명도를 높이는 것이 목표입니다. 의자를 낮춰 거의 서는 자세를 만들고, 팔꿈치를 90도로 높게 벌린 T자 형태를 유지하며 견갑골(날개뼈)을 강하게 쥐어짜주세요.', baseTopSet: 50, unit: '한쪽', alternatives: ['T-바 로우', '덤벨 실(Seal) 로우'], movement_pattern: 'horizontal_pull'},
+                { type: '메인', name: '해머스트랭스 하이로우', sets: '탑/백오프 세트', tip: '등 상부 전체, 특히 승모근과 능형근의 볼륨감을 키웁니다. 윗가슴을 패드에 고정하고, 팔꿈치를 대각선 아래 & 뒤쪽으로 당기며 등 상부를 최대한 수축하세요.', baseTopSet: 45, unit: '한쪽', alternatives: ['하이 케이블 로우 (와이드 그립)', '펜들레이 로우'], movement_pattern: 'horizontal_pull'},
+                { type: '메인', name: '해머스트랭스 로우로우', sets: '탑/백오프 세트', tip: '등 상부 전체, 특히 승모근과 능형근의 종합적인 발달을 위한 운동입니다. 이 머신은 당기는 동작 후반부에 자연스러운 상승 궤적을 그립니다. 이 궤적을 따라 견갑골을 강하게 모으면서 자연스럽게 으쓱해준다는 느낌으로 끝까지 당겨주면, 등 중앙부는 물론 상부 승모근까지 완벽하게 자극할 수 있습니다.', baseTopSet: 50, unit: '한쪽', alternatives: ['인클라인 덤벨 로우', '메도우 로우(Meadows Row)'], movement_pattern: 'horizontal_pull'},
+                { type: '보조', name: '리어 델트 머신', sets: '3~4세트', tip: '가슴을 패드에 붙이고, 팔을 편 상태를 유지하며 어깨 뒤쪽 근육의 힘으로만 핸들을 벌려줍니다.', staticGoal: '🔥 목표: 30-40kg x 12-15회.', increment: 2, alternatives: ['벤트오버 덤벨 레터럴 레이즈', '페이스 풀'], movement_pattern: 'isolation_shoulder'},
+                { type: '마무리', name: '케이블 푸쉬 다운', sets: '3~4세트', tip: '팔꿈치를 옆구리에 고정한 채, 삼두근 바깥쪽의 힘으로 바를 아래로 눌러줍니다. 상체 반동을 최소화하세요.', staticGoal: '🔥 목표: 35-45kg x 10-15회.', increment: 5, alternatives: ['케이블 오버헤드 익스텐션', '덤벨 킥백'], movement_pattern: 'isolation_triceps'}
             ]},
             leg: { name: '레그(Leg) A', routine: [
-                { type: '웜업', name: '노틸러스 이너 타이', sets: '2세트', tip: '고관절 내전근을 활성화합니다. (LBS 단위)', staticGoal: '🔥 목표: 100-130 LBS x 10-12회.', alternatives: ['케이블 어덕션', '코펜하겐 플랭크'] },
-                { type: '웜업', name: '노틸러스 아웃 타이', sets: '2세트', tip: '고관절 외전근(둔근)을 활성화합니다. (LBS 단위)', staticGoal: '🔥 목표: 100-130 LBS x 10-12회.', alternatives: ['케이블 어브덕션', '밴드 클램쉘'] },
-                { type: '웜업', name: '레그 익스텐션 (가볍게)', sets: '2세트', tip: '무릎 관절을 예열하고 대퇴사두에 혈류를 보냅니다.', staticGoal: '🔥 목표: 20-30kg x 15회.' },
-                { type: '메인', name: '싸이벡스 스미스 머신 스쿼트', sets: '탑/백오프 세트', tip: '발을 어깨너비로 벌리고, 허리를 편 상태를 유지하며 깊게 앉습니다. 하체 전반의 힘을 사용하세요.', baseTopSet: 45, unit: '한쪽', alternatives: ['바벨 백스쿼트', '고블릿 스쿼트']},
-                { type: '메인', name: '레그 프레스', sets: '탑/백오프 세트', tip: '발을 발판 중앙, 어깨너비로 둡니다. 발뒤꿈치로 민다는 느낌으로 허벅지 전체에 균형잡힌 부하를 전달합니다.', baseTopSet: 160, unit: '총', alternatives: ['바벨 백스쿼트', '덤벨 런지']},
-                { type: '보조', name: '노틸러스 레그 익스텐션 (보조)', sets: '3~4세트', tip: '다리를 완전히 폈을 때 1~2초간 멈춰 대퇴사두를 강하게 쥐어짭니다. 엉덩이가 뜨지 않도록 주의하세요.', staticGoal: '🔥 목표: 50-60kg x 12-15회.', increment: 2.5, alternatives: ['시시(Sissy) 스쿼트 (주의)', '밴드 레그 익스텐션'] },
-                { type: '보조', name: '노틸러스 레그 컬', sets: '3~4세트', tip: '뒤꿈치를 엉덩이 쪽으로 당길 때 햄스트링을 강하게 수축하고, 천천히 저항을 느끼면서 다리를 폅니다.', staticGoal: '🔥 목표: 40-50kg x 12-15회.', increment: 2.5, alternatives: ['덤벨 레그 컬', '노르딕 햄스트링 컬'] },
-                { type: '마무리', name: '레그 프레스 카프 레이즈', sets: '3~4세트', tip: '발끝을 발판 아래쪽에 두고, 발뒤꿈치를 최대한 이완시켰다가 발끝으로 강하게 밀어 종아리를 수축합니다.', staticGoal: '🔥 목표: 60-80kg x 15-20회.', increment: 5, alternatives: ['스미스머신 카프레이즈', '시티드 카프레이즈'] }
+                { type: '웜업', name: '노틸러스 이너 타이', sets: '2세트', tip: '고관절 내전근을 활성화합니다. (LBS 단위)', staticGoal: '🔥 목표: 100-130 LBS x 10-12회.', alternatives: ['케이블 어덕션', '코펜하겐 플랭크'], movement_pattern: 'isolation_quads' },
+                { type: '웜업', name: '노틸러스 아웃 타이', sets: '2세트', tip: '고관절 외전근(둔근)을 활성화합니다. (LBS 단위)', staticGoal: '🔥 목표: 100-130 LBS x 10-12회.', alternatives: ['케이블 어브덕션', '밴드 클램쉘'], movement_pattern: 'isolation_glutes' },
+                { type: '웜업', name: '레그 익스텐션 (가볍게)', sets: '2세트', tip: '무릎 관절을 예열하고 대퇴사두에 혈류를 보냅니다.', staticGoal: '🔥 목표: 20-30kg x 15회.', movement_pattern: 'isolation_quads' },
+                { type: '메인', name: '싸이벡스 스미스 머신 스쿼트', sets: '탑/백오프 세트', tip: '발을 어깨너비로 벌리고, 허리를 편 상태를 유지하며 깊게 앉습니다. 하체 전반의 힘을 사용하세요.', baseTopSet: 45, unit: '한쪽', alternatives: ['바벨 백스쿼트', '고블릿 스쿼트'], movement_pattern: 'squat'},
+                { type: '메인', name: '레그 프레스', sets: '탑/백오프 세트', tip: '발을 발판 중앙, 어깨너비로 둡니다. 발뒤꿈치로 민다는 느낌으로 허벅지 전체에 균형잡힌 부하를 전달합니다.', baseTopSet: 160, unit: '총', alternatives: ['바벨 백스쿼트', '덤벨 런지'], movement_pattern: 'squat'},
+                { type: '보조', name: '노틸러스 레그 익스텐션 (보조)', sets: '3~4세트', tip: '다리를 완전히 폈을 때 1~2초간 멈춰 대퇴사두를 강하게 쥐어짭니다. 엉덩이가 뜨지 않도록 주의하세요.', staticGoal: '🔥 목표: 50-60kg x 12-15회.', increment: 2.5, alternatives: ['시시(Sissy) 스쿼트 (주의)', '밴드 레그 익스텐션'], movement_pattern: 'isolation_quads' },
+                { type: '보조', name: '노틸러스 레그 컬', sets: '3~4세트', tip: '뒤꿈치를 엉덩이 쪽으로 당길 때 햄스트링을 강하게 수축하고, 천천히 저항을 느끼면서 다리를 폅니다.', staticGoal: '🔥 목표: 40-50kg x 12-15회.', increment: 2.5, alternatives: ['덤벨 레그 컬', '노르딕 햄스트링 컬'], movement_pattern: 'isolation_hams' },
+                { type: '마무리', name: '레그 프레스 카프 레이즈', sets: '3~4세트', tip: '발끝을 발판 아래쪽에 두고, 발뒤꿈치를 최대한 이완시켰다가 발끝으로 강하게 밀어 종아리를 수축합니다.', staticGoal: '🔥 목표: 60-80kg x 15-20회.', increment: 5, alternatives: ['스미스머신 카프레이즈', '시티드 카프레이즈'], movement_pattern: 'isolation_calves' }
             ]},
             push: { name: '푸쉬(Push) A', routine: [
-                { type: '웜업', name: '해머스트랭스 래터럴 로우', sets: '4세트', tip: '견갑을 안정화시키고 후면을 활성화합니다. (한쪽 20kg 고정) 가볍게 당기며 날개뼈 주변을 예열하세요.' },
-                { type: '웜업', name: '팩덱 플라이', sets: '3세트', tip: '가슴 근육을 선피로시켜 프레스 시 자극을 극대화합니다.', staticGoal: '🔥 목표: 60kg x 10-12회.', alternatives: ['가벼운 케이블 플라이', '덤벨 플라이'] },
-                { type: '메인', name: '로우 인클라인 스미스 프레스', sets: '탑/백오프 세트', tip: '벤치 각도를 낮게(약 15-20도) 설정하여 윗가슴 상부를 타겟합니다. 등을 패드에 단단히 고정하되, 견갑은 자연스럽게 움직이도록 허용하여 윗가슴의 최대 이완과 수축에 집중하세요.', baseTopSet: 35, unit: '한쪽', alternatives: ['로우 인클라인 덤벨 프레스', '로우 인클라인 바벨 프레스']},
-                { type: '메인', name: '해머스트랭스 인클라인 프레스', sets: '탑/백오프 세트', tip: '자연스러운 아크 궤적을 이용해 윗가슴에 새로운 자극을 줍니다. 등을 패드에 고정해 안정적인 기반을 만들고, 견갑의 자연스러운 움직임을 통해 윗가슴을 최대로 스트레칭하고 수축시키세요.', baseTopSet: 40, unit: '한쪽', alternatives: ['인클라인 덤벨 프레스', '인클라인 바벨 프레스']},
-                { type: '메인', name: '해머스트랭스 숄더 프레스', sets: '탑/백오프 세트', tip: '어깨의 전면과 측면을 타겟합니다. 등을 패드에 기대어 몸을 안정시키고, 자연스러운 어깨와 견갑의 리듬을 이용해 어깨 근육을 끝까지 수축하고 이완시키는 것에 집중하세요.', baseTopSet: 40, unit: '한쪽', alternatives: ['시티드 덤벨 숄더 프레스', '아놀드 프레스']},
-                { type: '보조', name: '딥스 머신', sets: '3~4세트', tip: '아랫가슴과 삼두근에 볼륨을 더합니다. 상체를 숙일수록 아랫가슴에 자극이 집중됩니다. 이완 시 견갑이 자연스럽게 상승하며 가슴이 최대로 늘어나는 것을 느끼세요.', staticGoal: '🔥 목표: 실패지점까지 x 3-4세트.', increment: 2.5, alternatives: ['딥스 (평행봉)', '디클라인 푸쉬업'] },
-                { type: '마무리', name: '뉴텍 암 컬 머신 (투핸드)', sets: '3~4세트', tip: '팔을 패드에 완전히 고정하고, 반동 없이 이두근의 힘으로만 핸들을 들어올려 강하게 수축합니다.', staticGoal: '🔥 목표: 25-35kg x 10-15회.', increment: 5, alternatives: ['덤벨 프리쳐 컬', '케이블 바이셉 컬']}
+                { type: '웜업', name: '해머스트랭스 래터럴 로우', sets: '4세트', tip: '견갑을 안정화시키고 후면을 활성화합니다. (한쪽 20kg 고정) 가볍게 당기며 날개뼈 주변을 예열하세요.', movement_pattern: 'horizontal_pull' },
+                { type: '웜업', name: '팩덱 플라이', sets: '3세트', tip: '가슴 근육을 선피로시켜 프레스 시 자극을 극대화합니다.', staticGoal: '🔥 목표: 60kg x 10-12회.', alternatives: ['가벼운 케이블 플라이', '덤벨 플라이'], movement_pattern: 'isolation_chest' },
+                { type: '메인', name: '로우 인클라인 스미스 프레스', sets: '탑/백오프 세트', tip: '벤치 각도를 낮게(약 15-20도) 설정하여 윗가슴 상부를 타겟합니다. 등을 패드에 단단히 고정하되, 견갑은 자연스럽게 움직이도록 허용하여 윗가슴의 최대 이완과 수축에 집중하세요.', baseTopSet: 35, unit: '한쪽', alternatives: ['로우 인클라인 덤벨 프레스', '로우 인클라인 바벨 프레스'], movement_pattern: 'horizontal_push'},
+                { type: '메인', name: '해머스트랭스 인클라인 프레스', sets: '탑/백오프 세트', tip: '자연스러운 아크 궤적을 이용해 윗가슴에 새로운 자극을 줍니다. 등을 패드에 고정해 안정적인 기반을 만들고, 견갑의 자연스러운 움직임을 통해 윗가슴을 최대로 스트레칭하고 수축시키세요.', baseTopSet: 40, unit: '한쪽', alternatives: ['인클라인 덤벨 프레스', '인클라인 바벨 프레스'], movement_pattern: 'horizontal_push'},
+                { type: '메인', name: '해머스트랭스 숄더 프레스', sets: '탑/백오프 세트', tip: '어깨의 전면과 측면을 타겟합니다. 등을 패드에 기대어 몸을 안정시키고, 자연스러운 어깨와 견갑의 리듬을 이용해 어깨 근육을 끝까지 수축하고 이완시키는 것에 집중하세요.', baseTopSet: 40, unit: '한쪽', alternatives: ['시티드 덤벨 숄더 프레스', '아놀드 프레스'], movement_pattern: 'vertical_push'},
+                { type: '보조', name: '딥스 머신', sets: '3~4세트', tip: '아랫가슴과 삼두근에 볼륨을 더합니다. 상체를 숙일수록 아랫가슴에 자극이 집중됩니다. 이완 시 견갑이 자연스럽게 상승하며 가슴이 최대로 늘어나는 것을 느끼세요.', staticGoal: '🔥 목표: 실패지점까지 x 3-4세트.', increment: 2.5, alternatives: ['딥스 (평행봉)', '디클라인 푸쉬업'], movement_pattern: 'horizontal_push' },
+                { type: '마무리', name: '뉴텍 암 컬 머신 (투핸드)', sets: '3~4세트', tip: '팔을 패드에 완전히 고정하고, 반동 없이 이두근의 힘으로만 핸들을 들어올려 강하게 수축합니다.', staticGoal: '🔥 목표: 25-35kg x 10-15회.', increment: 5, alternatives: ['덤벨 프리쳐 컬', '케이블 바이셉 컬'], movement_pattern: 'isolation_biceps'}
             ]}
         },
         2: {
             pull: { name: '풀(Pull) B', routine: [
-                { type: '웜업', name: '노틸러스 풀오버', sets: '2~3세트', tip: '광배근 스트레칭과 혈류 공급에 집중합니다. (LBS 단위)', staticGoal: '🔥 목표: 40-60 LBS x 12-15회.', alternatives: ['덤벨 풀오버', '스트레이트 암 케이블 푸쉬다운']},
-                { type: '웜업', name: '랫풀다운 (가볍게)', sets: '2세트', tip: '견갑을 아래로 누르는 움직임에 집중하여 등을 활성화시킵니다.', staticGoal: '🔥 목표: 30-40kg x 12-15회.', alternatives: ['어시스트 풀업', '가벼운 케이블 로우']},
-                { type: '메인', name: '해머스트랭스 D.Y. 로우', sets: '탑/백오프 세트', tip: '언더그립으로 광배근 하부를 완벽하게 고립하여 타겟합니다. 안장을 낮춰 명치에 패드가 오게 하고, 팔꿈치를 옆구리에 붙여 배꼽 쪽으로 당기는 느낌에 집중하세요.', baseTopSet: 40, unit: '한쪽', alternatives: ['원 암 덤벨 로우 (광배 하부 타겟)', '시티드 케이블 로우 (언더 그립)']},
-                { type: '메인', name: '랫풀다운 (맥그립 언더)', sets: '탑/백오프 세트', tip: 'D.Y. 로우와 함께 광배근 하부를 다른 각도(수직)에서 공략합니다. 가슴을 열고 당겨주며, 최대 수축 지점에서 등을 쥐어짜세요.', baseTopSet: 65, unit: '총', alternatives: ['어시스트 친업', '언더그립 바벨 로우']},
-                { type: '메인', name: '해머스트랭스 프론트 풀다운', sets: '탑/백오프 세트', tip: '광배근을 최대 이완시켜 너비감을 극대화하는 것이 목표입니다. 상체를 살짝 뒤로 젖혀 가슴을 열고, 팔이 벌어지는 궤적을 따라 광배근 바깥쪽이 최대로 늘어나는 것을 느끼고, 명치 쪽으로 강하게 당겨 수축하세요.', baseTopSet: 40, unit: '한쪽', alternatives: ['와이드 그립 풀업', '와이드 그립 랫풀다운']},
-                { type: '보조', name: '해머스트랭스 래터럴 로우 (원핸드 뉴트럴)', sets: '3~4세트', tip: "등 전체의 '덩어리감'과 볼륨을 채워줍니다. 팔꿈치로 등 중앙을 깊게 찍는다는 느낌으로 당깁니다.", staticGoal: '🔥 목표: 한쪽 30-40kg x 10-12회.', increment: 10, alternatives: ['원 암 덤벨 로우', '원 암 시티드 케이블 로우']},
-                { type: '마무리', name: '라잉 트라이셉스 익스텐션', sets: '3~4세트', tip: '삼두근의 가장 큰 부위(장두)를 타겟합니다. 팔꿈치를 고정한 채 이마나 정수리 쪽으로 바를 내립니다. EZ바 사용을 권장합니다.', staticGoal: '🔥 목표: 20-30kg x 10-15회.', increment: 2.5, alternatives: ['케이블 오버헤드 익스텐션', '덤벨 오버헤드 익스텐션']}
+                { type: '웜업', name: '노틸러스 풀오버', sets: '2~3세트', tip: '광배근 스트레칭과 혈류 공급에 집중합니다. (LBS 단위)', staticGoal: '🔥 목표: 40-60 LBS x 12-15회.', alternatives: ['덤벨 풀오버', '스트레이트 암 케이블 푸쉬다운'], movement_pattern: 'isolation_back'},
+                { type: '웜업', name: '랫풀다운 (가볍게)', sets: '2세트', tip: '견갑을 아래로 누르는 움직임에 집중하여 등을 활성화시킵니다.', staticGoal: '🔥 목표: 30-40kg x 12-15회.', alternatives: ['어시스트 풀업', '가벼운 케이블 로우'], movement_pattern: 'vertical_pull'},
+                { type: '메인', name: '해머스트랭스 D.Y. 로우', sets: '탑/백오프 세트', tip: '언더그립으로 광배근 하부를 완벽하게 고립하여 타겟합니다. 안장을 낮춰 명치에 패드가 오게 하고, 팔꿈치를 옆구리에 붙여 배꼽 쪽으로 당기는 느낌에 집중하세요.', baseTopSet: 40, unit: '한쪽', alternatives: ['원 암 덤벨 로우 (광배 하부 타겟)', '시티드 케이블 로우 (언더 그립)'], movement_pattern: 'horizontal_pull'},
+                { type: '메인', name: '랫풀다운 (맥그립 언더)', sets: '탑/백오프 세트', tip: 'D.Y. 로우와 함께 광배근 하부를 다른 각도(수직)에서 공략합니다. 가슴을 열고 당겨주며, 최대 수축 지점에서 등을 쥐어짜세요.', baseTopSet: 65, unit: '총', alternatives: ['어시스트 친업', '언더그립 바벨 로우'], movement_pattern: 'vertical_pull'},
+                { type: '메인', name: '해머스트랭스 프론트 풀다운', sets: '탑/백오프 세트', tip: '광배근을 최대 이완시켜 너비감을 극대화하는 것이 목표입니다. 상체를 살짝 뒤로 젖혀 가슴을 열고, 팔이 벌어지는 궤적을 따라 광배근 바깥쪽이 최대로 늘어나는 것을 느끼고, 명치 쪽으로 강하게 당겨 수축하세요.', baseTopSet: 40, unit: '한쪽', alternatives: ['와이드 그립 풀업', '와이드 그립 랫풀다운'], movement_pattern: 'vertical_pull'},
+                { type: '보조', name: '해머스트랭스 래터럴 로우 (원핸드 뉴트럴)', sets: '3~4세트', tip: "등 전체의 '덩어리감'과 볼륨을 채워줍니다. 팔꿈치로 등 중앙을 깊게 찍는다는 느낌으로 당깁니다.", staticGoal: '🔥 목표: 한쪽 30-40kg x 10-12회.', increment: 10, alternatives: ['원 암 덤벨 로우', '원 암 시티드 케이블 로우'], movement_pattern: 'horizontal_pull'},
+                { type: '마무리', name: '라잉 트라이셉스 익스텐션', sets: '3~4세트', tip: '삼두근의 가장 큰 부위(장두)를 타겟합니다. 팔꿈치를 고정한 채 이마나 정수리 쪽으로 바를 내립니다. EZ바 사용을 권장합니다.', staticGoal: '🔥 목표: 20-30kg x 10-15회.', increment: 2.5, alternatives: ['케이블 오버헤드 익스텐션', '덤벨 오버헤드 익스텐션'], movement_pattern: 'isolation_triceps'}
             ]},
             leg: { name: '레그(Leg) B', routine: [
-                { type: '웜업', name: '노틸러스 이너 타이', sets: '2세트', tip: '고관절 내전근을 활성화합니다. (LBS 단위)', staticGoal: '🔥 목표: 100-130 LBS x 10-12회.', alternatives: ['케이블 어덕션', '코펜하겐 플랭크'] },
-                { type: '웜업', name: '노틸러스 아웃 타이', sets: '2세트', tip: '고관절 외전근(둔근)을 활성화합니다. (LBS 단위)', staticGoal: '🔥 목표: 100-130 LBS x 10-12회.', alternatives: ['케이블 어브덕션', '밴드 클램쉘'] },
-                { type: '선피로', name: '노틸러스 레그 익스텐션 (선피로)', sets: '3세트', tip: '가벼운 무게로 대퇴사두에 혈류를 집중시킵니다. 펌핑감을 느끼는 데 집중하세요.', staticGoal: '🔥 목표: 25-35kg x 15-20회.' },
-                { type: '메인', name: '레그 프레스 (대퇴사두 타겟)', sets: '탑/백오프 세트', tip: '발을 발판 아래쪽에 어깨너비보다 좁게 두어 대퇴사두에 자극을 집중시킵니다. 무릎 통증에 주의하며 가동범위를 조절하세요.', baseTopSet: 160, unit: '총', alternatives: ['바벨 프론트 스쿼트', '핵스쿼트'] },
-                { type: '메인', name: '싸이벡스 핵스쿼트', sets: '탑/백오프 세트', tip: '안정적인 궤적을 이용해 대퇴사두에 강한 고립감을 줍니다. 등을 패드에 완전히 고정하고 엉덩이가 뜨지 않게 하며, 허리가 둥글게 말리기 직전까지만 내려가세요.', baseTopSet: 80, unit: '총', alternatives: ['V스쿼트', '스미스머신 프론트 스쿼트'] },
-                { type: '보조', name: '노틸러스 레그 익스텐션 (보조)', sets: '3세트', tip: '무거운 무게로 대퇴사두를 완전히 털어냅니다. 최대 수축 지점에서 1~2초 멈춰주세요.', staticGoal: '🔥 목표: 50-60kg x 12-15회.', increment: 2.5, alternatives: ['시시(Sissy) 스쿼트 (주의)', '밴드 레그 익스텐션'] },
-                { type: '마무리', name: '노틸러스 레그 컬', sets: '3세트', tip: '균형을 위해 햄스트링을 가볍게 자극하며 마무리합니다. 네거티브 동작에 집중하세요.', staticGoal: '🔥 목표: 40-50kg x 12-15회.', increment: 2.5, alternatives: ['덤벨 레그 컬', '스위스볼 레그 컬'] }
+                { type: '웜업', name: '노틸러스 이너 타이', sets: '2세트', tip: '고관절 내전근을 활성화합니다. (LBS 단위)', staticGoal: '🔥 목표: 100-130 LBS x 10-12회.', alternatives: ['케이블 어덕션', '코펜하겐 플랭크'], movement_pattern: 'isolation_quads' },
+                { type: '웜업', name: '노틸러스 아웃 타이', sets: '2세트', tip: '고관절 외전근(둔근)을 활성화합니다. (LBS 단위)', staticGoal: '🔥 목표: 100-130 LBS x 10-12회.', alternatives: ['케이블 어브덕션', '밴드 클램쉘'], movement_pattern: 'isolation_glutes' },
+                { type: '선피로', name: '노틸러스 레그 익스텐션 (선피로)', sets: '3세트', tip: '가벼운 무게로 대퇴사두에 혈류를 집중시킵니다. 펌핑감을 느끼는 데 집중하세요.', staticGoal: '🔥 목표: 25-35kg x 15-20회.', movement_pattern: 'isolation_quads' },
+                { type: '메인', name: '레그 프레스 (대퇴사두 타겟)', sets: '탑/백오프 세트', tip: '발을 발판 아래쪽에 어깨너비보다 좁게 두어 대퇴사두에 자극을 집중시킵니다. 무릎 통증에 주의하며 가동범위를 조절하세요.', baseTopSet: 160, unit: '총', alternatives: ['바벨 프론트 스쿼트', '핵스쿼트'], movement_pattern: 'squat' },
+                { type: '메인', name: '싸이벡스 핵스쿼트', sets: '탑/백오프 세트', tip: '안정적인 궤적을 이용해 대퇴사두에 강한 고립감을 줍니다. 등을 패드에 완전히 고정하고 엉덩이가 뜨지 않게 하며, 허리가 둥글게 말리기 직전까지만 내려가세요.', baseTopSet: 80, unit: '총', alternatives: ['V스쿼트', '스미스머신 프론트 스쿼트'], movement_pattern: 'squat' },
+                { type: '보조', name: '노틸러스 레그 익스텐션 (보조)', sets: '3세트', tip: '무거운 무게로 대퇴사두를 완전히 털어냅니다. 최대 수축 지점에서 1~2초 멈춰주세요.', staticGoal: '🔥 목표: 50-60kg x 12-15회.', increment: 2.5, alternatives: ['시시(Sissy) 스쿼트 (주의)', '밴드 레그 익스텐션'], movement_pattern: 'isolation_quads' },
+                { type: '마무리', name: '노틸러스 레그 컬', sets: '3세트', tip: '균형을 위해 햄스트링을 가볍게 자극하며 마무리합니다. 네거티브 동작에 집중하세요.', staticGoal: '🔥 목표: 40-50kg x 12-15회.', increment: 2.5, alternatives: ['덤벨 레그 컬', '스위스볼 레그 컬'], movement_pattern: 'isolation_hams' }
             ]},
             push: { name: '푸쉬(Push) B', routine: [
-                { type: '웜업', name: '해머스트랭스 래터럴 로우', sets: '4세트', tip: '견갑을 안정화시키고 후면을 활성화합니다. (한쪽 20kg 고정) 가볍게 당기며 날개뼈 주변을 예열하세요.' },
-                { type: '웜업', name: '팩덱 플라이', sets: '3세트', tip: '가슴 근육을 선피로시켜 프레스 시 자극을 극대화합니다.', staticGoal: '🔥 목표: 60kg x 10-12회.', alternatives: ['가벼운 케이블 플라이', '덤벨 플라이'] },
-                { type: '메인', name: '해머스트랭스 시티드 체스트 프레스', sets: '탑/백오프 세트', tip: '가슴 중앙부의 볼륨감을 키우는 것이 목표입니다. 등을 패드에 완전히 고정하여 안정적인 기반을 만들되, 견갑의 자연스러운 움직임을 허용하여 가슴 근육의 최대 수축과 이완에 집중하세요.', baseTopSet: 30, unit: '한쪽', alternatives: ['플랫 덤벨 프레스', '플랫 바벨 벤치프레스'] },
-                { type: '메인', name: '너틸러스 프레스 (디클라인 응용)', sets: '탑/백오프 세트', tip: '아랫가슴 라인을 선명하게 만듭니다. 등을 패드에 단단히 고정하되, 견갑의 움직임을 허용하여 팔꿈치를 아래로 내릴 때 아랫가슴이 최대로 스트레칭되는 느낌에 집중하세요.', baseTopSet: 70, unit: '총', alternatives: ['디클라인 덤벨/바벨 프레스', '딥스 (가슴 타겟)'] },
-                { type: '메인', name: '스미스 머신 숄더 프레스', sets: '탑/백오프 세트', tip: '바가 턱 끝이나 쇄골까지 오도록 깊게 내립니다. 등을 벤치에 기대어 안정성을 확보하고, 견갑의 자연스러운 상방회전을 이용해 어깨 근육을 끝까지 쥐어짜는 느낌에 집중하세요.', baseTopSet: 40, unit: '한쪽', alternatives: ['시티드 바벨 숄더 프레스', '시티드 덤벨 숄더 프레스'] },
-                { type: '보조', name: '케이블 크로스오버', sets: '3~4세트', tip: '가슴 중앙부와 안쪽 라인을 만드는 것이 목표입니다.<br>1. 케이블 풀리를 가슴 중앙 높이에 맞추고 D-핸들을 잡습니다.<br>2. 몸을 앞으로 살짝 숙여 안정적인 자세를 잡습니다.<br>3. 팔꿈치를 살짝 구부린 상태로, 큰 원을 그리듯 가슴 중앙으로 모아주며 강하게 수축합니다.', staticGoal: '🔥 목표: 한쪽 10-15kg x 15-20회.', increment: 2.5, alternatives: ['덤벨 플라이', '팩덱 플라이 머신'] },
-                { type: '마무리', name: '뉴텍 암 컬 머신 (원핸드)', sets: '3~4세트', tip: '한 팔씩 수행하여 좌우 불균형을 교정하고 최고의 마인드-머슬 커넥션을 이끌어냅니다.', staticGoal: '🔥 목표: 한쪽 17.5-22.5kg x 10-15회.', increment: 2.5, alternatives: ['원 암 덤벨 컬', '원 암 케이블 컬']}
+                { type: '웜업', name: '해머스트랭스 래터럴 로우', sets: '4세트', tip: '견갑을 안정화시키고 후면을 활성화합니다. (한쪽 20kg 고정) 가볍게 당기며 날개뼈 주변을 예열하세요.', movement_pattern: 'horizontal_pull' },
+                { type: '웜업', name: '팩덱 플라이', sets: '3세트', tip: '가슴 근육을 선피로시켜 프레스 시 자극을 극대화합니다.', staticGoal: '🔥 목표: 60kg x 10-12회.', alternatives: ['가벼운 케이블 플라이', '덤벨 플라이'], movement_pattern: 'isolation_chest' },
+                { type: '메인', name: '해머스트랭스 시티드 체스트 프레스', sets: '탑/백오프 세트', tip: '가슴 중앙부의 볼륨감을 키우는 것이 목표입니다. 등을 패드에 완전히 고정하여 안정적인 기반을 만들되, 견갑의 자연스러운 움직임을 허용하여 가슴 근육의 최대 수축과 이완에 집중하세요.', baseTopSet: 30, unit: '한쪽', alternatives: ['플랫 덤벨 프레스', '플랫 바벨 벤치프레스'], movement_pattern: 'horizontal_push' },
+                { type: '메인', name: '너틸러스 프레스 (디클라인 응용)', sets: '탑/백오프 세트', tip: '아랫가슴 라인을 선명하게 만듭니다. 등을 패드에 단단히 고정하되, 견갑의 움직임을 허용하여 팔꿈치를 아래로 내릴 때 아랫가슴이 최대로 스트레칭되는 느낌에 집중하세요.', baseTopSet: 70, unit: '총', alternatives: ['디클라인 덤벨/바벨 프레스', '딥스 (가슴 타겟)'], movement_pattern: 'horizontal_push' },
+                { type: '메인', name: '스미스 머신 숄더 프레스', sets: '탑/백오프 세트', tip: '바가 턱 끝이나 쇄골까지 오도록 깊게 내립니다. 등을 벤치에 기대어 안정성을 확보하고, 견갑의 자연스러운 상방회전을 이용해 어깨 근육을 끝까지 쥐어짜는 느낌에 집중하세요.', baseTopSet: 40, unit: '한쪽', alternatives: ['시티드 바벨 숄더 프레스', '시티드 덤벨 숄더 프레스'], movement_pattern: 'vertical_push' },
+                { type: '보조', name: '케이블 크로스오버', sets: '3~4세트', tip: '가슴 중앙부와 안쪽 라인을 만드는 것이 목표입니다.<br>1. 케이블 풀리를 가슴 중앙 높이에 맞추고 D-핸들을 잡습니다.<br>2. 몸을 앞으로 살짝 숙여 안정적인 자세를 잡습니다.<br>3. 팔꿈치를 살짝 구부린 상태로, 큰 원을 그리듯 가슴 중앙으로 모아주며 강하게 수축합니다.', staticGoal: '🔥 목표: 한쪽 10-15kg x 15-20회.', increment: 2.5, alternatives: ['덤벨 플라이', '팩덱 플라이 머신'], movement_pattern: 'isolation_chest' },
+                { type: '마무리', name: '뉴텍 암 컬 머신 (원핸드)', sets: '3~4세트', tip: '한 팔씩 수행하여 좌우 불균형을 교정하고 최고의 마인드-머슬 커넥션을 이끌어냅니다.', staticGoal: '🔥 목표: 한쪽 17.5-22.5kg x 10-15회.', increment: 2.5, alternatives: ['원 암 덤벨 컬', '원 암 케이블 컬'], movement_pattern: 'isolation_biceps'}
             ]}
         },
         3: {
              pull: { name: '풀(Pull) C', routine: [
-                { type: '웜업', name: '노틸러스 풀오버', sets: '2~3세트', tip: '광배근 스트레칭과 혈류 공급에 집중합니다. (LBS 단위)', staticGoal: '🔥 목표: 40-60 LBS x 12-15회.', alternatives: ['덤벨 풀오버', '스트레이트 암 케이블 푸쉬다운']},
-                { type: '웜업', name: '랫풀다운 (가볍게)', sets: '2세트', tip: '견갑을 아래로 누르는 움직임에 집중하여 등을 활성화시킵니다.', staticGoal: '🔥 목표: 30-40kg x 12-15회.', alternatives: ['어시스트 풀업', '가벼운 케이블 로우']},
-                { type: '메인', name: '랫풀다운 (맥그립 중간)', sets: '탑/백오프 세트', tip: '광배근 전체의 볼륨과 매스를 키우는 올라운더 그립. 가슴을 열고 팔꿈치를 아래쪽 옆구리로 당긴다는 느낌으로 수행합니다.', baseTopSet: 65, unit: '총', alternatives: ['뉴트럴 그립 풀업', '시티드 케이블 로우 (V-바)']},
-                { type: '메인', name: '원 암 시티드 케이블 로우', sets: '탑/백오프 세트', tip: '케이블의 지속적인 장력으로 광배근을 고립합니다. 당기면서 상체를 살짝 회전시켜 수축감을 극대화하고, 이완 시에는 최대한 늘려주세요.', baseTopSet: 40, unit: '한쪽', alternatives: ['원 암 덤벨 로우', 'T-바 로우 (원 암)']},
-                { type: '메인', name: '해머스트랭스 프론트 풀다운 (파나타 스타일)', sets: '탑/백오프 세트', tip: '광배근을 최대 이완시켜 너비감을 극대화하는 것이 목표입니다. 상체를 살짝 뒤로 젖혀 가슴을 열고, 팔이 벌어지는 궤적을 따라 광배근 바깥쪽이 최대로 늘어나는 것을 느끼고, 명치 쪽으로 강하게 당겨 수축하세요.', baseTopSet: 30, unit: '한쪽', alternatives: ['와이드 그립 풀업', '와이드 그립 랫풀다운']},
-                { type: '보조', name: '백 익스텐션', sets: '3~4세트', tip: '허리 라인의 선명함과 깊이감을 만듭니다. 엉덩이와 등의 힘으로 상체를 들어올리고, 허리가 과하게 꺾이지 않도록 주의합니다.', staticGoal: '🔥 목표: 맨몸 또는 10kg 원판 x 15-20회.', increment: 2.5, alternatives: ['굿모닝 (가볍게)', '리버스 하이퍼익스텐션']},
-                { type: '마무리', name: '뉴텍 오버헤드 트라이셉스 익스텐션', sets: '2~3세트', tip: '시작 저항이 매우 강한 머신입니다. 처음에는 원판 없이 시작하여 자극에 적응하세요. 팔꿈치를 고정하고, 천천히 이완하며 삼두근 장두가 최대로 늘어나는 것을 느끼는 것이 핵심입니다.', staticGoal: '🔥 목표: 0kg x 8-10회.', increment: 2.5, alternatives: ['케이블 오버헤드 익스텐션 (로프)', '덤벨 오버헤드 익스텐션']}
+                { type: '웜업', name: '노틸러스 풀오버', sets: '2~3세트', tip: '광배근 스트레칭과 혈류 공급에 집중합니다. (LBS 단위)', staticGoal: '🔥 목표: 40-60 LBS x 12-15회.', alternatives: ['덤벨 풀오버', '스트레이트 암 케이블 푸쉬다운'], movement_pattern: 'isolation_back'},
+                { type: '웜업', name: '랫풀다운 (가볍게)', sets: '2세트', tip: '견갑을 아래로 누르는 움직임에 집중하여 등을 활성화시킵니다.', staticGoal: '🔥 목표: 30-40kg x 12-15회.', alternatives: ['어시스트 풀업', '가벼운 케이블 로우'], movement_pattern: 'vertical_pull'},
+                { type: '메인', name: '랫풀다운 (맥그립 중간)', sets: '탑/백오프 세트', tip: '광배근 전체의 볼륨과 매스를 키우는 올라운더 그립. 가슴을 열고 팔꿈치를 아래쪽 옆구리로 당긴다는 느낌으로 수행합니다.', baseTopSet: 65, unit: '총', alternatives: ['뉴트럴 그립 풀업', '시티드 케이블 로우 (V-바)'], movement_pattern: 'vertical_pull'},
+                { type: '메인', name: '원 암 시티드 케이블 로우', sets: '탑/백오프 세트', tip: '케이블의 지속적인 장력으로 광배근을 고립합니다. 당기면서 상체를 살짝 회전시켜 수축감을 극대화하고, 이완 시에는 최대한 늘려주세요.', baseTopSet: 40, unit: '한쪽', alternatives: ['원 암 덤벨 로우', 'T-바 로우 (원 암)'], movement_pattern: 'horizontal_pull'},
+                { type: '메인', name: '해머스트랭스 프론트 풀다운 (파나타 스타일)', sets: '탑/백오프 세트', tip: '광배근을 최대 이완시켜 너비감을 극대화하는 것이 목표입니다. 상체를 살짝 뒤로 젖혀 가슴을 열고, 팔이 벌어지는 궤적을 따라 광배근 바깥쪽이 최대로 늘어나는 것을 느끼고, 명치 쪽으로 강하게 당겨 수축하세요.', baseTopSet: 30, unit: '한쪽', alternatives: ['와이드 그립 풀업', '와이드 그립 랫풀다운'], movement_pattern: 'vertical_pull'},
+                { type: '보조', name: '백 익스텐션', sets: '3~4세트', tip: '허리 라인의 선명함과 깊이감을 만듭니다. 엉덩이와 등의 힘으로 상체를 들어올리고, 허리가 과하게 꺾이지 않도록 주의합니다.', staticGoal: '🔥 목표: 맨몸 또는 10kg 원판 x 15-20회.', increment: 2.5, alternatives: ['굿모닝 (가볍게)', '리버스 하이퍼익스텐션'], movement_pattern: 'hip_hinge'},
+                { type: '마무리', name: '뉴텍 오버헤드 트라이셉스 익스텐션', sets: '2~3세트', tip: '시작 저항이 매우 강한 머신입니다. 처음에는 원판 없이 시작하여 자극에 적응하세요. 팔꿈치를 고정하고, 천천히 이완하며 삼두근 장두가 최대로 늘어나는 것을 느끼는 것이 핵심입니다.', staticGoal: '🔥 목표: 0kg x 8-10회.', increment: 2.5, alternatives: ['케이블 오버헤드 익스텐션 (로프)', '덤벨 오버헤드 익스텐션'], movement_pattern: 'isolation_triceps'}
             ]},
              leg: { name: '레그(Leg) C', routine: [
-                { type: '웜업', name: '노틸러스 이너 타이', sets: '2세트', tip: '고관절 내전근을 활성화합니다. (LBS 단위)', staticGoal: '🔥 목표: 100-130 LBS x 10-12회.', alternatives: ['케이블 어덕션', '코펜하겐 플랭크'] },
-                { type: '웜업', name: '노틸러스 아웃 타이', sets: '2세트', tip: '고관절 외전근(둔근)을 활성화합니다. (LBS 단위)', staticGoal: '🔥 목표: 100-130 LBS x 10-12회.', alternatives: ['케이블 어브덕션', '밴드 클램쉘'] },
-                { type: '선피로', name: '노틸러스 레그 컬', sets: '3세트', tip: '가벼운 무게로 햄스트링에 먼저 자극을 줍니다. 펌핑감에 집중하세요.', staticGoal: '🔥 목표: 25-35kg x 15-20회.' },
-                { type: '메인', name: '레그 프레스 (햄스트링/둔근 타겟)', sets: '탑/백오프 세트', tip: '발을 발판 위쪽에 넓게 두어 내전근을 포함한 후면 사슬 전체의 볼륨감에 집중합니다. 엉덩이가 패드에서 뜨지 않는 깊이까지만 내려가세요.', baseTopSet: 160, unit: '총', alternatives: ['루마니안 데드리프트', '바벨 굿모닝']},
-                { type: '메인', name: '뉴텍 V스쿼트 (리버스)', sets: '탑/백오프 세트', tip: '머신을 마주보고 서서 어깨를 고리 모양의 패드에 견착합니다. 발을 어깨너비 또는 약간 좁게 두고, 엉덩이를 뒤로 깊게 빼며 앉아 햄스트링과 둔근의 최대 이완과 고립에 집중하세요. 발뒤꿈치로 강하게 밀어 올라오며 둔근을 수축합니다.', baseTopSet: 80, unit: '총', alternatives: ['바벨 굿모닝', '케이블 풀 스루'] },
-                { type: '보조', name: '노틸러스 레그 컬', sets: '3~4세트', tip: '무거운 무게로 햄스트링 볼륨을 극대화합니다. 최대 수축 지점에서 1~2초 멈춰주세요.', staticGoal: '🔥 목표: 40-50kg x 12-15회.', increment: 2.5, alternatives: ['덤벨 레그 컬', '노르딕 햄스트링 컬'] },
-                { type: '마무리', name: '부티빌더 스탠딩 힙 쓰러스트', sets: '3~4세트', tip: '패드를 골반에 위치시키고, 발뒤꿈치로 강하게 밀어 엉덩이를 최대로 수축합니다. 정점에서 1~2초간 멈춰주세요.', staticGoal: '🔥 목표: 40-60kg x 12-15회.', increment: 5, alternatives: ['바벨 힙 쓰러스트', '케이블 풀 스루'] }
+                { type: '웜업', name: '노틸러스 이너 타이', sets: '2세트', tip: '고관절 내전근을 활성화합니다. (LBS 단위)', staticGoal: '🔥 목표: 100-130 LBS x 10-12회.', alternatives: ['케이블 어덕션', '코펜하겐 플랭크'], movement_pattern: 'isolation_quads' },
+                { type: '웜업', name: '노틸러스 아웃 타이', sets: '2세트', tip: '고관절 외전근(둔근)을 활성화합니다. (LBS 단위)', staticGoal: '🔥 목표: 100-130 LBS x 10-12회.', alternatives: ['케이블 어브덕션', '밴드 클램쉘'], movement_pattern: 'isolation_glutes' },
+                { type: '선피로', name: '노틸러스 레그 컬', sets: '3세트', tip: '가벼운 무게로 햄스트링에 먼저 자극을 줍니다. 펌핑감에 집중하세요.', staticGoal: '🔥 목표: 25-35kg x 15-20회.', movement_pattern: 'isolation_hams' },
+                { type: '메인', name: '레그 프레스 (햄스트링/둔근 타겟)', sets: '탑/백오프 세트', tip: '발을 발판 위쪽에 넓게 두어 내전근을 포함한 후면 사슬 전체의 볼륨감에 집중합니다. 엉덩이가 패드에서 뜨지 않는 깊이까지만 내려가세요.', baseTopSet: 160, unit: '총', alternatives: ['루마니안 데드리프트', '바벨 굿모닝'], movement_pattern: 'squat'},
+                { type: '메인', name: '뉴텍 V스쿼트 (리버스)', sets: '탑/백오프 세트', tip: '머신을 마주보고 서서 어깨를 고리 모양의 패드에 견착합니다. 발을 어깨너비 또는 약간 좁게 두고, 엉덩이를 뒤로 깊게 빼며 앉아 햄스트링과 둔근의 최대 이완과 고립에 집중하세요. 발뒤꿈치로 강하게 밀어 올라오며 둔근을 수축합니다.', baseTopSet: 80, unit: '총', alternatives: ['바벨 굿모닝', '케이블 풀 스루'], movement_pattern: 'hip_hinge' },
+                { type: '보조', name: '노틸러스 레그 컬', sets: '3~4세트', tip: '무거운 무게로 햄스트링 볼륨을 극대화합니다. 최대 수축 지점에서 1~2초 멈춰주세요.', staticGoal: '🔥 목표: 40-50kg x 12-15회.', increment: 2.5, alternatives: ['덤벨 레그 컬', '노르딕 햄스트링 컬'], movement_pattern: 'isolation_hams' },
+                { type: '마무리', name: '부티빌더 스탠딩 힙 쓰러스트', sets: '3~4세트', tip: '패드를 골반에 위치시키고, 발뒤꿈치로 강하게 밀어 엉덩이를 최대로 수축합니다. 정점에서 1~2초간 멈춰주세요.', staticGoal: '🔥 목표: 40-60kg x 12-15회.', increment: 5, alternatives: ['바벨 힙 쓰러스트', '케이블 풀 스루'], movement_pattern: 'hip_hinge' }
             ]},
             push: { name: '푸쉬(Push) C', routine: [
-                { type: '웜업', name: '해머스트랭스 래터럴 로우', sets: '4세트', tip: '견갑을 안정화시키고 후면을 활성화합니다. (한쪽 20kg 고정) 가볍게 당기며 날개뼈 주변을 예열하세요.' },
-                { type: '웜업', name: '팩덱 플라이', sets: '3세트', tip: '가슴 근육을 선피로시켜 프레스 시 자극을 극대화합니다.', alternatives: ['가벼운 케이블 플라이', '덤벨 플라이'] },
-                { type: '메인', name: '너틸러스 인클라인 프레스 (뉴트럴 그립)', sets: '탑/백오프 세트', tip: '너틸러스 머신의 독특한 궤적과 뉴트럴 그립을 활용하여 윗가슴에 새로운 자극을 줍니다. 어깨 관절의 부담을 줄이면서 가슴 상부를 공략하는 것이 핵심입니다.', baseTopSet: 60, unit: '총', alternatives: ['뉴트럴 그립 덤벨 인클라인 프레스']},
-                { type: '메인', name: '너틸러스 체스트 프레스 (뉴트럴)', sets: '탑/백오프 세트', tip: 'V자 그립으로 가슴 중앙부를 강하게 수축시킵니다. 등을 패드에 기대 안정성을 확보하고, 프레스 동작 마지막에 견갑을 살짝 전인(내밀어)시켜 가슴 안쪽까지 완전히 쥐어짜주세요.', baseTopSet: 70, unit: '총', alternatives: ['뉴트럴 그립 덤벨 프레스', '클로즈 그립 벤치프레스']},
-                // [BUGFIX v6.4.2] Changed to Double Progression by default. Dynamic logic in renderWorkout().
-                { type: '메인', name: '사이드 래터럴 레이즈 머신', sets: '3~4세트', tip: '어깨 측면(측면 삼각근)을 완벽하게 고립하여 어깨 프레임을 넓히는 것이 목표입니다. 팔꿈치로 패드를 들어올린다는 느낌으로 수행하고, 승모근이 으쓱하지 않도록 통제하는 것이 핵심입니다.', staticGoal: '🔥 목표: 30kg x 10-15회.', increment: 10, alternatives: ['덤벨 사이드 레터럴 레이즈', '케이블 사이드 레터럴 레이즈']},
-                { type: '보조', name: '딥스 머신', sets: '3~4세트', tip: '아랫가슴과 삼두근에 볼륨을 더합니다. 상체를 숙일수록 아랫가슴에 자극이 집중됩니다. 이완 시 견갑이 자연스럽게 상승하며 가슴이 최대로 늘어나는 것을 느끼세요.', staticGoal: '🔥 목표: 실패지점까지 x 3-4세트.', increment: 2.5, alternatives: ['딥스 (평행봉)', '디클라인 푸쉬업'] },
-                { type: '마무리', name: '인클라인 케이블 컬', sets: '3~4세트', tip: '벤치에 누워 이두근을 최대로 이완시킨 상태에서 시작하여, 이두근의 장두(긴 갈래)를 집중적으로 공략합니다. 지속적인 장력을 느끼는 것이 핵심입니다.', staticGoal: '🔥 목표: 한쪽 10-15kg x 10-15회.', increment: 2.5, alternatives: ['인클라인 덤벨 컬', '케이블 드래그 컬']}
+                { type: '웜업', name: '해머스트랭스 래터럴 로우', sets: '4세트', tip: '견갑을 안정화시키고 후면을 활성화합니다. (한쪽 20kg 고정) 가볍게 당기며 날개뼈 주변을 예열하세요.', movement_pattern: 'horizontal_pull' },
+                { type: '웜업', name: '팩덱 플라이', sets: '3세트', tip: '가슴 근육을 선피로시켜 프레스 시 자극을 극대화합니다.', alternatives: ['가벼운 케이블 플라이', '덤벨 플라이'], movement_pattern: 'isolation_chest' },
+                { type: '메인', name: '너틸러스 인클라인 프레스 (뉴트럴 그립)', sets: '탑/백오프 세트', tip: '너틸러스 머신의 독특한 궤적과 뉴트럴 그립을 활용하여 윗가슴에 새로운 자극을 줍니다. 어깨 관절의 부담을 줄이면서 가슴 상부를 공략하는 것이 핵심입니다.', baseTopSet: 60, unit: '총', alternatives: ['뉴트럴 그립 덤벨 인클라인 프레스'], movement_pattern: 'horizontal_push'},
+                { type: '메인', name: '너틸러스 체스트 프레스 (뉴트럴)', sets: '탑/백오프 세트', tip: 'V자 그립으로 가슴 중앙부를 강하게 수축시킵니다. 등을 패드에 기대 안정성을 확보하고, 프레스 동작 마지막에 견갑을 살짝 전인(내밀어)시켜 가슴 안쪽까지 완전히 쥐어짜주세요.', baseTopSet: 70, unit: '총', alternatives: ['뉴트럴 그립 덤벨 프레스', '클로즈 그립 벤치프레스'], movement_pattern: 'horizontal_push'},
+                { type: '메인', name: '사이드 래터럴 레이즈 머신', sets: '3~4세트', tip: '어깨 측면(측면 삼각근)을 완벽하게 고립하여 어깨 프레임을 넓히는 것이 목표입니다. 팔꿈치로 패드를 들어올린다는 느낌으로 수행하고, 승모근이 으쓱하지 않도록 통제하는 것이 핵심입니다.', staticGoal: '🔥 목표: 30kg x 10-15회.', increment: 10, alternatives: ['덤벨 사이드 레터럴 레이즈', '케이블 사이드 레터럴 레이즈'], movement_pattern: 'isolation_shoulder'},
+                { type: '보조', name: '딥스 머신', sets: '3~4세트', tip: '아랫가슴과 삼두근에 볼륨을 더합니다. 상체를 숙일수록 아랫가슴에 자극이 집중됩니다. 이완 시 견갑이 자연스럽게 상승하며 가슴이 최대로 늘어나는 것을 느끼세요.', staticGoal: '🔥 목표: 실패지점까지 x 3-4세트.', increment: 2.5, alternatives: ['딥스 (평행봉)', '디클라인 푸쉬업'], movement_pattern: 'horizontal_push' },
+                { type: '마무리', name: '인클라인 케이블 컬', sets: '3~4세트', tip: '벤치에 누워 이두근을 최대로 이완시킨 상태에서 시작하여, 이두근의 장두(긴 갈래)를 집중적으로 공략합니다. 지속적인 장력을 느끼는 것이 핵심입니다.', staticGoal: '🔥 목표: 한쪽 10-15kg x 10-15회.', increment: 2.5, alternatives: ['인클라인 덤벨 컬', '케이블 드래그 컬'], movement_pattern: 'isolation_biceps'}
             ]}
         },
         13: {
             pull: { name: '풀(Pull) 종합 디로딩', routine: [
-                { type: '웜업', name: '노틸러스 풀오버 (가볍게)', sets: '2세트', tip: '중량 50~60%, 세트 수 절반. 실패지점 금지.'},
-                { type: '회복', name: '랫풀다운 (맥그립 중간)', sets: '2세트', tip: '광배근 전체의 움직임 패턴과 신경계를 가볍게 활성화'},
-                { type: '회복', name: '해머스트랭스 D.Y. 로우', sets: '2세트', tip: '광배근 하부의 독특한 궤적에 대한 감각 유지'},
-                { type: '회복', name: '해머스트랭스 래터럴 로우 (T바)', sets: '2세트', tip: '등 상부를 자극하는 움직임 패턴 유지'},
-                { type: '회복', name: '리어 델트 머신', sets: '2세트', tip: '후면 삼각근 혈류 공급 및 관절 예열'},
-                { type: '회복', name: '케이블 이두 컬', sets: '2세트', tip: '이두근의 가장 기본적인 움직임 패턴 유지'}
+                { type: '웜업', name: '노틸러스 풀오버 (가볍게)', sets: '2세트', tip: '중량 50~60%, 세트 수 절반. 실패지점 금지.', movement_pattern: 'isolation_back'},
+                { type: '회복', name: '랫풀다운 (맥그립 중간)', sets: '2세트', tip: '광배근 전체의 움직임 패턴과 신경계를 가볍게 활성화', movement_pattern: 'vertical_pull'},
+                { type: '회복', name: '해머스트랭스 D.Y. 로우', sets: '2세트', tip: '광배근 하부의 독특한 궤적에 대한 감각 유지', movement_pattern: 'horizontal_pull'},
+                { type: '회복', name: '해머스트랭스 래터럴 로우 (T바)', sets: '2세트', tip: '등 상부를 자극하는 움직임 패턴 유지', movement_pattern: 'horizontal_pull'},
+                { type: '회복', name: '리어 델트 머신', sets: '2세트', tip: '후면 삼각근 혈류 공급 및 관절 예열', movement_pattern: 'isolation_shoulder'},
+                { type: '회복', name: '케이블 이두 컬', sets: '2세트', tip: '이두근의 가장 기본적인 움직임 패턴 유지', movement_pattern: 'isolation_biceps'}
             ]},
             leg: { name: '레그(Leg) 종합 디로딩', routine: [
-                { type: '웜업', name: '노틸러스 이너 타이', sets: '1세트', tip: '중량 50~60%, 세트 수 절반. 실패지점 금지.'},
-                { type: '웜업', name: '노틸러스 아웃 타이', sets: '1세트', tip: '중량 50~60%, 세트 수 절반. 실패지점 금지.'},
-                { type: '회복', name: '싸이벡스 스미스 머신 스쿼트', sets: '2세트', tip: '스쿼트 패턴의 신경계를 유지하고 하체 전체에 혈류 공급'},
-                { type: '회복', name: '레그 프레스 (기본 스탠스)', sets: '2세트', tip: '무릎과 고관절에 부담 없이 하체 볼륨감 유지'},
-                { type: '회복', name: '노틸러스 레그 익스텐션 (보조)', sets: '2세트', tip: '대퇴사두와 무릎 관절의 움직임 감각 유지'},
-                { type: '회복', name: '노틸러스 레그 컬', sets: '2세트', tip: '햄스트링과 무릎 관절 후면의 움직임 감각 유지'},
-                { type: '회복', name: '부티빌더 스탠딩 힙 쓰러스트', sets: '2세트', tip: '둔근의 신경계 활성화'}
+                { type: '웜업', name: '노틸러스 이너 타이', sets: '1세트', tip: '중량 50~60%, 세트 수 절반. 실패지점 금지.', movement_pattern: 'isolation_quads'},
+                { type: '웜업', name: '노틸러스 아웃 타이', sets: '1세트', tip: '중량 50~60%, 세트 수 절반. 실패지점 금지.', movement_pattern: 'isolation_glutes'},
+                { type: '회복', name: '싸이벡스 스미스 머신 스쿼트', sets: '2세트', tip: '스쿼트 패턴의 신경계를 유지하고 하체 전체에 혈류 공급', movement_pattern: 'squat'},
+                { type: '회복', name: '레그 프레스 (기본 스탠스)', sets: '2세트', tip: '무릎과 고관절에 부담 없이 하체 볼륨감 유지', movement_pattern: 'squat'},
+                { type: '회복', name: '노틸러스 레그 익스텐션 (보조)', sets: '2세트', tip: '대퇴사두와 무릎 관절의 움직임 감각 유지', movement_pattern: 'isolation_quads'},
+                { type: '회복', name: '노틸러스 레그 컬', sets: '2세트', tip: '햄스트링과 무릎 관절 후면의 움직임 감각 유지', movement_pattern: 'isolation_hams'},
+                { type: '회복', name: '부티빌더 스탠딩 힙 쓰러스트', sets: '2세트', tip: '둔근의 신경계 활성화', movement_pattern: 'hip_hinge'}
             ]},
             push: { name: '푸쉬(Push) 종합 디로딩', routine: [
-                { type: '웜업', name: '팩덱 플라이 (가볍게)', sets: '2세트', tip: '중량 50~60%, 세트 수 절반. 실패지점 금지.'},
-                { type: '회복', name: '로우 인클라인 스미스 프레스', sets: '2세트', tip: '윗가슴을 자극하는 메인 프레스 패턴 유지'},
-                { type: '회복', name: '해머스트랭스 시티드 체스트 프레스', sets: '2세트', tip: '가슴 중앙부를 자극하는 다른 궤적의 프레스 패턴 유지'},
-                { type: '회복', name: '해머스트랭스 숄더 프레스', sets: '2세트', tip: '어깨 관절의 수직 프레스 움직임 감각 유지'},
-                { type: '회복', name: '사이드 래터럴 레이즈 머신', sets: '2세트', tip: '어깨 측면의 혈류 공급 및 신경계 활성화'},
-                { type: '회복', name: '케이블 푸쉬 다운', sets: '2세트', tip: '삼두근의 가장 기본적인 움직임 패턴 유지'}
+                { type: '웜업', name: '팩덱 플라이 (가볍게)', sets: '2세트', tip: '중량 50~60%, 세트 수 절반. 실패지점 금지.', movement_pattern: 'isolation_chest'},
+                { type: '회복', name: '로우 인클라인 스미스 프레스', sets: '2세트', tip: '윗가슴을 자극하는 메인 프레스 패턴 유지', movement_pattern: 'horizontal_push'},
+                { type: '회복', name: '해머스트랭스 시티드 체스트 프레스', sets: '2세트', tip: '가슴 중앙부를 자극하는 다른 궤적의 프레스 패턴 유지', movement_pattern: 'horizontal_push'},
+                { type: '회복', name: '해머스트랭스 숄더 프레스', sets: '2세트', tip: '어깨 관절의 수직 프레스 움직임 감각 유지', movement_pattern: 'vertical_push'},
+                { type: '회복', name: '사이드 래터럴 레이즈 머신', sets: '2세트', tip: '어깨 측면의 혈류 공급 및 신경계 활성화', movement_pattern: 'isolation_shoulder'},
+                { type: '회복', name: '케이블 푸쉬 다운', sets: '2세트', tip: '삼두근의 가장 기본적인 움직임 패턴 유지', movement_pattern: 'isolation_triceps'}
             ]}
         },
     };
@@ -450,6 +477,7 @@ v6.0 업데이트를 통해 프로그램의 디테일과 정확성이 향상되�
     let currentCycleId = 1;
     let chartInstance = null;
     let popupChartInstance = null;
+    let movementPatternChart = null;
     
     // DOM Elements
     const weekSelector = document.getElementById('week-selector');
@@ -479,7 +507,25 @@ v6.0 업데이트를 통해 프로그램의 디테일과 정확성이 향상되�
     const closeExportModalButton = document.getElementById('close-export-modal-button');
     const recordPopupModal = document.getElementById('record-popup-modal');
     const closeRecordPopupButton = document.getElementById('close-record-popup-button');
+    const rpeModal = document.getElementById('rpe-modal');
+    const rpeModalTitle = document.getElementById('rpe-modal-title');
+    const rpeSlider = document.getElementById('rpe-slider');
+    const rpeValueDisplay = document.getElementById('rpe-value-display');
+    const rpeDescription = document.getElementById('rpe-description');
+    const saveRpeButton = document.getElementById('save-rpe');
+    const cancelRpeButton = document.getElementById('cancel-rpe');
 
+    const RPE_DESCRIPTIONS = {
+        "10": "실패 지점. 더 이상 반복 불가능.",
+        "9.5": "마지막 반복이 매우 느렸음.",
+        "9": "1회 정도 더 반복 가능.",
+        "8.5": "1~2회 더 반복 가능.",
+        "8": "2회 더 반복 가능.",
+        "7.5": "2~3회 더 반복 가능.",
+        "7": "3회 더 반복 가능.",
+        "6.5": "3-4회 더 반복 가능.",
+        "6": "4회 이상 더 반복 가능 (웜업 수준)."
+    };
 
     const phaseDescriptions = {
         '강화 주기': '최대 근력(Strength) 증진. 메인 운동은 \'탑/백오프 세트\' 방식으로 진행하며, 점진적으로 더 무거운 무게에 도전하는 것이 목표입니다.',
@@ -537,7 +583,7 @@ v6.0 업데이트를 통해 프로그램의 디테일과 정확성이 향상되�
         return { phase, method, type, originalWeekData };
     }
 
-    // CORE LOGIC: Main Exercise Goal Calculation
+    // [UPDATED in v7.0.4] RPE-based Progression Logic
     function getMainGoalText(exercise, week, cycleId, allRecords) {
         if (!exercise.baseTopSet) return null;
 
@@ -577,7 +623,6 @@ v6.0 업데이트를 통해 프로그램의 디테일과 정확성이 향상되�
                 });
                 
                 let lastStrengthExposureCount = allPreviousStrengthRecordsForLast.length -1;
-
                 const lastWeekInMicroCycle = lastStrengthExposureCount % 3;
                 
                 let minRepGoal = 0;
@@ -586,10 +631,12 @@ v6.0 업데이트를 통해 프로그램의 디테일과 정확성이 향상되�
                 else minRepGoal = 3;
 
                 const performed1RM = calculateEpley1RM(bestSetFromHistory.weight, bestSetFromHistory.reps);
-                if (bestSetFromHistory.reps >= minRepGoal) {
-                    e1RM = performed1RM * 1.025; 
+                const lastRPE = lastPerformance.rpe === null ? 8.0 : lastPerformance.rpe;
+
+                if (bestSetFromHistory.reps >= minRepGoal && lastRPE <= 8.5) {
+                    e1RM = performed1RM * 1.025; // Success & Room to grow -> Increment
                 } else {
-                    e1RM = performed1RM; 
+                    e1RM = performed1RM; // Failure or Success at limit -> Maintain
                 }
                 
                 lastStrengthTopSetWeight = bestSetFromHistory.weight;
@@ -633,7 +680,7 @@ v6.0 업데이트를 통해 프로그램의 디테일과 정확성이 향상되�
         return null;
     }
     
-    // [BUGFIX v6.4.3] Completely refactored for accuracy
+    // [UPDATED in v7.0.4] RPE-based Progression Logic
     function getAssistanceGoalText(exercise, allRecords) {
         if (!exercise.staticGoal || !exercise.increment) {
             return exercise.staticGoal;
@@ -667,8 +714,9 @@ v6.0 업데이트를 통해 프로그램의 디테일과 정확성이 향상되�
             }
 
             const isSuccess = record.sets.every(set => set.weight >= maxWeightGoal && set.reps >= maxReps);
+            const lastRPE = record.rpe === null ? 8.0 : record.rpe;
 
-            if (isSuccess) {
+            if (isSuccess && lastRPE <= 8.5) {
                 const actualMaxWeight = Math.max(0, ...record.sets.map(s => s.weight));
                 const newIncrement = exercise.increment;
                 const newMaxWeight = actualMaxWeight + newIncrement;
@@ -685,53 +733,55 @@ v6.0 업데이트를 통해 프로그램의 디테일과 정확성이 향상되�
                 }
             }
 
-            return currentGoal;
+            return currentGoal; // Maintain goal if success at high RPE or failure
         }, exercise.staticGoal);
     }
-
 
     // LOCAL STORAGE & DATA HANDLING
     function saveAllSets(exercise) {
         const sanitizedName = getSanitizedName(exercise);
-        const setsContainer = document.getElementById(`sets-container-${sanitizedName}`);
-        if (!setsContainer) return;
-
-        const setRows = setsContainer.querySelectorAll('.set-row');
-        const setsData = Array.from(setRows).map(row => {
-            const weightInput = row.querySelector('input[data-type="weight"]');
-            const repsInput = row.querySelector('input[data-type="reps"]');
-            if (weightInput.value && repsInput.value) {
-                return { weight: parseFloat(weightInput.value), reps: parseInt(repsInput.value) };
-            }
-            return null;
-        }).filter(Boolean);
-
         let records = JSON.parse(localStorage.getItem('workoutRecords')) || {};
         if (!records[sanitizedName]) records[sanitizedName] = [];
-
+        
         const today = new Date().toISOString().split('T')[0];
         let recordIndex = records[sanitizedName].findIndex(r => r.week === currentWeek && r.cycleId === currentCycleId && r.day === currentDay);
 
-        const { phase, originalWeekData } = getWeekInfo(currentWeek, currentCycleId);
-        const dayName = originalWeekData[currentDay]?.name || '';
-
-        const newRecord = {
-            date: today,
-            week: currentWeek,
-            day: currentDay,
-            dayName: dayName,
-            phase: phase,
-            sets: setsData,
-            cycleId: currentCycleId
-        };
-
-        if (setsData.length > 0) {
-            if (recordIndex > -1) records[sanitizedName][recordIndex] = newRecord;
-            else records[sanitizedName].push(newRecord);
-        } else if (recordIndex > -1) {
-            records[sanitizedName].splice(recordIndex, 1);
+        let currentRecord;
+        if (recordIndex > -1) {
+            currentRecord = records[sanitizedName][recordIndex];
+        } else {
+            const { phase, originalWeekData } = getWeekInfo(currentWeek, currentCycleId);
+            const dayName = originalWeekData[currentDay]?.name || '';
+            currentRecord = {
+                date: today, week: currentWeek, day: currentDay, dayName: dayName,
+                phase: phase, sets: [], cycleId: currentCycleId, rpe: null
+            };
         }
-        
+
+        const setsContainer = document.getElementById(`sets-container-${sanitizedName}`);
+        if(setsContainer) {
+            const setRows = setsContainer.querySelectorAll('.set-row');
+            const setsData = Array.from(setRows).map(row => {
+                const weightInput = row.querySelector('input[data-type="weight"]');
+                const repsInput = row.querySelector('input[data-type="reps"]');
+                if (weightInput.value && repsInput.value) {
+                    return { weight: parseFloat(weightInput.value), reps: parseInt(repsInput.value) };
+                }
+                return null;
+            }).filter(Boolean);
+            currentRecord.sets = setsData;
+        }
+
+        if (recordIndex > -1) {
+            records[sanitizedName][recordIndex] = currentRecord;
+        } else {
+            records[sanitizedName].push(currentRecord);
+        }
+
+        if (currentRecord.sets.length === 0 && currentRecord.rpe === null) {
+            records[sanitizedName] = records[sanitizedName].filter(r => r !== currentRecord);
+        }
+
         localStorage.setItem('workoutRecords', JSON.stringify(records));
     }
     
@@ -775,6 +825,59 @@ v6.0 업데이트를 통해 프로그램의 디테일과 정확성이 향상되�
         modal.classList.remove('hidden');
     }
 
+    // [NEW in v7.0.2] RPE Modal Logic
+    function openRpeModal(sanitizedName, exerciseName) {
+        rpeModalTitle.textContent = `${exerciseName} RPE 기록`;
+
+        const records = JSON.parse(localStorage.getItem('workoutRecords')) || {};
+        const exerciseRecords = records[sanitizedName] || [];
+        const recordForSession = exerciseRecords.find(r => r.week === currentWeek && r.cycleId === currentCycleId && r.day === currentDay);
+
+        const currentRpe = recordForSession?.rpe || 8;
+        rpeSlider.value = currentRpe;
+        rpeValueDisplay.textContent = parseFloat(currentRpe).toFixed(1);
+
+        rpeSlider.oninput = () => {
+            const value = rpeSlider.value;
+            rpeValueDisplay.textContent = parseFloat(value).toFixed(1);
+            rpeDescription.textContent = RPE_DESCRIPTIONS[value] || "";
+        };
+        rpeSlider.dispatchEvent(new Event('input'));
+        
+        saveRpeButton.onclick = () => {
+            const newRpe = parseFloat(rpeSlider.value);
+            
+            let allRecords = JSON.parse(localStorage.getItem('workoutRecords')) || {};
+            if (!allRecords[sanitizedName]) allRecords[sanitizedName] = [];
+            let exerciseRecords = allRecords[sanitizedName];
+            let recordIndex = exerciseRecords.findIndex(r => r.week === currentWeek && r.cycleId === currentCycleId && r.day === currentDay);
+
+            if (recordIndex === -1) {
+                 const { phase, originalWeekData } = getWeekInfo(currentWeek, currentCycleId);
+                 const dayName = originalWeekData[currentDay]?.name || '';
+                 const newRecord = {
+                    date: new Date().toISOString().split('T')[0],
+                    week: currentWeek, day: currentDay, dayName: dayName,
+                    phase: phase, sets: [], cycleId: currentCycleId, rpe: newRpe
+                };
+                exerciseRecords.push(newRecord);
+            } else {
+                exerciseRecords[recordIndex].rpe = newRpe;
+            }
+            
+            allRecords[sanitizedName] = exerciseRecords;
+            localStorage.setItem('workoutRecords', JSON.stringify(allRecords));
+            rpeModal.classList.add('hidden');
+            renderWorkout(); 
+        };
+
+        cancelRpeButton.onclick = () => {
+            rpeModal.classList.add('hidden');
+        };
+
+        rpeModal.classList.remove('hidden');
+    }
+
     // UI RENDERING
     function renderWorkout() {
         const { phase, method, originalWeekData } = getWeekInfo(currentWeek, currentCycleId);
@@ -795,17 +898,15 @@ v6.0 업데이트를 통해 프로그램의 디테일과 정확성이 향상되�
         dayData.routine.forEach(exercise => {
             let currentExercise = JSON.parse(JSON.stringify(exercise)); 
 
-            // [BUGFIX v6.4.2] Dynamic exercise change for Side Lateral Raise
             if (exercise.name === '사이드 래터럴 레이즈 머신') {
                  if (phase === '축적 주기') {
                     currentExercise.name = '케이블 X-레이즈';
                     currentExercise.tip = '측면 삼각근을 최대로 이완(Stretch)시켜 자극하는 것이 목표입니다. 케이블 풀리를 중간 높이로 설정하고, 발목 스트랩을 양 손목에 착용합니다. 벤치에 누워 반대편 케이블을 손목 스트랩에 교차하여 연결한 뒤, 팔꿈치를 살짝 구부린 상태를 유지하며 큰 원을 그리듯 팔을 벌려 측면 어깨가 최대로 늘어나는 것을 느끼세요.';
                     currentExercise.staticGoal = '🔥 목표: 0kg x 12-15회.';
                     currentExercise.increment = 5;
-                } else { // 강화 주기
+                } else { 
                     currentExercise.name = '뉴텍 스탠딩 사이드 레터럴 레이즈';
                     currentExercise.tip = '어깨 관절을 머신의 회전축에 맞추고, 한 손씩 수행하여 측면 삼각근을 완벽하게 고립합니다. 반대 손으로 몸을 지지하여 반동을 통제하세요.';
-                    // The base definition from workoutPlan (staticGoal, increment) is used for '강화 주기'
                 }
             }
             
@@ -818,7 +919,6 @@ v6.0 업데이트를 통해 프로그램의 디테일과 정확성이 향상되�
             const isMain = currentExercise.type === '메인';
             let goalText;
 
-            // [BUGFIX v6.4.2] Route Side Lateral Raise to Double Progression
             if (isMain && exercise.name !== '사이드 래터럴 레이즈 머신') {
                 goalText = getMainGoalText(currentExercise, currentWeek, currentCycleId, allRecords);
             } else if (currentExercise.type === '보조' || currentExercise.type === '마무리' || exercise.name === '사이드 래터럴 레이즈 머신') {
@@ -844,16 +944,20 @@ v6.0 업데이트를 통해 프로그램의 디테일과 정확성이 향상되�
                 `;
             }
 
+            const rpeButtonText = recordForSession && recordForSession.rpe ? `RPE: ${recordForSession.rpe} (기록됨)` : '오늘의 RPE 기록';
+            const rpeButtonClass = recordForSession && recordForSession.rpe ? 'bg-green-100 text-green-800 hover:bg-green-200' : 'bg-indigo-100 text-indigo-700 hover:bg-indigo-200';
+
             card.innerHTML = `
                 <div class="flex-1">
                     <div class="flex items-start gap-3 mb-3">
                         <div class="flex-grow">
-                             <div class="flex items-center gap-3">
+                             <div class="flex items-center gap-3 flex-wrap">
                                 <span class="text-xs sm:text-sm font-bold uppercase py-1 px-3 rounded-full whitespace-nowrap ${
                                     currentExercise.type.includes('웜업') || currentExercise.type.includes('선피로') ? 'bg-amber-100 text-amber-800' :
                                     isMain ? 'bg-blue-100 text-blue-800' : 'bg-slate-100 text-slate-800'
                                 }">${currentExercise.type}</span>
                                 <h4 class="text-lg sm:text-xl font-bold text-slate-900">${currentExercise.name}</h4>
+                                <span class="text-xs font-semibold bg-gray-200 text-gray-700 px-2 py-0.5 rounded-full whitespace-nowrap">#${currentExercise.movement_pattern}</span>
                             </div>
                         </div>
                     </div>
@@ -872,7 +976,10 @@ v6.0 업데이트를 통해 프로그램의 디테일과 정확성이 향상되�
                      ${alternativesHTML}
                 </div>
                 <div id="sets-container-${sanitizedName}" class="space-y-3 mt-4"></div>
-                <button type="button" class="add-set-btn mt-4 w-full bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold py-2 px-4 rounded-lg transition shadow-md">+ 세트 추가</button>
+                <div class="mt-4 grid grid-cols-2 gap-3">
+                    <button type="button" class="add-set-btn w-full bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold py-2 px-4 rounded-lg transition shadow-md">+ 세트 추가</button>
+                    <button type="button" class="record-rpe-btn w-full ${rpeButtonClass} font-semibold py-2 px-4 rounded-lg transition shadow-md" data-sanitized-name="${sanitizedName}" data-exercise-name="${currentExercise.name}">${rpeButtonText}</button>
+                </div>
             `;
             workoutList.appendChild(card);
             
@@ -896,6 +1003,15 @@ v6.0 업데이트를 통해 프로그램의 디테일과 정확성이 향상되�
                 const sanitizedName = targetBtn.dataset.sanitizedName;
                 const exerciseName = targetBtn.dataset.exerciseName;
                 openRecordPopup(sanitizedName, exerciseName);
+            });
+        });
+
+        document.querySelectorAll('.record-rpe-btn').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                const targetBtn = e.currentTarget;
+                const sanitizedName = targetBtn.dataset.sanitizedName;
+                const exerciseName = targetBtn.dataset.exerciseName;
+                openRpeModal(sanitizedName, exerciseName);
             });
         });
     }
@@ -959,6 +1075,7 @@ v6.0 업데이트를 통해 프로그램의 디테일과 정확성이 향상되�
         });
 
         if (viewName === 'records') {
+            renderMovementPatternAnalysis();
             populateExerciseSelector();
             renderRecords();
         } else if (viewName === 'plan') {
@@ -989,6 +1106,142 @@ v6.0 업데이트를 통해 프로그램의 디테일과 정확성이 향상되�
         }
     }
     
+    // [NEW in v7.0.5] Movement Pattern Analysis Logic
+    function renderMovementPatternAnalysis() {
+        const allRecords = JSON.parse(localStorage.getItem('workoutRecords')) || {};
+        const cycleInfo = JSON.parse(localStorage.getItem('workoutCycleInfo')) || { cycleId: 1 };
+        
+        const isBlock = (cycleInfo.cycleId % 2 === 1);
+        const weeksToAnalyze = isBlock ? 3 : 6;
+        const feedbackPeriodText = isBlock ? "최근 3주" : "최근 6주";
+
+        const recentRecords = [];
+        const endDate = new Date();
+        const startDate = new Date();
+        startDate.setDate(endDate.getDate() - (weeksToAnalyze * 7));
+
+        for (const key in allRecords) {
+            allRecords[key].forEach(record => {
+                const recordDate = new Date(record.date);
+                if (recordDate >= startDate && recordDate <= endDate && record.cycleId === cycleInfo.cycleId) {
+                    recentRecords.push({ ...record, sanitizedName: key });
+                }
+            });
+        }
+        
+        const exerciseMap = new Map();
+        Object.values(workoutPlan).forEach(week => {
+            Object.values(week).forEach(day => {
+                day.routine.forEach(ex => {
+                    const sanitizedName = getSanitizedName(ex);
+                    if (!exerciseMap.has(sanitizedName)) {
+                         exerciseMap.set(sanitizedName, ex);
+                    }
+                });
+            });
+        });
+
+        const patternVolumes = {
+            horizontal_push: 0, horizontal_pull: 0,
+            vertical_push: 0, vertical_pull: 0,
+            squat: 0, hip_hinge: 0,
+        };
+
+        recentRecords.forEach(record => {
+            const exerciseInfo = exerciseMap.get(record.sanitizedName);
+            if (exerciseInfo && patternVolumes.hasOwnProperty(exerciseInfo.movement_pattern)) {
+                const volume = record.sets.reduce((sum, set) => sum + (set.weight * set.reps), 0);
+                patternVolumes[exerciseInfo.movement_pattern] += volume;
+            }
+        });
+        
+        // Chart Rendering
+        const chartCanvas = document.getElementById('movementPatternChart');
+        const ctx = chartCanvas.getContext('2d');
+        if (movementPatternChart) {
+            movementPatternChart.destroy();
+        }
+        movementPatternChart = new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: ['수평 밀기/당기기', '수직 밀기/당기기', '스쿼트/힙힌지'],
+                datasets: [
+                    {
+                        label: '밀기/스쿼트 (전면)',
+                        data: [patternVolumes.horizontal_push, patternVolumes.vertical_push, patternVolumes.squat],
+                        backgroundColor: 'rgba(59, 130, 246, 0.7)',
+                    },
+                    {
+                        label: '당기기/힙힌지 (후면)',
+                        data: [patternVolumes.horizontal_pull, patternVolumes.vertical_pull, patternVolumes.hip_hinge],
+                        backgroundColor: 'rgba(239, 68, 68, 0.7)',
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                indexAxis: 'y',
+                scales: {
+                    x: {
+                        title: { display: true, text: '총 볼륨 (kg)' },
+                        stacked: false,
+                    },
+                    y: {
+                        stacked: false,
+                    }
+                },
+                plugins: {
+                    title: {
+                        display: true,
+                        text: `주요 움직임 패턴 볼륨 균형 (${feedbackPeriodText})`
+                    },
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                let label = context.dataset.label || '';
+                                if (label) {
+                                    label += ': ';
+                                }
+                                if (context.parsed.x !== null) {
+                                    label += new Intl.NumberFormat('ko-KR').format(context.parsed.x) + ' kg';
+                                }
+                                return label;
+                            }
+                        }
+                    }
+                }
+            }
+        });
+
+        // AI Feedback Generation
+        let feedback = `${cycleInfo.cycleId} 사이클(${isBlock ? '블록' : '파동형'} 주기)의 ${feedbackPeriodText}간 훈련을 분석했습니다. `;
+        let issues = [];
+
+        function checkBalance(push, pull, pushName, pullName) {
+            const total = push + pull;
+            if (total < 100) return; // Ignore if volume is negligible
+            const ratio = push / total;
+            if (ratio > 0.625 || ratio < 0.375) { // ~25% imbalance
+                 issues.push(`${pushName}과 ${pullName}의 불균형이 감지됩니다. 장기적으로는 부상 위험을 높일 수 있습니다.`);
+            }
+        }
+        
+        checkBalance(patternVolumes.horizontal_push, patternVolumes.horizontal_pull, '수평 밀기(가슴)', '수평 당기기(등)');
+        checkBalance(patternVolumes.vertical_push, patternVolumes.vertical_pull, '수직 밀기(어깨)', '수직 당기기(등 너비)');
+        checkBalance(patternVolumes.squat, patternVolumes.hip_hinge, '스쿼트(대퇴사두)', '힙힌지(후면사슬)');
+
+        if (issues.length > 0) {
+            feedback += issues.join(' ');
+        } else if (recentRecords.length === 0) {
+            feedback = "아직 분석할 데이터가 충분하지 않습니다. 훈련을 기록하고 다시 확인해주세요.";
+        } else {
+            feedback += "주요 움직임 패턴 간 훈련 볼륨이 매우 이상적인 균형을 이루고 있습니다. 훌륭한 훈련 분배입니다!";
+        }
+        document.getElementById('ai-feedback-text').textContent = feedback;
+    }
+
+
     // RECORDS VIEW LOGIC
     function populateExerciseSelector() {
         const exerciseGroupMap = new Map();
@@ -1064,7 +1317,6 @@ v6.0 업데이트를 통해 프로그램의 디테일과 정확성이 향상되�
         renderRecordsTable(exerciseData, 'records-table-container');
     }
     
-    // [REFACTORED in v6.0]
     function renderProgressChart(data, canvasId) {
         const chartCanvas = document.getElementById(canvasId);
         if (!chartCanvas) return;
@@ -1116,7 +1368,6 @@ v6.0 업데이트를 통해 프로그램의 디테일과 정확성이 향상되�
         }
     }
 
-    // [REFACTORED in v6.0]
     function renderRecordsTable(data, containerId) {
         const tableContainer = document.getElementById(containerId);
         if(!tableContainer) return;
@@ -1126,9 +1377,10 @@ v6.0 업데이트를 통해 프로그램의 디테일과 정확성이 향상되�
             dayTable.className = 'w-full text-left border-collapse mb-4';
             const dayNameMap = {'pull': '풀', 'leg':'하체', 'push':'푸쉬'};
             const cycleText = record.cycleId ? ` (사이클 ${record.cycleId})` : ` (사이클 1)`;
+            const rpeText = record.rpe ? ` (RPE ${record.rpe})` : '';
             dayTable.innerHTML = `
                 <thead class="bg-slate-100">
-                    <tr><th colspan="3" class="p-3 font-semibold text-slate-800">${record.date} (${record.week}주차, ${dayNameMap[record.day] || record.day})${cycleText}</th></tr>
+                    <tr><th colspan="3" class="p-3 font-semibold text-slate-800">${record.date} (${record.week}주차, ${dayNameMap[record.day] || record.day})${cycleText}${rpeText}</th></tr>
                     <tr class="text-sm">
                         <th class="p-3 font-semibold text-slate-600 w-1/3">세트</th><th class="p-3 font-semibold text-slate-600 w-1/3">중량(kg)</th><th class="p-3 font-semibold text-slate-600 w-1/3">횟수(Reps)</th>
                     </tr>
@@ -1170,15 +1422,19 @@ v6.0 업데이트를 통해 프로그램의 디테일과 정확성이 향상되�
     }
     
     function migrateOldRecords() {
-        if (localStorage.getItem('migrationV5_2_Complete')) return; // Renamed for clarity
+        if (localStorage.getItem('migrationV7_alpha_Complete')) return;
         let records = JSON.parse(localStorage.getItem('workoutRecords')) || {};
         let needsUpdate = false;
         for (const key in records) {
             records[key].forEach(r => {
-                if (!r.phase) {
+                if (!r.phase) { // For migration from versions before v5.2
                     const cycleId = r.cycleId || 1;
                     const { phase } = getWeekInfo(r.week, cycleId);
                     r.phase = phase;
+                    needsUpdate = true;
+                }
+                if (typeof r.rpe === 'undefined') { // For migration to v7
+                    r.rpe = null;
                     needsUpdate = true;
                 }
             });
@@ -1186,7 +1442,7 @@ v6.0 업데이트를 통해 프로그램의 디테일과 정확성이 향상되�
         if (needsUpdate) {
             localStorage.setItem('workoutRecords', JSON.stringify(records));
         }
-        localStorage.setItem('migrationV5_2_Complete', 'true');
+        localStorage.setItem('migrationV7_alpha_Complete', 'true');
     }
 
     function handleExportData() {
@@ -1194,7 +1450,7 @@ v6.0 업데이트를 통해 프로그램의 디테일과 정확성이 향상되�
         const cycleInfo = JSON.parse(localStorage.getItem('workoutCycleInfo')) || { cycleId: 1 };
 
         const archiveData = {
-            programVersion: "v6.4.4 Final",
+            programVersion: "v7.0.7 Final",
             exportDate: new Date().toISOString().split('T')[0],
             cycleInfo,
             workoutRecords
