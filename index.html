@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>26주 장기 성장 프로그램 | 인터랙티브 플래너 (v6.4 Final)</title>
+    <title>26주 장기 성장 프로그램 | 인터랙티브 플래너 (v6.4.3 Bugfix)</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
@@ -410,7 +410,8 @@ v6.0 업데이트를 통해 프로그램의 디테일과 정확성이 향상되�
                 { type: '웜업', name: '팩덱 플라이', sets: '3세트', tip: '가슴 근육을 선피로시켜 프레스 시 자극을 극대화합니다.', alternatives: ['가벼운 케이블 플라이', '덤벨 플라이'] },
                 { type: '메인', name: '너틸러스 인클라인 프레스 (뉴트럴 그립)', sets: '탑/백오프 세트', tip: '너틸러스 머신의 독특한 궤적과 뉴트럴 그립을 활용하여 윗가슴에 새로운 자극을 줍니다. 어깨 관절의 부담을 줄이면서 가슴 상부를 공략하는 것이 핵심입니다.', baseTopSet: 60, unit: '총', alternatives: ['뉴트럴 그립 덤벨 인클라인 프레스']},
                 { type: '메인', name: '너틸러스 체스트 프레스 (뉴트럴)', sets: '탑/백오프 세트', tip: 'V자 그립으로 가슴 중앙부를 강하게 수축시킵니다. 등을 패드에 기대 안정성을 확보하고, 프레스 동작 마지막에 견갑을 살짝 전인(내밀어)시켜 가슴 안쪽까지 완전히 쥐어짜주세요.', baseTopSet: 70, unit: '총', alternatives: ['뉴트럴 그립 덤벨 프레스', '클로즈 그립 벤치프레스']},
-                { type: '메인', name: '사이드 래터럴 레이즈 머신', sets: '탑/백오프 세트', tip: '어깨 측면(측면 삼각근)을 완벽하게 고립하여 어깨 프레임을 넓히는 것이 목표입니다. 팔꿈치로 패드를 들어올린다는 느낌으로 수행하고, 승모근이 으쓱하지 않도록 통제하는 것이 핵심입니다.', baseTopSet: 20, unit: '총', alternatives: ['덤벨 사이드 레터럴 레이즈', '케이블 사이드 레터럴 레이즈']},
+                // [BUGFIX v6.4.2] Changed to Double Progression by default. Dynamic logic in renderWorkout().
+                { type: '메인', name: '사이드 래터럴 레이즈 머신', sets: '3~4세트', tip: '어깨 측면(측면 삼각근)을 완벽하게 고립하여 어깨 프레임을 넓히는 것이 목표입니다. 팔꿈치로 패드를 들어올린다는 느낌으로 수행하고, 승모근이 으쓱하지 않도록 통제하는 것이 핵심입니다.', staticGoal: '🔥 목표: 30kg x 10-15회.', increment: 10, alternatives: ['덤벨 사이드 레터럴 레이즈', '케이블 사이드 레터럴 레이즈']},
                 { type: '보조', name: '딥스 머신', sets: '3~4세트', tip: '아랫가슴과 삼두근에 볼륨을 더합니다. 상체를 숙일수록 아랫가슴에 자극이 집중됩니다. 이완 시 견갑이 자연스럽게 상승하며 가슴이 최대로 늘어나는 것을 느끼세요.', staticGoal: '🔥 목표: 실패지점까지 x 3-4세트.', increment: 2.5, alternatives: ['딥스 (평행봉)', '디클라인 푸쉬업'] },
                 { type: '마무리', name: '인클라인 케이블 컬', sets: '3~4세트', tip: '벤치에 누워 이두근을 최대로 이완시킨 상태에서 시작하여, 이두근의 장두(긴 갈래)를 집중적으로 공략합니다. 지속적인 장력을 느끼는 것이 핵심입니다.', staticGoal: '🔥 목표: 한쪽 10-15kg x 10-15회.', increment: 2.5, alternatives: ['인클라인 덤벨 컬', '케이블 드래그 컬']}
             ]}
@@ -632,72 +633,60 @@ v6.0 업데이트를 통해 프로그램의 디테일과 정확성이 향상되�
         return null;
     }
     
-    // [BUG FIXED in v6.1]
+    // [BUGFIX v6.4.3] Completely refactored for accuracy
     function getAssistanceGoalText(exercise, allRecords) {
-        if (!exercise.staticGoal || !exercise.increment) return exercise.staticGoal;
+        if (!exercise.staticGoal || !exercise.increment) {
+            return exercise.staticGoal;
+        }
 
         const sanitizedName = getSanitizedName(exercise);
         const exerciseRecords = allRecords[sanitizedName] || [];
+        
+        const sortedRecords = [...exerciseRecords].sort((a, b) => new Date(a.date) - new Date(b.date));
 
-        function findCurrentGoal(records, baseGoal, baseSets) {
-            if (records.length === 0) {
-                return baseGoal;
-            }
-
-            const lastRecord = records[0];
-            const remainingRecords = records.slice(1);
-            const parentGoal = findCurrentGoal(remainingRecords, baseGoal, baseSets);
-
-            const repRegex = /(\d+)-(\d+)회/;
+        return sortedRecords.reduce((currentGoal, record) => {
             const setRegex = /(\d+)~(\d+)세트/;
+            const repRegex = /(\d+)-(\d+)회/;
+            const weightRegex = /([\d.]+)(?:-([\d.]+))?kg/;
 
-            const repMatch = parentGoal.match(repRegex);
-            const setMatch = baseSets.match(setRegex);
+            const setMatch = exercise.sets.match(setRegex);
+            const repMatch = currentGoal.match(repRegex);
+            const weightMatch = currentGoal.match(weightRegex);
             
-            const numbersInGoal = parentGoal.match(/(\d[\d.]*)/g);
-
-            if (!repMatch || !setMatch || !lastRecord || !lastRecord.sets || lastRecord.sets.length === 0) {
-                return parentGoal;
-            }
-
-            let maxWeight = 0;
-            let minWeight = 0;
-            if (numbersInGoal) {
-                maxWeight = parseFloat(numbersInGoal[numbersInGoal.length - 1]);
-                minWeight = numbersInGoal.length > 1 ? parseFloat(numbersInGoal[0]) : maxWeight;
+            if (!setMatch || !repMatch || !weightMatch || !record.sets || record.sets.length === 0) {
+                return currentGoal;
             }
             
-            const maxReps = parseInt(repMatch[2]);
             const maxSets = parseInt(setMatch[2]);
+            const maxReps = parseInt(repMatch[2]);
+            const minWeightGoal = parseFloat(weightMatch[1]);
+            const maxWeightGoal = parseFloat(weightMatch[2] || weightMatch[1]);
 
-            if (lastRecord.sets.length < maxSets) {
-                return parentGoal;
+            if (record.sets.length < maxSets) {
+                return currentGoal;
             }
 
-            const isSuccess = lastRecord.sets.every(set => (maxWeight > 0 ? set.weight >= maxWeight : true) && set.reps >= maxReps);
+            const isSuccess = record.sets.every(set => set.weight >= maxWeightGoal && set.reps >= maxReps);
 
             if (isSuccess) {
-                const actualMaxWeight = Math.max(0, ...lastRecord.sets.map(s => s.weight));
+                const actualMaxWeight = Math.max(0, ...record.sets.map(s => s.weight));
                 const newIncrement = exercise.increment;
-                
-                const newMaxWeight = (maxWeight === 0 ? 0 : actualMaxWeight) + newIncrement;
-                const weightRange = maxWeight - minWeight;
+                const newMaxWeight = actualMaxWeight + newIncrement;
+                const weightRange = maxWeightGoal - minWeightGoal;
                 const newMinWeight = newMaxWeight - weightRange;
 
                 const newRepString = `${parseInt(repMatch[1])}-${maxReps}회`;
-                
-                if (newMinWeight < newMaxWeight) {
-                     return `🔥 목표: 한쪽 ${newMinWeight}-${newMaxWeight}kg x ${newRepString}.`;
+                const prefix = currentGoal.includes('한쪽') ? '한쪽 ' : '';
+
+                if (newMinWeight > 0 && newMinWeight < newMaxWeight) {
+                    return `🔥 목표: ${prefix}${newMinWeight}-${newMaxWeight}kg x ${newRepString}.`;
                 } else {
-                     return `🔥 목표: 한쪽 ${newMaxWeight}kg x ${newRepString}.`;
+                    return `🔥 목표: ${prefix}${newMaxWeight}kg x ${newRepString}.`;
                 }
             }
 
-            return parentGoal;
-        }
-
-        const sortedRecords = [...exerciseRecords].sort((a,b) => new Date(a.date) - new Date(b.date));
-        return findCurrentGoal(sortedRecords, exercise.staticGoal, exercise.sets);
+            return currentGoal;
+        }, exercise.staticGoal);
     }
 
 
@@ -806,14 +795,17 @@ v6.0 업데이트를 통해 프로그램의 디테일과 정확성이 향상되�
         dayData.routine.forEach(exercise => {
             let currentExercise = JSON.parse(JSON.stringify(exercise)); 
 
+            // [BUGFIX v6.4.2] Dynamic exercise change for Side Lateral Raise
             if (exercise.name === '사이드 래터럴 레이즈 머신') {
                  if (phase === '축적 주기') {
                     currentExercise.name = '케이블 X-레이즈';
-                    currentExercise.tip = '측면 삼각근을 최대로 이완(Stretch)시켜 자극하는 것이 목표입니다. 케이블 풀리를 중간 높이로 설정하고, 발목 스트랩을 양 손목에 착용합니다. 벤치에 누워 반대편 케이블을 손목 스트랩에 교차하여 연결한 뒤, 팔꿈치를 살짝 구부린 상태를 유지하며 큰 원을 그리듯 팔을 벌려 측면 어깨가 최대로 늘어나는 것을 느끼세요.';
-                    currentExercise.staticGoal = '🔥 목표: 12-15회 반복 가능한 무게로 실패지점까지.';
+                    currentExercise.tip = '측면 삼각근을 최대로 이완(Stretch)시켜 자극하는 것이 목표입니다. 케이블 풀리를 중간 높이로 설정하고, 발목 스트랩을 양 손목에 착용합니다. 벤치에 누워 반대편 케이블을 손목 스트랩에 교차하여 연결한 뒤, 팔꿈치를 살짝 구부린 상태를 유지하며 큰 원을 그리듯 팔을 벌려 측면 어깨가 최대로 늘어나는 것을 느끼세요.';
+                    currentExercise.staticGoal = '🔥 목표: 0kg x 12-15회.';
+                    currentExercise.increment = 5;
                 } else { // 강화 주기
                     currentExercise.name = '뉴텍 스탠딩 사이드 레터럴 레이즈';
                     currentExercise.tip = '어깨 관절을 머신의 회전축에 맞추고, 한 손씩 수행하여 측면 삼각근을 완벽하게 고립합니다. 반대 손으로 몸을 지지하여 반동을 통제하세요.';
+                    // The base definition from workoutPlan (staticGoal, increment) is used for '강화 주기'
                 }
             }
             
@@ -826,9 +818,10 @@ v6.0 업데이트를 통해 프로그램의 디테일과 정확성이 향상되�
             const isMain = currentExercise.type === '메인';
             let goalText;
 
-            if (isMain) {
+            // [BUGFIX v6.4.2] Route Side Lateral Raise to Double Progression
+            if (isMain && exercise.name !== '사이드 래터럴 레이즈 머신') {
                 goalText = getMainGoalText(currentExercise, currentWeek, currentCycleId, allRecords);
-            } else if (currentExercise.type === '보조' || currentExercise.type === '마무리') {
+            } else if (currentExercise.type === '보조' || currentExercise.type === '마무리' || exercise.name === '사이드 래터럴 레이즈 머신') {
                 goalText = getAssistanceGoalText(currentExercise, allRecords);
             } else { 
                 goalText = currentExercise.staticGoal;
@@ -836,7 +829,7 @@ v6.0 업데이트를 통해 프로그램의 디테일과 정확성이 향상되�
             if(!goalText && currentExercise.staticGoal) goalText = currentExercise.staticGoal;
 
 
-            const methodText = isMain ? method : currentExercise.sets;
+            const methodText = (isMain && exercise.name !== '사이드 래터럴 레이즈 머신') ? method : currentExercise.sets;
             const tipHTML = goalText ? `${currentExercise.tip} <br><span class="font-bold text-red-600">${goalText}</span>` : currentExercise.tip;
 
             let alternativesHTML = '';
@@ -1201,7 +1194,7 @@ v6.0 업데이트를 통해 프로그램의 디테일과 정확성이 향상되�
         const cycleInfo = JSON.parse(localStorage.getItem('workoutCycleInfo')) || { cycleId: 1 };
 
         const archiveData = {
-            programVersion: "v6.1 Final",
+            programVersion: "v6.4.3 Bugfix",
             exportDate: new Date().toISOString().split('T')[0],
             cycleInfo,
             workoutRecords
@@ -1288,5 +1281,3 @@ v6.0 업데이트를 통해 프로그램의 디테일과 정확성이 향상되�
 </script>
 </body>
 </html>
-
-
