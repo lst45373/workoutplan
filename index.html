@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>26주 장기 성장 프로그램 | 인터랙티브 플래너 (v11.1.0)</title>
+    <title>26주 장기 성장 프로그램 | 인터랙티브 플래너 (v11.1.2)</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
@@ -505,7 +505,7 @@ v10.0을 통해 프로그램의 핵심 성장 엔진이 완성되었으나, 아�
         return weight * (1 + reps / 30);
     }
     
-    // [NEW in v11.1] Rounding to nearest 5kg for Leg Press
+    // [NEW in v11.1.2] Rounding to nearest 5kg for Leg Press
     function roundToNearest5(number) {
         return Math.round(number / 5) * 5;
     }
@@ -548,7 +548,7 @@ v10.0을 통해 프로그램의 핵심 성장 엔진이 완성되었으나, 아�
         return { phase, method, type, originalWeekData };
     }
 
-    // [UPDATED in v10.0] Performance-Based Multi-Stage Progression
+    // [UPDATED in v11.1.2] Performance-Based Multi-Stage Progression with unit text and Leg Press logic
     function getMainGoalText(exercise, week, cycleId, allRecords) {
         if (!exercise.baseTopSet) return null;
 
@@ -589,22 +589,21 @@ v10.0을 통해 프로그램의 핵심 성장 엔진이 완성되었으나, 아�
             }
         }
         
+        const rounder = exercise.name.includes('레그 프레스') ? roundToNearest5 : roundToNearest2point5;
+        const unitText = exercise.unit === '총' ? '(전체 중량)' : '(한쪽 원판)';
+
         if (phase === '강화 주기') {
-            const rounder = exercise.name.includes('레그 프레스') ? roundToNearest5 : roundToNearest2point5;
             const goalWeight = rounder(previousWeight);
             const backoffWeight = rounder(goalWeight * 0.8);
-            const unitText = exercise.unit === '총' ? '(전체 중량)' : '(한쪽 원판)';
             return `🔥 강화 목표: ${unitText} 탑 ${goalWeight}kg x 최대 반복 / 백오프 ${backoffWeight}kg x 8-10회.`;
         } else if (phase === '축적 주기') {
-            const rounder = exercise.name.includes('레그 프레스') ? roundToNearest5 : roundToNearest2point5;
             const goalWeight = rounder(e1RM * 0.7);
-            const unitText = exercise.unit === '총' ? '(전체 중량)' : '(한쪽 원판)';
             return `🔥 축적 목표: ${unitText} 워킹 세트 ${goalWeight}kg x 8-12회 (3-4세트).`;
         }
         return null;
     }
     
-    // [NEW in v11.0] Smart 3-Stage Auto-Regulation for Assistance exercises
+    // [UPDATED in v11.1.2] Smart 3-Stage Auto-Regulation for Assistance exercises
     function getSmartAssistanceGoal(exercise, allRecords) {
         const { staticGoal, increment, sets: setsString } = exercise;
         const sanitizedName = getSanitizedName(exercise);
@@ -639,8 +638,9 @@ v10.0을 통해 프로그램의 핵심 성장 엔진이 완성되었으나, 아�
 
         const calculateVolume = (weight, reps) => (weight > 0 ? weight * reps : reps);
         
-        const minTargetVolume = calculateVolume(minWeightGoal, minRepsGoal) * lastRecord.sets.length;
-        const maxTargetVolume = calculateVolume(maxWeightGoal, maxRepsGoal) * lastRecord.sets.length;
+        // [BUG FIX in v11.1.2] Use maxSetsGoal instead of lastRecord.sets.length for target volume calculation
+        const minTargetVolume = calculateVolume(minWeightGoal, minRepsGoal) * maxSetsGoal;
+        const maxTargetVolume = calculateVolume(maxWeightGoal, maxRepsGoal) * maxSetsGoal;
         const performedVolume = lastRecord.sets.reduce((total, set) => total + calculateVolume(set.weight, set.reps), 0);
         
         let newMinWeight = minWeightGoal;
@@ -1404,4 +1404,3 @@ v10.0을 통해 프로그램의 핵심 성장 엔진이 완성되었으나, 아�
 
 </body>
 </html>
-
