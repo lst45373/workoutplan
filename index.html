@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>26주 장기 성장 프로그램 | 인터랙티브 플래너 (v11.1.3)</title>
+    <title>26주 장기 성장 프로그램 | 인터랙티브 플래너 (v11.1.4)</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
@@ -621,7 +621,7 @@ v10.0을 통해 프로그램의 핵심 성장 엔진이 완성되었으나, 아�
 
             const weightMatch = currentGoal.match(/([\d.]+)(?:-([\d.]+))?kg/);
             const repMatch = currentGoal.match(/(\d+)-(\d+)회/);
-            const setMatch = setsString.match(/(\d+)~(\d+)세트/);
+            const setMatch = setsString.match(/(\d+)(?:~(\d+))?세트/); // [BUG FIX] Handle single set counts
 
             if (!weightMatch || !repMatch || !setMatch) {
                 return currentGoal;
@@ -631,11 +631,11 @@ v10.0을 통해 프로그램의 핵심 성장 엔진이 완성되었으나, 아�
             const maxWeightGoal = parseFloat(weightMatch[2] || weightMatch[1]);
             const minRepsGoal = parseInt(repMatch[1]);
             const maxRepsGoal = parseInt(repMatch[2]);
-            const maxSetsGoal = parseInt(setMatch[2]);
+            const maxSetsGoal = parseInt(setMatch[2] || setMatch[1]); // [BUG FIX] Handle single set counts
 
             const calculateVolume = (weight, reps) => (weight > 0 ? weight * reps : reps);
             
-            // [BUG FIX in v11.1.2] Use maxSetsGoal instead of lastRecord.sets.length for target volume calculation
+            // Use maxSetsGoal instead of lastRecord.sets.length for target volume calculation
             const minTargetVolume = calculateVolume(minWeightGoal, minRepsGoal) * maxSetsGoal;
             const maxTargetVolume = calculateVolume(maxWeightGoal, maxRepsGoal) * maxSetsGoal;
             const performedVolume = record.sets.reduce((total, set) => total + calculateVolume(set.weight, set.reps), 0);
