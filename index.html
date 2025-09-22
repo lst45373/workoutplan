@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>26주 장기 성장 프로그램 | 인터랙티브 플래너 (v13.2)</title>
+    <title>26주 장기 성장 프로그램 | 인터랙티브 플래너 (v13.4.1)</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
@@ -443,6 +443,7 @@
     let movementPatternChart = null;
     let inbodyChart = null;
     
+    // DOM Elements
     const weekSelector = document.getElementById('week-selector');
     const daySelector = document.getElementById('day-selector');
     const workoutTitle = document.getElementById('workout-title');
@@ -483,6 +484,7 @@
         '디로딩 주간': 'bg-sky-100 text-sky-800'
     };
 
+    // UTILITY FUNCTIONS
     function getSanitizedName(exercise) {
          if(typeof exercise.name !== 'string' || typeof exercise.type !== 'string') return '';
          return (exercise.name + exercise.type).replace(/\s/g, '').replace(/[^a-zA-Z0-9가-힣]/g, '');
@@ -502,6 +504,7 @@
         return Math.round(number / 2.5) * 2.5;
     }
 
+    // CORE LOGIC: Get Week Info
     function getWeekInfo(week, cycleId) {
         if (week === 13) {
             return {
@@ -534,6 +537,7 @@
         return { phase, method, type, originalWeekData };
     }
 
+    // [MODIFIED in v13.1]
     function getMainGoalText(exercise, week, cycleId, allRecords) {
         if (!exercise.baseTopSet) return null;
 
@@ -610,10 +614,12 @@
             
             let goalWeight = rounder(targetWeight);
 
+            // [NEW in v13.1] Minimum Progression Guarantee
             if (lastTopSet.reps >= 6 && goalWeight <= lastTopSet.weight) {
                 goalWeight = lastTopSet.weight + 2.5;
             }
 
+            // [NEW in v13.1] Deload Floor
             if (goalWeight < 10) {
                 goalWeight = 10;
             }
@@ -625,7 +631,7 @@
             
             const boosterIcon = boosterApplied ? '🚀 ' : '';
             return `${boosterIcon}🔥 강화 목표: ${unitText} 탑 ${goalWeight}kg x 최대 반복 / 백오프 ${backoffWeight}kg x 8-10회.`;
-        } else { 
+        } else { // 축적 주기
             const goalWeight = rounder(e1RM * 0.7);
             return `🔥 축적 목표: ${unitText} 워킹 세트 ${goalWeight}kg x 8-12회 (3-4세트).`;
         }
@@ -641,6 +647,7 @@
         const recordsToConsider = (allRecords[sanitizedName] || [])
             .filter(r => {
                 if (!r.sets || r.sets.length === 0) return false;
+                // Important: Only consider records from previous weeks/cycles
                 return (r.cycleId < currentCycleId) || (r.cycleId === currentCycleId && r.week < currentWeek);
             })
             .sort((a, b) => new Date(a.date) - new Date(b.date));
@@ -692,6 +699,7 @@
         }, initialGoal);
     }
 
+    // [MODIFIED in v13.4]
     function saveAllSets(exercise) {
         const sanitizedName = getSanitizedName(exercise);
         let records = JSON.parse(localStorage.getItem('workoutRecords')) || {};
@@ -731,8 +739,35 @@
         }
 
         localStorage.setItem('workoutRecords', JSON.stringify(records));
+        updateGoalTexts(); 
     }
     
+    // [NEW in v13.4]
+    function updateGoalTexts() {
+        const allRecords = JSON.parse(localStorage.getItem('workoutRecords')) || {};
+        const { originalWeekData } = getWeekInfo(currentWeek, currentCycleId);
+        const dayData = originalWeekData[currentDay];
+        if (!dayData) return;
+
+        dayData.routine.forEach(exercise => {
+            const sanitizedName = getSanitizedName(exercise);
+            const goalSpan = document.getElementById(`goal-text-${sanitizedName}`);
+            if (goalSpan) {
+                let newGoalText;
+                if (exercise.type === '메인') {
+                    newGoalText = getMainGoalText(exercise, currentWeek, currentCycleId, allRecords);
+                } else if (exercise.type === '보조' || exercise.type === '마무리') {
+                    newGoalText = getSmartAssistanceGoal(exercise, allRecords);
+                } else {
+                    newGoalText = exercise.staticGoal;
+                }
+                if (newGoalText) {
+                    goalSpan.innerHTML = newGoalText.replace("최대 반복", "최대 반복(AMRAP)");
+                }
+            }
+        });
+    }
+
     function loadMostRecentRecordForSession(exercise) {
         const sanitizedName = getSanitizedName(exercise);
         const records = JSON.parse(localStorage.getItem('workoutRecords')) || {};
@@ -766,7 +801,10 @@
         const allRecords = JSON.parse(localStorage.getItem('workoutRecords')) || {};
 
         const dayData = originalWeekData[currentDay];
-        if (!dayData) return;
+        if (!dayData) {
+            workoutList.innerHTML = '';
+            return;
+        };
 
         workoutTitle.textContent = `${currentWeek}주차: ${dayData.name}`;
         workoutPhaseBadge.className = `px-4 py-1.5 text-base font-semibold rounded-full self-start ${phaseColors[phase]}`;
@@ -791,7 +829,8 @@
             }
 
             const methodText = (exercise.type === '메인') ? method : exercise.sets;
-            const tipHTML = goalText ? `${exercise.tip} <br><span class="font-bold text-red-600">${goalText.replace("최대 반복", "최대 반복(AMRAP)")}</span>` : exercise.tip;
+            const goalTextHTML = goalText ? `<br><span id="goal-text-${sanitizedName}" class="font-bold text-red-600">${goalText.replace("최대 반복", "최대 반복(AMRAP)")}</span>` : '';
+            const tipHTML = `${exercise.tip}${goalTextHTML}`;
 
             card.innerHTML = `
                 <div class="flex-1">
@@ -1315,3 +1354,4 @@
 
 </body>
 </html>
+
