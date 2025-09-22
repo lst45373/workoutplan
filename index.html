@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>26주 장기 성장 프로그램 | 인터랙티브 플래너 (v13.1)</title>
+    <title>26주 장기 성장 프로그램 | 인터랙티브 플래너 (v13.2)</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
@@ -534,7 +534,6 @@
         return { phase, method, type, originalWeekData };
     }
 
-    // [MODIFIED in v13.1]
     function getMainGoalText(exercise, week, cycleId, allRecords) {
         if (!exercise.baseTopSet) return null;
 
@@ -611,12 +610,10 @@
             
             let goalWeight = rounder(targetWeight);
 
-            // [NEW in v13.1] Minimum Progression Guarantee
             if (lastTopSet.reps >= 6 && goalWeight <= lastTopSet.weight) {
                 goalWeight = lastTopSet.weight + 2.5;
             }
 
-            // [NEW in v13.1] Deload Floor
             if (goalWeight < 10) {
                 goalWeight = 10;
             }
@@ -628,23 +625,27 @@
             
             const boosterIcon = boosterApplied ? '🚀 ' : '';
             return `${boosterIcon}🔥 강화 목표: ${unitText} 탑 ${goalWeight}kg x 최대 반복 / 백오프 ${backoffWeight}kg x 8-10회.`;
-        } else { // 축적 주기
+        } else { 
             const goalWeight = rounder(e1RM * 0.7);
             return `🔥 축적 목표: ${unitText} 워킹 세트 ${goalWeight}kg x 8-12회 (3-4세트).`;
         }
     }
     
+    // [MODIFIED in v13.2]
     function getSmartAssistanceGoal(exercise, allRecords) {
         const { staticGoal: initialGoal, increment, sets: setsString } = exercise;
         const sanitizedName = getSanitizedName(exercise);
 
         if (!initialGoal || !increment || !setsString) return initialGoal;
 
-        const sortedRecords = (allRecords[sanitizedName] || [])
-            .filter(r => r.sets && r.sets.length > 0)
+        const recordsToConsider = (allRecords[sanitizedName] || [])
+            .filter(r => {
+                if (!r.sets || r.sets.length === 0) return false;
+                return (r.cycleId < currentCycleId) || (r.cycleId === currentCycleId && r.week < currentWeek);
+            })
             .sort((a, b) => new Date(a.date) - new Date(b.date));
 
-        return sortedRecords.reduce((currentGoal, record) => {
+        return recordsToConsider.reduce((currentGoal, record) => {
             if (currentGoal.includes("실패지점까지") || currentGoal.includes("AMRAP") || currentGoal.includes("맨몸")) {
                 return currentGoal;
             }
@@ -1287,11 +1288,7 @@
                 smm: parseFloat(document.getElementById('inbody-smm').value),
                 fatPercentage: parseFloat(document.getElementById('inbody-fat').value)
             };
-            if (!record.date) { 
-                const customAlert = document.getElementById('custom-alert');
-                if(customAlert) customAlert.style.display = 'flex';
-                return;
-            }
+            if (!record.date) { alert('날짜를 선택해주세요.'); return; }
             saveInbodyRecord(record);
             renderBodycompView();
             inbodyForm.reset();
@@ -1300,38 +1297,11 @@
 
         document.getElementById('inbody-table-container').addEventListener('click', e => {
             if (e.target.classList.contains('delete-inbody-btn')) {
-                const customConfirm = document.getElementById('custom-confirm');
-                if(customConfirm) {
-                    customConfirm.querySelector('#confirm-message').textContent = '이 기록을 정말 삭제하시겠습니까?';
-                    customConfirm.style.display = 'flex';
-                    
-                    const confirmBtn = customConfirm.querySelector('#confirm-ok-btn');
-                    
-                    const newConfirmBtn = confirmBtn.cloneNode(true);
-                    confirmBtn.parentNode.replaceChild(newConfirmBtn, confirmBtn);
-
-                    newConfirmBtn.addEventListener('click', () => {
-                        deleteInbodyRecord(e.target.dataset.date);
-                        customConfirm.style.display = 'none';
-                    });
+                if (confirm('이 기록을 삭제하시겠습니까?')) {
+                    deleteInbodyRecord(e.target.dataset.date);
                 }
             }
         });
-        
-        const customConfirm = document.getElementById('custom-confirm');
-        if(customConfirm) {
-            customConfirm.querySelector('#confirm-cancel-btn').addEventListener('click', () => {
-                customConfirm.style.display = 'none';
-            });
-        }
-        
-        const customAlert = document.getElementById('custom-alert');
-        if(customAlert) {
-            customAlert.querySelector('#alert-ok-btn').addEventListener('click', () => {
-                customAlert.style.display = 'none';
-            });
-        }
-
 
         document.getElementById('inbody-date').valueAsDate = new Date();
         
@@ -1345,4 +1315,3 @@
 
 </body>
 </html>
-
