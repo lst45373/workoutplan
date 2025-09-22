@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>26주 장기 성장 프로그램 | 인터랙티브 플래너 (v13.0)</title>
+    <title>26주 장기 성장 프로그램 | 인터랙티브 플래너 (v13.1)</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
@@ -58,7 +58,6 @@
                             </div>
                         </div>
                     </section>
-
                     <section id="workout-display">
                         <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center mb-4 gap-3">
                              <h2 id="workout-title" class="text-2xl sm:text-3xl font-bold text-slate-900"></h2>
@@ -94,7 +93,6 @@
                                    <p class="mt-1">'능동적 회복'을 통해 그동안 쌓인 중추신경계와 관절의 피로를 완전히 해소하고 다음 12주를 준비하는 시기입니다. 평소 워킹 세트 중량의 50%~60%, 세트 수의 절반만 가볍게 수행합니다.</p>
                                </div>
                           </div>
-
                           <div class="mt-10 pt-8 border-t border-slate-200">
                             <h2 class="text-2xl font-bold text-slate-900 mb-4">핵심 훈련 방식 상세</h2>
                             <div class="space-y-8 text-slate-700 prose">
@@ -142,7 +140,6 @@
                                 </div>
                             </div>
                         </div>
-                         
                           <h2 class="text-2xl font-bold text-slate-900 mt-10 mb-4">현재 사이클 계획표 요약</h2>
                           <table class="w-full text-left border-collapse">
                                <thead>
@@ -254,7 +251,6 @@
                         
                         <h3 class="text-xl sm:text-2xl font-bold text-slate-800 mb-4 mt-10 pt-8 border-t border-slate-200">상세 기록</h3>
                         <div id="inbody-table-container" class="overflow-x-auto rounded-lg border border-slate-200 shadow-sm">
-                            <!-- InBody records table will be rendered here -->
                         </div>
                     </div>
                 </div>
@@ -264,7 +260,7 @@
         <div id="reset-all-modal" class="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center hidden z-50 p-4 modal-enter">
             <div class="bg-white rounded-xl p-6 md:p-8 shadow-2xl max-w-md w-full">
                 <h3 class="text-xl sm:text-2xl font-bold mb-4 text-slate-900">모든 기록을 삭제하시겠습니까?</h3>
-                <p class="text-slate-600 mb-8 text-sm sm:text-base">이 작업은 되돌릴 수 없습니다. 모든 운동 기록이 영구적으로 삭제되고, 새로운 사이클을 시작할 수 있도록 앱이 초기화됩니다.</p>
+                <p class="text-slate-600 mb-8 text-sm sm:text-base">이 작업은 되돌릴 수 없습니다. 모든 운동 기록과 신체 기록이 영구적으로 삭제되고, 앱이 초기화됩니다.</p>
                 <div class="flex justify-end gap-3">
                     <button id="cancel-reset-all" class="px-4 py-2 sm:px-5 sm:py-2.5 rounded-lg bg-slate-200 text-slate-800 font-bold hover:bg-slate-300 transition shadow-md">취소</button>
                     <button id="confirm-reset-all" class="px-4 py-2 sm:px-5 sm:py-2.5 rounded-lg bg-red-600 text-white font-bold hover:bg-red-700 transition shadow-md">삭제 및 초기화</button>
@@ -275,7 +271,7 @@
         <div id="new-cycle-modal" class="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center hidden z-50 p-4 modal-enter">
             <div class="bg-white rounded-xl p-6 md:p-8 shadow-2xl max-w-md w-full">
                 <h3 class="text-xl sm:text-2xl font-bold mb-4 text-slate-900">새로운 사이클을 시작하시겠습니까?</h3>
-                <p class="text-slate-600 mb-8 text-sm sm:text-base">기존의 모든 운동 기록은 '기록 보기' 탭에 보존됩니다. 1주차부터 새로운 13주 훈련 계획이 시작되며, 목표 중량은 이전 사이클의 성과를 바탕으로 재설정됩니다.</p>
+                <p class="text-slate-600 mb-8 text-sm sm:text-base">기존의 모든 운동 기록은 보존됩니다. 1주차부터 새로운 13주 훈련 계획이 시작되며, 목표 중량은 이전 사이클의 성과를 바탕으로 재설정됩니다.</p>
                 <div class="flex justify-end gap-3">
                     <button id="cancel-new-cycle" class="px-4 py-2 sm:px-5 sm:py-2.5 rounded-lg bg-slate-200 text-slate-800 font-bold hover:bg-slate-300 transition shadow-md">취소</button>
                     <button id="confirm-new-cycle" class="px-4 py-2 sm:px-5 sm:py-2.5 rounded-lg bg-blue-600 text-white font-bold hover:bg-blue-700 transition shadow-md">새 사이클 시작</button>
@@ -297,7 +293,6 @@
             </div>
         </div>
 
-        <!-- [NEW] Record Popup Modal in v6.0 -->
         <div id="record-popup-modal" class="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center hidden z-50 p-4 modal-enter">
             <div class="bg-white rounded-xl p-6 md:p-8 shadow-2xl max-w-4xl w-full flex flex-col" style="height: 90vh;">
                 <div class="flex-shrink-0 flex justify-between items-center mb-4">
@@ -448,7 +443,6 @@
     let movementPatternChart = null;
     let inbodyChart = null;
     
-    // DOM Elements
     const weekSelector = document.getElementById('week-selector');
     const daySelector = document.getElementById('day-selector');
     const workoutTitle = document.getElementById('workout-title');
@@ -489,7 +483,6 @@
         '디로딩 주간': 'bg-sky-100 text-sky-800'
     };
 
-    // UTILITY FUNCTIONS
     function getSanitizedName(exercise) {
          if(typeof exercise.name !== 'string' || typeof exercise.type !== 'string') return '';
          return (exercise.name + exercise.type).replace(/\s/g, '').replace(/[^a-zA-Z0-9가-힣]/g, '');
@@ -509,7 +502,6 @@
         return Math.round(number / 2.5) * 2.5;
     }
 
-    // CORE LOGIC: Get Week Info
     function getWeekInfo(week, cycleId) {
         if (week === 13) {
             return {
@@ -542,7 +534,7 @@
         return { phase, method, type, originalWeekData };
     }
 
-    // [MODIFIED in v12.2]
+    // [MODIFIED in v13.1]
     function getMainGoalText(exercise, week, cycleId, allRecords) {
         if (!exercise.baseTopSet) return null;
 
@@ -552,8 +544,9 @@
         const sanitizedName = getSanitizedName(exercise);
         const exerciseRecords = allRecords[sanitizedName] || [];
         
-        let previousWeight = exercise.baseTopSet;
-        let e1RM = calculateEpley1RM(exercise.baseTopSet, 6); // Default e1RM
+        let targetWeight = exercise.baseTopSet;
+        let e1RM = calculateEpley1RM(exercise.baseTopSet, 6);
+        let lastTopSet = { weight: exercise.baseTopSet, reps: 0 };
 
         const referenceRecords = exerciseRecords
             .filter(r => (r.cycleId < cycleId || (r.cycleId === cycleId && r.week < week)) && r.phase === '강화 주기' && getWeekInfo(r.week, r.cycleId).type === type)
@@ -569,6 +562,7 @@
             });
 
             if (topSet.weight > 0) {
+                lastTopSet = topSet;
                 let percentageChange = 1.0;
                 if (topSet.reps > 10) percentageChange = 1.05;
                 else if (topSet.reps >= 8) percentageChange = 1.025;
@@ -578,15 +572,13 @@
                 else if (topSet.reps === 3) percentageChange = 0.95;
                 else percentageChange = 0.90;
                 
-                previousWeight = topSet.weight * percentageChange;
+                targetWeight = topSet.weight * percentageChange;
                 e1RM = calculateEpley1RM(topSet.weight, topSet.reps);
             }
         }
         
         const rounder = exercise.name.includes('레그 프레스') ? roundToNearest5 : roundToNearest2point5;
-        const unitText = exercise.unit === '총' ? '(전체 중량)' :
-                           exercise.unit === '한쪽' ? '(한쪽 원판)' : '';
-
+        const unitText = exercise.unit ? (exercise.unit === '총' ? '(전체 중량)' : '(한쪽 원판)') : '';
         let boosterApplied = false;
 
         if (phase === '강화 주기') {
@@ -594,12 +586,13 @@
                 .filter(r => (r.cycleId < cycleId || (r.cycleId === cycleId && r.week < week)) && r.phase === '축적 주기' && getWeekInfo(r.week, r.cycleId).type === type)
                 .sort((a, b) => (b.cycleId - a.cycleId) || (b.week - a.week))[0];
 
-            if (lastAccumulationRecord && lastAccumulationRecord.sets && lastAccumulationRecord.sets.length > 0) {
+            if (lastAccumulationRecord?.sets?.length > 0) {
                 const dayData = getWeekInfo(lastAccumulationRecord.week, lastAccumulationRecord.cycleId).originalWeekData[lastAccumulationRecord.day];
                 const originalExercise = dayData.routine.find(ex => getSanitizedName(ex) === sanitizedName);
-                if(originalExercise && originalExercise.sets) {
+                if(originalExercise?.sets) {
+                    const tempGoalText = getMainGoalText(originalExercise, lastAccumulationRecord.week, lastAccumulationRecord.cycleId, allRecords) || "";
                     const setMatch = originalExercise.sets.match(/(\d+)(?:~(\d+))?세트/);
-                    const repMatch = getMainGoalText(originalExercise, lastAccumulationRecord.week, lastAccumulationRecord.cycleId, allRecords)?.match(/(\d+)-(\d+)회/);
+                    const repMatch = tempGoalText.match(/(\d+)-(\d+)회/);
                     
                     if(setMatch && repMatch) {
                         const maxSets = parseInt(setMatch[2] || setMatch[1]);
@@ -609,24 +602,36 @@
                                             lastAccumulationRecord.sets.every(s => s.reps >= maxReps);
 
                         if (allMaxedOut) {
-                            previousWeight *= 1.0125;
+                            targetWeight *= 1.0125;
                             boosterApplied = true;
                         }
                     }
                 }
             }
-        }
-        
-        if (phase === '강화 주기') {
-            const goalWeight = rounder(previousWeight);
-            const backoffWeight = rounder(goalWeight * 0.8);
+            
+            let goalWeight = rounder(targetWeight);
+
+            // [NEW in v13.1] Minimum Progression Guarantee
+            if (lastTopSet.reps >= 6 && goalWeight <= lastTopSet.weight) {
+                goalWeight = lastTopSet.weight + 2.5;
+            }
+
+            // [NEW in v13.1] Deload Floor
+            if (goalWeight < 10) {
+                goalWeight = 10;
+            }
+
+            let backoffWeight = rounder(goalWeight * 0.8);
+            if (backoffWeight < 10) {
+                backoffWeight = 10;
+            }
+            
             const boosterIcon = boosterApplied ? '🚀 ' : '';
             return `${boosterIcon}🔥 강화 목표: ${unitText} 탑 ${goalWeight}kg x 최대 반복 / 백오프 ${backoffWeight}kg x 8-10회.`;
-        } else if (phase === '축적 주기') {
+        } else { // 축적 주기
             const goalWeight = rounder(e1RM * 0.7);
             return `🔥 축적 목표: ${unitText} 워킹 세트 ${goalWeight}kg x 8-12회 (3-4세트).`;
         }
-        return null;
     }
     
     function getSmartAssistanceGoal(exercise, allRecords) {
@@ -665,15 +670,16 @@
             let newMinWeight = minWeightGoal;
             let newMaxWeight = maxWeightGoal;
 
-            if (performedVolume >= maxTargetVolume) { // Success -> Progression
+            if (performedVolume >= maxTargetVolume) {
                 newMinWeight += increment;
                 newMaxWeight += increment;
-            } else if (performedVolume < minTargetVolume) { // Failure -> Deload
+            } else if (performedVolume < minTargetVolume) {
                 newMinWeight -= increment;
                 newMaxWeight -= increment;
-                newMinWeight = Math.max(0, newMinWeight);
-                newMaxWeight = Math.max(0, newMaxWeight);
             }
+
+            newMinWeight = Math.max(0, newMinWeight);
+            newMaxWeight = Math.max(0, newMaxWeight);
 
             const prefix = currentGoal.includes('한쪽') ? '한쪽 ' : '';
             if (newMinWeight >= newMaxWeight) {
@@ -685,7 +691,6 @@
         }, initialGoal);
     }
 
-    // LOCAL STORAGE & DATA HANDLING
     function saveAllSets(exercise) {
         const sanitizedName = getSanitizedName(exercise);
         let records = JSON.parse(localStorage.getItem('workoutRecords')) || {};
@@ -700,10 +705,7 @@
         } else {
             const { phase, originalWeekData } = getWeekInfo(currentWeek, currentCycleId);
             const dayName = originalWeekData[currentDay]?.name || '';
-            currentRecord = {
-                date: today, week: currentWeek, day: currentDay, dayName: dayName,
-                phase: phase, sets: [], cycleId: currentCycleId
-            };
+            currentRecord = { date: today, week: currentWeek, day: currentDay, dayName, phase, sets: [], cycleId: currentCycleId };
         }
 
         const setsContainer = document.getElementById(`sets-container-${sanitizedName}`);
@@ -718,13 +720,13 @@
         }
 
         if (recordIndex > -1) {
-            records[sanitizedName][recordIndex] = currentRecord;
+            if (currentRecord.sets.length > 0) {
+                records[sanitizedName][recordIndex] = currentRecord;
+            } else {
+                 records[sanitizedName].splice(recordIndex, 1);
+            }
         } else if (currentRecord.sets.length > 0) {
             records[sanitizedName].push(currentRecord);
-        }
-
-        if (currentRecord.sets.length === 0 && recordIndex > -1) {
-            records[sanitizedName].splice(recordIndex, 1);
         }
 
         localStorage.setItem('workoutRecords', JSON.stringify(records));
@@ -734,14 +736,8 @@
         const sanitizedName = getSanitizedName(exercise);
         const records = JSON.parse(localStorage.getItem('workoutRecords')) || {};
         const exerciseRecords = records[sanitizedName];
-
         if (!exerciseRecords?.length) return null;
-
-        const sessionRecords = exerciseRecords.filter(r => 
-            r.week === currentWeek && r.day === currentDay && r.cycleId === currentCycleId
-        );
-
-        return sessionRecords.sort((a, b) => new Date(b.date) - new Date(a.date))[0] || null;
+        return exerciseRecords.find(r => r.week === currentWeek && r.day === currentDay && r.cycleId === currentCycleId) || null;
     }
 
     function openRecordPopup(sanitizedName, exerciseName) {
@@ -756,12 +752,12 @@
             renderRecordsTable(exerciseData, 'record-popup-table-container');
         } else {
             if (popupChartInstance) popupChartInstance.destroy();
+            document.getElementById('record-popup-chart').getContext('2d').clearRect(0, 0, 300, 150);
             document.getElementById('record-popup-table-container').innerHTML = `<p class="p-4 text-center text-slate-500">이 운동에 대한 기록이 아직 없습니다.</p>`;
         }
         modal.classList.remove('hidden');
     }
 
-    // UI RENDERING
     function renderWorkout() {
         const { phase, method, originalWeekData } = getWeekInfo(currentWeek, currentCycleId);
         const cycleTypeText = (currentCycleId % 2 === 1) ? '블록 주기화' : '주간 파동형 주기화';
@@ -862,7 +858,7 @@
             <input type="number" data-type="reps" value="${setData.reps}" placeholder="횟수" class="w-full p-2.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition text-lg">
             <span class="font-semibold text-slate-400">회</span>
             <button type="button" class="delete-set-btn p-2 text-slate-400 hover:text-red-500 transition">
-                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path d="M5.5 5.5A.5.5 0 0 1 6 6v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5m2.5 0a.5.5 0 0 1 .5.5v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5m3 .5a.5.5 0 0 0-1 0v6a.5.5 0 0 0 1 0z"/><path fill-rule="evenodd" d="M14.5 3a1 1 0 0 1-1 1H13v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V4h-.5a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1H6a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1h3.5a1 1 0 0 1 1 1zM4.118 4L4 4.059V13a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1V4.059L11.882 4zM2.5 3h11V2h-11z"/></svg>
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path d="M5.5 5.5A.5.5 0 0 1 6 6v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5m2.5 0a.5.5 0 0 1 .5.5v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5m3 .5a.5.5 0 0 0-1 0v6a.5.5 0 0 0 1 0z"/><path fill-rule="evenodd" d="M14.5 3a1 1 0 0 1-1 1H13v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V4h-.5a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1H6a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1h3.5a1 1 0 0 1 1 1zM4.118 4 4 4.059V13a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1V4.059L11.882 4zM2.5 3h11V2h-11z"/></svg>
             </button>
         `;
         container.appendChild(setRow);
@@ -880,26 +876,20 @@
         });
     }
     
-    // UI NAVIGATION & STATE
     function updateActiveButtons() {
         document.querySelectorAll('#week-selector button').forEach(btn => btn.classList.toggle('week-btn-active', parseInt(btn.dataset.week) === currentWeek));
         document.querySelectorAll('#day-selector button').forEach(btn => btn.classList.toggle('day-btn-active', btn.dataset.day === currentDay));
     }
     
-    // [MODIFIED in v13.0]
     function showView(viewName) {
-        document.getElementById('view-today').classList.toggle('hidden', viewName !== 'today');
-        document.getElementById('view-plan').classList.toggle('hidden', viewName !== 'plan');
-        document.getElementById('view-records').classList.toggle('hidden', viewName !== 'records');
-        document.getElementById('view-bodycomp').classList.toggle('hidden', viewName !== 'bodycomp');
-        
-        document.getElementById('tab-today').classList.toggle('tab-active', viewName === 'today');
-        document.getElementById('tab-plan').classList.toggle('tab-active', viewName === 'plan');
-        document.getElementById('tab-records').classList.toggle('tab-active', viewName === 'records');
-        document.getElementById('tab-bodycomp').classList.toggle('tab-active', viewName === 'bodycomp');
-        
-        ['today', 'plan', 'records', 'bodycomp'].forEach(tab => {
-            document.getElementById(`tab-${tab}`).classList.toggle('text-slate-500', viewName !== tab);
+        ['today', 'plan', 'records', 'bodycomp'].forEach(view => {
+            const viewEl = document.getElementById(`view-${view}`);
+            const tabEl = document.getElementById(`tab-${view}`);
+            if (viewEl) viewEl.classList.toggle('hidden', view !== viewName);
+            if (tabEl) {
+                tabEl.classList.toggle('tab-active', view === viewName);
+                tabEl.classList.toggle('text-slate-500', view !== viewName);
+            }
         });
 
         if (viewName === 'records') {
@@ -980,10 +970,9 @@
                     { label: '당기기/힙힌지 (후면)', data: [patternVolumes.horizontal_pull, patternVolumes.vertical_pull, patternVolumes.hip_hinge], backgroundColor: 'rgba(239, 68, 68, 0.7)' }
                 ]
             },
-            options: { responsive: true, maintainAspectRatio: false, indexAxis: 'y' /* ... other options ... */ }
+            options: { responsive: true, maintainAspectRatio: false, indexAxis: 'y' }
         });
 
-        // AI Feedback Generation
         let feedback = `${cycleInfo.cycleId} 사이클(${isBlock ? '블록' : '파동형'} 주기)의 ${feedbackPeriodText}간 훈련을 분석했습니다. `;
         let issues = [];
         const checkBalance = (a, b, nameA, nameB) => { if ((a + b) > 100 && (a / (a + b) > 0.625 || a / (a + b) < 0.375)) issues.push(`${nameA}과 ${nameB}의 불균형이 감지됩니다.`) };
@@ -997,7 +986,6 @@
         document.getElementById('ai-feedback-text').textContent = feedback;
     }
 
-    // RECORDS VIEW LOGIC
     function populateExerciseSelector() {
         const exerciseGroupMap = new Map();
         Object.values(workoutPlan).forEach(weekData => {
@@ -1049,7 +1037,6 @@
         renderRecordsTable(combinedData, 'records-table-container');
     }
     
-    // [MODIFIED in v13.0]
     function renderProgressChart(data, canvasId) {
         const chartCanvas = document.getElementById(canvasId);
         const ctx = chartCanvas.getContext('2d');
@@ -1145,7 +1132,6 @@
         };
     }
 
-    // [NEW in v13.0] InBody Data Handling
     function saveInbodyRecord(record) {
         let records = JSON.parse(localStorage.getItem('inbodyRecords')) || [];
         const recordIndex = records.findIndex(r => r.date === record.date);
@@ -1226,8 +1212,6 @@
         renderBodycompView();
     }
 
-
-    // INITIALIZATION & EVENT LISTENERS
     function initApp() {
         const savedState = JSON.parse(localStorage.getItem('workoutState')) || {};
         currentWeek = savedState.currentWeek || 1;
@@ -1260,10 +1244,7 @@
         cancelResetAll.addEventListener('click', () => resetAllModal.classList.add('hidden'));
         confirmResetAll.addEventListener('click', () => {
             localStorage.clear();
-            currentWeek = 1; currentDay = 'pull'; currentCycleId = 1;
-            initApp();
-            showView('today');
-            resetAllModal.classList.add('hidden');
+            window.location.reload();
         });
 
         newCycleButton.addEventListener('click', () => newCycleModal.classList.remove('hidden'));
@@ -1306,7 +1287,11 @@
                 smm: parseFloat(document.getElementById('inbody-smm').value),
                 fatPercentage: parseFloat(document.getElementById('inbody-fat').value)
             };
-            if (!record.date) { alert('날짜를 선택해주세요.'); return; }
+            if (!record.date) { 
+                const customAlert = document.getElementById('custom-alert');
+                if(customAlert) customAlert.style.display = 'flex';
+                return;
+            }
             saveInbodyRecord(record);
             renderBodycompView();
             inbodyForm.reset();
@@ -1315,11 +1300,38 @@
 
         document.getElementById('inbody-table-container').addEventListener('click', e => {
             if (e.target.classList.contains('delete-inbody-btn')) {
-                if (confirm('이 기록을 삭제하시겠습니까?')) {
-                    deleteInbodyRecord(e.target.dataset.date);
+                const customConfirm = document.getElementById('custom-confirm');
+                if(customConfirm) {
+                    customConfirm.querySelector('#confirm-message').textContent = '이 기록을 정말 삭제하시겠습니까?';
+                    customConfirm.style.display = 'flex';
+                    
+                    const confirmBtn = customConfirm.querySelector('#confirm-ok-btn');
+                    
+                    const newConfirmBtn = confirmBtn.cloneNode(true);
+                    confirmBtn.parentNode.replaceChild(newConfirmBtn, confirmBtn);
+
+                    newConfirmBtn.addEventListener('click', () => {
+                        deleteInbodyRecord(e.target.dataset.date);
+                        customConfirm.style.display = 'none';
+                    });
                 }
             }
         });
+        
+        const customConfirm = document.getElementById('custom-confirm');
+        if(customConfirm) {
+            customConfirm.querySelector('#confirm-cancel-btn').addEventListener('click', () => {
+                customConfirm.style.display = 'none';
+            });
+        }
+        
+        const customAlert = document.getElementById('custom-alert');
+        if(customAlert) {
+            customAlert.querySelector('#alert-ok-btn').addEventListener('click', () => {
+                customAlert.style.display = 'none';
+            });
+        }
+
 
         document.getElementById('inbody-date').valueAsDate = new Date();
         
