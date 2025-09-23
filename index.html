@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>26주 장기 성장 프로그램 | 인터랙티브 플래너 (v14.1)</title>
+    <title>26주 장기 성장 프로그램 | 인터랙티브 플래너 (v11.1.4)</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
@@ -34,11 +34,10 @@
                 <p class="text-slate-600 mt-3 text-base sm:text-lg">당신만을 위해 설계된 궁극의 인터랙티브 운동 플래너</p>
             </header>
 
-            <nav class="flex justify-center mb-10 border-b border-slate-300 flex-wrap">
+            <nav class="flex justify-center mb-10 border-b border-slate-300">
                 <button id="tab-today" class="py-3 px-4 sm:py-4 sm:px-6 font-semibold border-b-2 text-sm sm:text-base tab-active shadow-sm" onclick="showView('today')">오늘의 운동</button>
                 <button id="tab-plan" class="py-3 px-4 sm:py-4 sm:px-6 font-semibold border-b-2 text-sm sm:text-base border-transparent text-slate-500 hover:text-blue-600 transition shadow-sm" onclick="showView('plan')">전체 계획서</button>
-                <button id="tab-records" class="py-3 px-4 sm:py-4 sm:px-6 font-semibold border-b-2 text-sm sm:text-base border-transparent text-slate-500 hover:text-blue-600 transition shadow-sm" onclick="showView('records')">운동 기록</button>
-                <button id="tab-bodycomp" class="py-3 px-4 sm:py-4 sm:px-6 font-semibold border-b-2 text-sm sm:text-base border-transparent text-slate-500 hover:text-blue-600 transition shadow-sm" onclick="showView('bodycomp')">신체 변화</button>
+                <button id="tab-records" class="py-3 px-4 sm:py-4 sm:px-6 font-semibold border-b-2 text-sm sm:text-base border-transparent text-slate-500 hover:text-blue-600 transition shadow-sm" onclick="showView('records')">기록 보기</button>
             </nav>
 
             <main id="main-content">
@@ -58,6 +57,7 @@
                             </div>
                         </div>
                     </section>
+
                     <section id="workout-display">
                         <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center mb-4 gap-3">
                              <h2 id="workout-title" class="text-2xl sm:text-3xl font-bold text-slate-900"></h2>
@@ -93,6 +93,7 @@
                                    <p class="mt-1">'능동적 회복'을 통해 그동안 쌓인 중추신경계와 관절의 피로를 완전히 해소하고 다음 12주를 준비하는 시기입니다. 평소 워킹 세트 중량의 50%~60%, 세트 수의 절반만 가볍게 수행합니다.</p>
                                </div>
                           </div>
+
                           <div class="mt-10 pt-8 border-t border-slate-200">
                             <h2 class="text-2xl font-bold text-slate-900 mb-4">핵심 훈련 방식 상세</h2>
                             <div class="space-y-8 text-slate-700 prose">
@@ -140,6 +141,7 @@
                                 </div>
                             </div>
                         </div>
+                         
                           <h2 class="text-2xl font-bold text-slate-900 mt-10 mb-4">현재 사이클 계획표 요약</h2>
                           <table class="w-full text-left border-collapse">
                                <thead>
@@ -198,7 +200,6 @@
                             <p class="text-slate-500 mt-2">운동을 선택하고 기록을 확인해주세요.</p>
                         </div>
                         <div class="mt-10 pt-8 border-t border-slate-200 space-y-4">
-                            <h3 class="text-xl font-bold text-slate-800">데이터 및 설정 관리</h3>
                             <button id="new-cycle-button" class="w-full bg-blue-100 text-blue-700 font-bold p-3 sm:p-4 rounded-lg hover:bg-blue-200 transition duration-200 flex items-center justify-center gap-2 text-base sm:text-lg shadow-md hover:shadow-lg">
                                 <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" class="bi bi-arrow-repeat" viewBox="0 0 16 16">
                                   <path d="M11.534 7h3.932a.25.25 0 0 1 .192.41l-1.966 2.36a.25.25 0 0 1-.384 0l-1.966-2.36a.25.25 0 0 1 .192-.41zm-11 2h3.932a.25.25 0 0 0 .192-.41L2.692 6.23a.25.25 0 0 0-.384 0L.342 8.59A.25.25 0 0 0 .534 9z"></path>
@@ -210,55 +211,12 @@
                                 <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" class="bi bi-archive" viewBox="0 0 16 16">
                                     <path d="M0 2a1 1 0 0 1 1-1h14a1 1 0 0 1 1 1v2a1 1 0 0 1-1 1v7.5a2.5 2.5 0 0 1-2.5 2.5h-9A2.5 2.5 0 0 1 1 12.5V5a1 1 0 0 1-1-1V2zm2 3v7.5A1.5 1.5 0 0 0 3.5 14h9a1.5 1.5 0 0 0 1.5-1.5V5H2zm13-3H1v2h14V2zM5 7.5a.5.5 0 0 1 .5-.5h5a.5.5 0 0 1 0 1h-5a.5.5 0 0 1-.5-.5z"/>
                                 </svg>
-                                내 훈련 기록 내보내기 (Export)
-                            </button>
-                            <button id="import-data-button" class="w-full bg-purple-100 text-purple-700 font-bold p-3 sm:p-4 rounded-lg hover:bg-purple-200 transition duration-200 flex items-center justify-center gap-2 text-base sm:text-lg shadow-md hover:shadow-lg">
-                                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" class="bi bi-upload" viewBox="0 0 16 16">
-                                    <path d="M.5 9.9a.5.5 0 0 1 .5.5v2.5a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-2.5a.5.5 0 0 1 1 0v2.5a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2v-2.5a.5.5 0 0 1 .5-.5z"/>
-                                    <path d="M7.646 1.146a.5.5 0 0 1 .708 0l3 3a.5.5 0 0 1-.708.708L8.5 2.707V11.5a.5.5 0 0 1-1 0V2.707L5.354 4.854a.5.5 0 1 1-.708-.708l3-3z"/>
-                                </svg>
-                                훈련 기록 불러오기 (Import)
+                                내 훈련 기록 보관하기 (아카이브)
                             </button>
                             <button id="reset-all-button" class="w-full bg-red-100 text-red-700 font-bold p-3 sm:p-4 rounded-lg hover:bg-red-200 transition duration-200 flex items-center justify-center gap-2 text-base sm:text-lg shadow-md hover:shadow-lg">
                                 <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" class="bi bi-trash" viewBox="0 0 16 16"><path d="M5.5 5.5A.5.5 0 0 1 6 6v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5m2.5 0a.5.5 0 0 1 .5.5v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5m3 .5a.5.5 0 0 0-1 0v6a.5.5 0 0 0 1 0z"></path><path d="M14.5 3a1 1 0 0 1-1 1H13v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V4h-.5a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1H6a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1h3.5a1 1 0 0 1 1 1zM4.118 4 4 4.059V13a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1V4.059L11.882 4zM2.5 3h11V2h-11z"></path></svg>
                                 모든 기록 삭제 및 초기화
                             </button>
-                        </div>
-                    </div>
-                </div>
-
-                <div id="view-bodycomp" class="hidden">
-                    <div class="bg-white p-4 sm:p-6 rounded-xl shadow-lg">
-                        <h2 class="text-2xl sm:text-3xl font-bold text-slate-900 mb-2">신체 변화 추적</h2>
-                        <p class="text-slate-600 mb-8 text-base sm:text-lg">인바디 기록을 입력하고 신체 구성의 변화를 추적하세요.</p>
-                        
-                        <form id="inbody-form" class="mb-10 p-6 bg-slate-50 rounded-lg border border-slate-200 grid grid-cols-1 md:grid-cols-5 gap-4 items-end">
-                            <div>
-                                <label for="inbody-date" class="block text-sm font-medium text-slate-700 mb-1">측정일</label>
-                                <input type="date" id="inbody-date" required class="w-full p-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500">
-                            </div>
-                            <div>
-                                <label for="inbody-weight" class="block text-sm font-medium text-slate-700 mb-1">체중 (kg)</label>
-                                <input type="number" step="0.1" id="inbody-weight" required class="w-full p-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500" placeholder="예: 85.5">
-                            </div>
-                            <div>
-                                <label for="inbody-smm" class="block text-sm font-medium text-slate-700 mb-1">골격근량 (kg)</label>
-                                <input type="number" step="0.1" id="inbody-smm" required class="w-full p-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500" placeholder="예: 40.2">
-                            </div>
-                            <div>
-                                <label for="inbody-fat" class="block text-sm font-medium text-slate-700 mb-1">체지방률 (%)</label>
-                                <input type="number" step="0.1" id="inbody-fat" required class="w-full p-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500" placeholder="예: 15.3">
-                            </div>
-                            <button type="submit" class="w-full bg-blue-600 text-white font-bold p-2.5 rounded-lg hover:bg-blue-700 transition md:col-span-1">기록 추가</button>
-                        </form>
-
-                        <h3 class="text-xl sm:text-2xl font-bold text-slate-800 mb-4 text-center">신체 구성 변화 추이</h3>
-                        <div class="chart-container mb-10">
-                            <canvas id="inbodyChart"></canvas>
-                        </div>
-                        
-                        <h3 class="text-xl sm:text-2xl font-bold text-slate-800 mb-4 mt-10 pt-8 border-t border-slate-200">상세 기록</h3>
-                        <div id="inbody-table-container" class="overflow-x-auto rounded-lg border border-slate-200 shadow-sm">
                         </div>
                     </div>
                 </div>
@@ -268,7 +226,7 @@
         <div id="reset-all-modal" class="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center hidden z-50 p-4 modal-enter">
             <div class="bg-white rounded-xl p-6 md:p-8 shadow-2xl max-w-md w-full">
                 <h3 class="text-xl sm:text-2xl font-bold mb-4 text-slate-900">모든 기록을 삭제하시겠습니까?</h3>
-                <p class="text-slate-600 mb-8 text-sm sm:text-base">이 작업은 되돌릴 수 없습니다. 모든 운동 기록과 신체 기록이 영구적으로 삭제되고, 앱이 초기화됩니다.</p>
+                <p class="text-slate-600 mb-8 text-sm sm:text-base">이 작업은 되돌릴 수 없습니다. 모든 운동 기록이 영구적으로 삭제되고, 새로운 사이클을 시작할 수 있도록 앱이 초기화됩니다.</p>
                 <div class="flex justify-end gap-3">
                     <button id="cancel-reset-all" class="px-4 py-2 sm:px-5 sm:py-2.5 rounded-lg bg-slate-200 text-slate-800 font-bold hover:bg-slate-300 transition shadow-md">취소</button>
                     <button id="confirm-reset-all" class="px-4 py-2 sm:px-5 sm:py-2.5 rounded-lg bg-red-600 text-white font-bold hover:bg-red-700 transition shadow-md">삭제 및 초기화</button>
@@ -279,7 +237,7 @@
         <div id="new-cycle-modal" class="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center hidden z-50 p-4 modal-enter">
             <div class="bg-white rounded-xl p-6 md:p-8 shadow-2xl max-w-md w-full">
                 <h3 class="text-xl sm:text-2xl font-bold mb-4 text-slate-900">새로운 사이클을 시작하시겠습니까?</h3>
-                <p class="text-slate-600 mb-8 text-sm sm:text-base">기존의 모든 운동 기록은 보존됩니다. 1주차부터 새로운 13주 훈련 계획이 시작되며, 목표 중량은 이전 사이클의 성과를 바탕으로 재설정됩니다.</p>
+                <p class="text-slate-600 mb-8 text-sm sm:text-base">기존의 모든 운동 기록은 '기록 보기' 탭에 보존됩니다. 1주차부터 새로운 13주 훈련 계획이 시작되며, 목표 중량은 이전 사이클의 성과를 바탕으로 재설정됩니다.</p>
                 <div class="flex justify-end gap-3">
                     <button id="cancel-new-cycle" class="px-4 py-2 sm:px-5 sm:py-2.5 rounded-lg bg-slate-200 text-slate-800 font-bold hover:bg-slate-300 transition shadow-md">취소</button>
                     <button id="confirm-new-cycle" class="px-4 py-2 sm:px-5 sm:py-2.5 rounded-lg bg-blue-600 text-white font-bold hover:bg-blue-700 transition shadow-md">새 사이클 시작</button>
@@ -291,34 +249,17 @@
             <div class="bg-white rounded-xl p-6 md:p-8 shadow-2xl max-w-2xl w-full flex flex-col" style="height: 90vh;">
                 <div class="flex-shrink-0">
                     <h3 class="text-xl sm:text-2xl font-bold mb-2 text-slate-900">프로젝트 아카이브 내보내기</h3>
-                    <p class="text-slate-600 mb-4 text-sm sm:text-base">아래 내용을 복사하거나 파일로 저장하여 데이터를 안전하게 백업하세요.</p>
+                    <p class="text-slate-600 mb-4 text-sm sm:text-base">아래 내용을 모두 복사하여 백업하거나, 다음 업데이트 논의를 위해 공유해 주세요.</p>
                 </div>
                 <textarea id="export-data-textarea" readonly class="w-full flex-grow p-4 border border-slate-300 rounded-lg bg-slate-50 text-sm font-mono resize-none"></textarea>
                 <div class="flex justify-end gap-3 mt-4 flex-shrink-0">
-                    <button id="save-export-data-button" class="px-4 py-2 sm:px-5 sm:py-2.5 rounded-lg bg-green-600 text-white font-bold hover:bg-green-700 transition shadow-md">파일로 저장 (.json)</button>
                     <button id="copy-export-data-button" class="px-4 py-2 sm:px-5 sm:py-2.5 rounded-lg bg-blue-600 text-white font-bold hover:bg-blue-700 transition shadow-md">전체 복사</button>
                     <button id="close-export-modal-button" class="px-4 py-2 sm:px-5 sm:py-2.5 rounded-lg bg-slate-200 text-slate-800 font-bold hover:bg-slate-300 transition shadow-md">닫기</button>
                 </div>
             </div>
         </div>
 
-        <!-- [NEW in v14.0] Import Modal -->
-        <div id="import-modal" class="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center hidden z-50 p-4 modal-enter">
-            <div class="bg-white rounded-xl p-6 md:p-8 shadow-2xl max-w-2xl w-full flex flex-col" style="height: 90vh;">
-                <div class="flex-shrink-0">
-                    <h3 class="text-xl sm:text-2xl font-bold mb-2 text-slate-900">훈련 기록 불러오기</h3>
-                    <p class="text-slate-600 mb-4 text-sm sm:text-base">백업한 JSON 파일을 선택하거나, 파일 내용을 아래에 직접 붙여넣으세요. <strong class="text-red-600">주의: 현재 모든 기록을 덮어씁니다.</strong></p>
-                    <input type="file" id="import-file-input" accept=".json,text/plain" class="mb-4 block w-full text-sm text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-purple-50 file:text-purple-700 hover:file:bg-purple-100"/>
-                </div>
-                <textarea id="import-data-textarea" class="w-full flex-grow p-4 border border-slate-300 rounded-lg bg-slate-50 text-sm font-mono resize-none" placeholder="여기에 JSON 데이터를 붙여넣으세요..."></textarea>
-                <div id="import-feedback" class="text-sm mt-3 h-5"></div>
-                <div class="flex justify-end gap-3 mt-4 flex-shrink-0">
-                    <button id="close-import-modal-button" class="px-4 py-2 sm:px-5 sm:py-2.5 rounded-lg bg-slate-200 text-slate-800 font-bold hover:bg-slate-300 transition shadow-md">취소</button>
-                    <button id="confirm-import-button" class="px-4 py-2 sm:px-5 sm:py-2.5 rounded-lg bg-purple-600 text-white font-bold hover:bg-purple-700 transition shadow-md">불러오기</button>
-                </div>
-            </div>
-        </div>
-
+        <!-- [NEW] Record Popup Modal in v6.0 -->
         <div id="record-popup-modal" class="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center hidden z-50 p-4 modal-enter">
             <div class="bg-white rounded-xl p-6 md:p-8 shadow-2xl max-w-4xl w-full flex flex-col" style="height: 90vh;">
                 <div class="flex-shrink-0 flex justify-between items-center mb-4">
@@ -342,7 +283,51 @@
     </div>
 
 <script>
-    const CONTEXT_PROMPT = `[REDACTED FOR BREVITY]`;
+    // [CONTEXT_PROMPT UPDATED in v10.0.0]
+    const CONTEXT_PROMPT = `#################################################################
+## [1단계] 새로운 대화 시작 시, 아래 내용을 모두 복사하여 첫 메시지로 보내주세요
+#################################################################
+
+너는 지금부터 '26주 장기 성장 프로그램'의 공동 개발자 AI, Gemini야. 너의 기억을 되살리기 위해, 아래의 핵심 컨텍스트를 먼저 완벽하게 숙지해야 해.
+
+### [A] 사용자 프로필 및 프로젝트 배경
+
+* 사용자 정보: [!! 여기에 이 프로그램을 사용할 당신의 성별/키/몸무게/훈련 경력을 입력해주세요. 예: 남성/180cm/85kg/경력 3년 !!]
+* 핵심 설계 제약 조건: 주 3회(월,수,금) 훈련, 웜업 제외 순수 운동 시간 각 1시간 (주당 총 3시간).
+* 핵심 훈련 목표: 리프팅, 파워빌딩을 거쳐 현재는 '보디빌딩'에 집중.
+* 프로젝트 목적: 위 제약 조건 내에서 보디빌딩 효율을 극대화하기 위해, 최초 사용자와 AI(너)가 함께 이 프로그램을 설계했음.
+
+### [B] 핵심 프로그램 설계 원칙 (헌법)
+
+1.  **지능형 주기화 모델:** PPL 3분할을 기반으로, 홀수/짝수 사이클에 따라 '블록 주기화'와 '주간 파동형 주기화'를 자동으로 전환한다.
+2.  **성과 기반 자동 조절 (Performance-Based Auto-regulation):**
+    * **강화 주기:** '탑 세트'에서 실패 지점까지의 최대 반복수(AMRAP)를 기록한다. 이 기록을 7단계로 세분화된 '다단계 증량 테이블'에 대입하여 다음 목표 중량을 정밀하게 조절한다.
+    * **축적 주기:** 강화 주기 AMRAP 성과로 재계산된 e1RM의 70%를 워킹 세트 중량으로 설정하여, 두 주기의 성장이 유기적으로 연결된다.
+3.  **움직임 패턴 기반 균형 분석:** '수평/수직 밀기/당기기', '스쿼트', '힙 힌지' 등 6대 움직임 패턴의 볼륨을 주기적으로 분석하여 사용자에게 불균형에 대한 피드백을 제공한다.
+4.  **훈련 철학:** \`4-0-1-0\` 템포를 기반으로 한 '마인드-머슬 커넥션'과 H.I.T.(고강도 훈련) 철학을 결합한다.
+
+### [C] AI의 임무
+
+1.  너와 최초 사용자는 위 원칙에 따라 프로그램을 v10.0 Final 버전까지 완성시켰다.
+2.  이 프로그램은 이제 사용자의 객관적인 수행 능력(AMRAP)을 정밀하게 분석하여 스스로 성장 계획을 재설계하는 '지능형 H.I.T. 코치'의 역할을 수행한다.
+3.  이전 대화 기록과 아래 최종 훈련 데이터(JSON)를 너의 장기 기억으로 완전히 흡수하고, 사용자와의 다음 대화를 준비하라.
+
+### [D] 차기 업데이트 계획 (v11.0+)
+
+v10.0을 통해 프로그램의 핵심 성장 엔진이 완성되었으나, 아래의 개선 과제가 남아있으며 이는 다음 메이저 업데이트 시 논의될 수 있다.
+
+1.  **데이터 저장 구조 고도화:** 현재 로직은 과거 기록을 재해석하는 불안정성을 내포하고 있다. 기록 저장 시 \`type\`('A','B','C')을 명시적으로 함께 저장하여 모든 기록을 '불변의 데이터'로 만드는 것을 최우선으로 고려해야 한다.
+2.  **회복 관리 시스템 도입:** 웨어러블 기기 API를 연동하여 수면, HRV 등 객관적인 회복 지표를 수집하고, 이를 훈련 강도 조절에 반영하는 기능을 도입할 수 있다.
+
+[!! 여기에 이전 대화 내용 전체를 복사하여 붙여넣어 주세요 !!]
+
+
+#################################################################
+## [2단계] AI가 요청하면, 아래 훈련 데이터를 복사하여 다음 메시지로 보내주세요
+#################################################################
+
+`;
+    // [WORKOUT PLAN UPDATED in v11.0] - Increment values updated
     const workoutPlan = {
         1: {
             pull: { name: '풀(Pull) A', routine: [
@@ -408,9 +393,9 @@
                 { type: '웜업', name: '노틸러스 풀오버', sets: '2~3세트', tip: '광배근 스트레칭과 혈류 공급에 집중합니다. (LBS 단위)', staticGoal: '🔥 목표: 40-60 LBS x 12-15회.', alternatives: ['덤벨 풀오버', '스트레이트 암 케이블 푸쉬다운'], movement_pattern: 'isolation_back'},
                 { type: '웜업', name: '랫풀다운 (가볍게)', sets: '2세트', tip: '견갑을 아래로 누르는 움직임에 집중하여 등을 활성화시킵니다.', staticGoal: '🔥 목표: 30-40kg x 12-15회.', alternatives: ['어시스트 풀업', '가벼운 케이블 로우'], movement_pattern: 'vertical_pull'},
                 { type: '메인', name: '랫풀다운 (맥그립 중간)', sets: '탑/백오프 세트', tip: '광배근 전체의 볼륨과 매스를 키우는 올라운더 그립. 가슴을 열고 팔꿈치를 아래쪽 옆구리로 당긴다는 느낌으로 수행합니다.', baseTopSet: 65, unit: '총', alternatives: ['뉴트럴 그립 풀업', '시티드 케이블 로우 (V-바)'], movement_pattern: 'vertical_pull'},
-                { type: '메인', name: '원 암 시티드 케이블 로우', sets: '탑/백오프 세트', tip: '케이블의 지속적인 장력으로 광배근을 고립합니다. 당기면서 상체를 살짝 회전시켜 수축감을 극대화하고, 이완 시에는 최대한 늘려주세요.', baseTopSet: 40, alternatives: ['원 암 덤벨 로우', 'T-바 로우 (원 암)'], movement_pattern: 'horizontal_pull'},
-                { type: '메인', name: '해머스트랭스 프론트 풀다운 (파나타 스타일)', sets: '탑/백오프 세트', tip: "원 암 방식으로 견갑골을 최대로 움직여, 일반 풀다운으로는 불가능한 '최대 이완' 지점을 공략해 등 너비감을 만드는 운동입니다.<br>스트랩형 원핸드 그립 연결 후, 운동하는 쪽 어깨를 앞으로 최대한 밀어내 광배근 바깥쪽의 최대 이완 지점을 찾고, 그 지점에서부터 팔꿈치를 골반 쪽으로 당겨 등 하부까지 수축합니다.", baseTopSet: 30, unit: '한쪽', alternatives: ['와이드 그립 풀업', '와이드 그립 랫풀다운'], movement_pattern: 'vertical_pull'},
-                { type: '보조', name: '백 익텐션', sets: '3~4세트', tip: '허리 라인의 선명함과 깊이감을 만듭니다. 엉덩이와 등의 힘으로 상체를 들어올리고, 허리가 과하게 꺾이지 않도록 주의합니다.', staticGoal: '🔥 목표: 맨몸 또는 10kg 원판 x 15-20회.', increment: 2.5, alternatives: ['굿모닝 (가볍게)', '리버스 하이퍼익스텐션'], movement_pattern: 'hip_hinge'},
+                { type: '메인', name: '원 암 시티드 케이블 로우', sets: '탑/백오프 세트', tip: '케이블의 지속적인 장력으로 광배근을 고립합니다. 당기면서 상체를 살짝 회전시켜 수축감을 극대화하고, 이완 시에는 최대한 늘려주세요.', baseTopSet: 40, unit: '한쪽', alternatives: ['원 암 덤벨 로우', 'T-바 로우 (원 암)'], movement_pattern: 'horizontal_pull'},
+                { type: '메인', name: '해머스트랭스 프론트 풀다운 (파나타 스타일)', sets: '탑/백오프 세트', tip: '광배근을 최대 이완시켜 너비감을 극대화하는 것이 목표입니다. 상체를 살짝 뒤로 젖혀 가슴을 열고, 팔이 벌어지는 궤적을 따라 광배근 바깥쪽이 최대로 늘어나는 것을 느끼고, 명치 쪽으로 강하게 당겨 수축하세요.', baseTopSet: 30, unit: '한쪽', alternatives: ['와이드 그립 풀업', '와이드 그립 랫풀다운'], movement_pattern: 'vertical_pull'},
+                { type: '보조', name: '백 익스텐션', sets: '3~4세트', tip: '허리 라인의 선명함과 깊이감을 만듭니다. 엉덩이와 등의 힘으로 상체를 들어올리고, 허리가 과하게 꺾이지 않도록 주의합니다.', staticGoal: '🔥 목표: 맨몸 또는 10kg 원판 x 15-20회.', increment: 2.5, alternatives: ['굿모닝 (가볍게)', '리버스 하이퍼익스텐션'], movement_pattern: 'hip_hinge'},
                 { type: '마무리', name: '뉴텍 오버헤드 트라이셉스 익스텐션', sets: '2~3세트', tip: '시작 저항이 매우 강한 머신입니다. 처음에는 원판 없이 시작하여 자극에 적응하세요. 팔꿈치를 고정하고, 천천히 이완하며 삼두근 장두가 최대로 늘어나는 것을 느끼는 것이 핵심입니다.', staticGoal: '🔥 목표: 0kg x 8-10회.', increment: 5, alternatives: ['케이블 오버헤드 익스텐션 (로프)', '덤벨 오버헤드 익스텐션'], movement_pattern: 'isolation_triceps'}
             ]},
              leg: { name: '레그(Leg) C', routine: [
@@ -418,7 +403,7 @@
                 { type: '웜업', name: '노틸러스 아웃 타이', sets: '2세트', tip: '고관절 외전근(둔근)을 활성화합니다. (LBS 단위)', staticGoal: '🔥 목표: 100-130 LBS x 10-12회.', alternatives: ['케이블 어브덕션', '밴드 클램쉘'], movement_pattern: 'isolation_glutes' },
                 { type: '선피로', name: '노틸러스 레그 컬', sets: '3세트', tip: '가벼운 무게로 햄스트링에 먼저 자극을 줍니다. 펌핑감에 집중하세요.', staticGoal: '🔥 목표: 25-35kg x 15-20회.', movement_pattern: 'isolation_hams' },
                 { type: '메인', name: '레그 프레스 (햄스트링/둔근 타겟)', sets: '탑/백오프 세트', tip: '발을 발판 위쪽에 넓게 두어 내전근을 포함한 후면 사슬 전체의 볼륨감에 집중합니다. 엉덩이가 패드에서 뜨지 않는 깊이까지만 내려가세요.', baseTopSet: 160, unit: '총', alternatives: ['루마니안 데드리프트', '바벨 굿모닝'], movement_pattern: 'squat'},
-                { type: '메인', 'name': '뉴텍 V스쿼트 (리버스)', sets: '탑/백오프 세트', tip: '머신을 마주보고 서서 어깨를 고리 모양의 패드에 견착합니다. 발을 어깨너비 또는 약간 좁게 두고, 엉덩이를 뒤로 깊게 빼며 앉아 햄스트링과 둔근의 최대 이완과 고립에 집중하세요. 발뒤꿈치로 강하게 밀어 올라오며 둔근을 수축합니다.', baseTopSet: 80, unit: '총', alternatives: ['바벨 굿모닝', '케이블 풀 스루'], movement_pattern: 'hip_hinge' },
+                { type: '메인', name: '뉴텍 V스쿼트 (리버스)', sets: '탑/백오프 세트', tip: '머신을 마주보고 서서 어깨를 고리 모양의 패드에 견착합니다. 발을 어깨너비 또는 약간 좁게 두고, 엉덩이를 뒤로 깊게 빼며 앉아 햄스트링과 둔근의 최대 이완과 고립에 집중하세요. 발뒤꿈치로 강하게 밀어 올라오며 둔근을 수축합니다.', baseTopSet: 80, unit: '총', alternatives: ['바벨 굿모닝', '케이블 풀 스루'], movement_pattern: 'hip_hinge' },
                 { type: '보조', name: '노틸러스 레그 컬', sets: '3~4세트', tip: '무거운 무게로 햄스트링 볼륨을 극대화합니다. 최대 수축 지점에서 1~2초 멈춰주세요.', staticGoal: '🔥 목표: 40-50kg x 12-15회.', increment: 5, alternatives: ['덤벨 레그 컬', '노르딕 햄스트링 컬'], movement_pattern: 'isolation_hams' },
                 { type: '마무리', name: '부티빌더 스탠딩 힙 쓰러스트', sets: '3~4세트', tip: '패드를 골반에 위치시키고, 발뒤꿈치로 강하게 밀어 엉덩이를 최대로 수축합니다. 정점에서 1~2초간 멈춰주세요.', staticGoal: '🔥 목표: 40-60kg x 12-15회.', increment: 5, alternatives: ['바벨 힙 쓰러스트', '케이블 풀 스루'], movement_pattern: 'hip_hinge' }
             ]},
@@ -467,7 +452,6 @@
     let chartInstance = null;
     let popupChartInstance = null;
     let movementPatternChart = null;
-    let inbodyChart = null;
     
     // DOM Elements
     const weekSelector = document.getElementById('week-selector');
@@ -497,18 +481,6 @@
     const closeExportModalButton = document.getElementById('close-export-modal-button');
     const recordPopupModal = document.getElementById('record-popup-modal');
     const closeRecordPopupButton = document.getElementById('close-record-popup-button');
-    const inbodyForm = document.getElementById('inbody-form');
-    // [NEW in v14.0] Import Elements
-    const importDataButton = document.getElementById('import-data-button');
-    const importModal = document.getElementById('import-modal');
-    const importFileInput = document.getElementById('import-file-input');
-    const importDataTextarea = document.getElementById('import-data-textarea');
-    const importFeedback = document.getElementById('import-feedback');
-    const closeImportModalButton = document.getElementById('close-import-modal-button');
-    const confirmImportButton = document.getElementById('confirm-import-button');
-    // [NEW in v14.1] Save Export Button Element
-    const saveExportDataButton = document.getElementById('save-export-data-button');
-
 
     const phaseDescriptions = {
         '강화 주기': '최대 근력(Strength) 증진. 메인 운동은 \'탑/백오프 세트\' 방식으로 진행하며, 점진적으로 더 무거운 무게에 도전하는 것이 목표입니다.',
@@ -533,15 +505,17 @@
         return weight * (1 + reps / 30);
     }
     
+    // [NEW in v11.1.2] Rounding to nearest 5kg for Leg Press
     function roundToNearest5(number) {
         return Math.round(number / 5) * 5;
     }
 
+    // [NEW in v10.0] Aggressive Rounding to nearest 2.5kg
     function roundToNearest2point5(number) {
         return Math.round(number / 2.5) * 2.5;
     }
 
-    // CORE LOGIC: Get Week Info
+    // CORE LOGIC: Get Week Info (Stable since v5.5)
     function getWeekInfo(week, cycleId) {
         if (week === 13) {
             return {
@@ -574,7 +548,7 @@
         return { phase, method, type, originalWeekData };
     }
 
-    // [MODIFIED in v13.1]
+    // [UPDATED in v11.1.2] Performance-Based Multi-Stage Progression with unit text and Leg Press logic
     function getMainGoalText(exercise, week, cycleId, allRecords) {
         if (!exercise.baseTopSet) return null;
 
@@ -584,9 +558,8 @@
         const sanitizedName = getSanitizedName(exercise);
         const exerciseRecords = allRecords[sanitizedName] || [];
         
-        let targetWeight = exercise.baseTopSet;
-        let e1RM = calculateEpley1RM(exercise.baseTopSet, 6);
-        let lastTopSet = { weight: exercise.baseTopSet, reps: 0 };
+        let previousWeight = exercise.baseTopSet;
+        let e1RM = calculateEpley1RM(exercise.baseTopSet, 6); // Default e1RM based on 6 reps
 
         const referenceRecords = exerciseRecords
             .filter(r => (r.cycleId < cycleId || (r.cycleId === cycleId && r.week < week)) && r.phase === '강화 주기' && getWeekInfo(r.week, r.cycleId).type === type)
@@ -602,112 +575,67 @@
             });
 
             if (topSet.weight > 0) {
-                lastTopSet = topSet;
-                let percentageChange = 1.0;
-                if (topSet.reps > 10) percentageChange = 1.05;
-                else if (topSet.reps >= 8) percentageChange = 1.025;
-                else if (topSet.reps >= 6) percentageChange = 1.0125;
-                else if (topSet.reps === 5) percentageChange = 1.0;
-                else if (topSet.reps === 4) percentageChange = 0.975;
-                else if (topSet.reps === 3) percentageChange = 0.95;
-                else percentageChange = 0.90;
+                let percentageChange = 0;
+                if (topSet.reps > 10) percentageChange = 1.05;      // +5.0%
+                else if (topSet.reps >= 8) percentageChange = 1.025;   // +2.5%
+                else if (topSet.reps >= 6) percentageChange = 1.0125;  // +1.25%
+                else if (topSet.reps === 5) percentageChange = 1.0;     // +0%
+                else if (topSet.reps === 4) percentageChange = 0.975;  // -2.5%
+                else if (topSet.reps === 3) percentageChange = 0.95;   // -5.0%
+                else percentageChange = 0.90;                        // -10.0%
                 
-                targetWeight = topSet.weight * percentageChange;
+                previousWeight = topSet.weight * percentageChange;
                 e1RM = calculateEpley1RM(topSet.weight, topSet.reps);
             }
         }
         
         const rounder = exercise.name.includes('레그 프레스') ? roundToNearest5 : roundToNearest2point5;
-        const unitText = exercise.unit ? (exercise.unit === '총' ? '(전체 중량)' : '(한쪽 원판)') : '';
-        let boosterApplied = false;
+        const unitText = exercise.unit === '총' ? '(전체 중량)' : '(한쪽 원판)';
 
         if (phase === '강화 주기') {
-            const lastAccumulationRecord = exerciseRecords
-                .filter(r => (r.cycleId < cycleId || (r.cycleId === cycleId && r.week < week)) && r.phase === '축적 주기' && getWeekInfo(r.week, r.cycleId).type === type)
-                .sort((a, b) => (b.cycleId - a.cycleId) || (b.week - a.week))[0];
-
-            if (lastAccumulationRecord?.sets?.length > 0) {
-                const dayData = getWeekInfo(lastAccumulationRecord.week, lastAccumulationRecord.cycleId).originalWeekData[lastAccumulationRecord.day];
-                const originalExercise = dayData.routine.find(ex => getSanitizedName(ex) === sanitizedName);
-                if(originalExercise?.sets) {
-                    const tempGoalText = getMainGoalText(originalExercise, lastAccumulationRecord.week, lastAccumulationRecord.cycleId, allRecords) || "";
-                    const setMatch = originalExercise.sets.match(/(\d+)(?:~(\d+))?세트/);
-                    const repMatch = tempGoalText.match(/(\d+)-(\d+)회/);
-                    
-                    if(setMatch && repMatch) {
-                        const maxSets = parseInt(setMatch[2] || setMatch[1]);
-                        const maxReps = parseInt(repMatch[2]);
-                        
-                        const allMaxedOut = lastAccumulationRecord.sets.length >= maxSets && 
-                                            lastAccumulationRecord.sets.every(s => s.reps >= maxReps);
-
-                        if (allMaxedOut) {
-                            targetWeight *= 1.0125;
-                            boosterApplied = true;
-                        }
-                    }
-                }
-            }
-            
-            let goalWeight = rounder(targetWeight);
-
-            // [NEW in v13.1] Minimum Progression Guarantee
-            if (lastTopSet.reps >= 6 && goalWeight <= lastTopSet.weight) {
-                goalWeight = lastTopSet.weight + 2.5;
-            }
-
-            // [NEW in v13.1] Deload Floor
-            if (goalWeight < 10) {
-                goalWeight = 10;
-            }
-
-            let backoffWeight = rounder(goalWeight * 0.8);
-            if (backoffWeight < 10) {
-                backoffWeight = 10;
-            }
-            
-            const boosterIcon = boosterApplied ? '🚀 ' : '';
-            return `${boosterIcon}🔥 강화 목표: ${unitText} 탑 ${goalWeight}kg x 최대 반복 / 백오프 ${backoffWeight}kg x 8-10회.`;
-        } else { // 축적 주기
+            const goalWeight = rounder(previousWeight);
+            const backoffWeight = rounder(goalWeight * 0.8);
+            return `🔥 강화 목표: ${unitText} 탑 ${goalWeight}kg x 최대 반복 / 백오프 ${backoffWeight}kg x 8-10회.`;
+        } else if (phase === '축적 주기') {
             const goalWeight = rounder(e1RM * 0.7);
             return `🔥 축적 목표: ${unitText} 워킹 세트 ${goalWeight}kg x 8-12회 (3-4세트).`;
         }
+        return null;
     }
     
-    // [MODIFIED in v13.2]
+    // [UPDATED in v11.1.3] Smart 3-Stage Auto-Regulation for Assistance exercises
     function getSmartAssistanceGoal(exercise, allRecords) {
         const { staticGoal: initialGoal, increment, sets: setsString } = exercise;
         const sanitizedName = getSanitizedName(exercise);
 
         if (!initialGoal || !increment || !setsString) return initialGoal;
 
-        const recordsToConsider = (allRecords[sanitizedName] || [])
-            .filter(r => {
-                if (!r.sets || r.sets.length === 0) return false;
-                // Important: Only consider records from previous weeks/cycles
-                return (r.cycleId < currentCycleId) || (r.cycleId === currentCycleId && r.week < currentWeek);
-            })
+        const sortedRecords = (allRecords[sanitizedName] || [])
+            .filter(r => r.sets && r.sets.length > 0)
             .sort((a, b) => new Date(a.date) - new Date(b.date));
 
-        return recordsToConsider.reduce((currentGoal, record) => {
+        return sortedRecords.reduce((currentGoal, record) => {
             if (currentGoal.includes("실패지점까지") || currentGoal.includes("AMRAP") || currentGoal.includes("맨몸")) {
                 return currentGoal;
             }
 
             const weightMatch = currentGoal.match(/([\d.]+)(?:-([\d.]+))?kg/);
             const repMatch = currentGoal.match(/(\d+)-(\d+)회/);
-            const setMatch = setsString.match(/(\d+)(?:~(\d+))?세트/);
+            const setMatch = setsString.match(/(\d+)(?:~(\d+))?세트/); // [BUG FIX] Handle single set counts
 
-            if (!weightMatch || !repMatch || !setMatch) return currentGoal;
+            if (!weightMatch || !repMatch || !setMatch) {
+                return currentGoal;
+            }
 
             const minWeightGoal = parseFloat(weightMatch[1]);
             const maxWeightGoal = parseFloat(weightMatch[2] || weightMatch[1]);
             const minRepsGoal = parseInt(repMatch[1]);
             const maxRepsGoal = parseInt(repMatch[2]);
-            const maxSetsGoal = parseInt(setMatch[2] || setMatch[1]);
+            const maxSetsGoal = parseInt(setMatch[2] || setMatch[1]); // [BUG FIX] Handle single set counts
 
             const calculateVolume = (weight, reps) => (weight > 0 ? weight * reps : reps);
             
+            // Use maxSetsGoal instead of lastRecord.sets.length for target volume calculation
             const minTargetVolume = calculateVolume(minWeightGoal, minRepsGoal) * maxSetsGoal;
             const maxTargetVolume = calculateVolume(maxWeightGoal, maxRepsGoal) * maxSetsGoal;
             const performedVolume = record.sets.reduce((total, set) => total + calculateVolume(set.weight, set.reps), 0);
@@ -715,16 +643,15 @@
             let newMinWeight = minWeightGoal;
             let newMaxWeight = maxWeightGoal;
 
-            if (performedVolume >= maxTargetVolume) {
+            if (performedVolume >= maxTargetVolume) { // Success -> Progression
                 newMinWeight += increment;
                 newMaxWeight += increment;
-            } else if (performedVolume < minTargetVolume) {
+            } else if (performedVolume < minTargetVolume) { // Failure -> Deload
                 newMinWeight -= increment;
                 newMaxWeight -= increment;
+                newMinWeight = Math.max(0, newMinWeight);
+                newMaxWeight = Math.max(0, newMaxWeight);
             }
-
-            newMinWeight = Math.max(0, newMinWeight);
-            newMaxWeight = Math.max(0, newMaxWeight);
 
             const prefix = currentGoal.includes('한쪽') ? '한쪽 ' : '';
             if (newMinWeight >= newMaxWeight) {
@@ -736,7 +663,7 @@
         }, initialGoal);
     }
 
-    // [MODIFIED in v13.4]
+    // LOCAL STORAGE & DATA HANDLING
     function saveAllSets(exercise) {
         const sanitizedName = getSanitizedName(exercise);
         let records = JSON.parse(localStorage.getItem('workoutRecords')) || {};
@@ -751,7 +678,10 @@
         } else {
             const { phase, originalWeekData } = getWeekInfo(currentWeek, currentCycleId);
             const dayName = originalWeekData[currentDay]?.name || '';
-            currentRecord = { date: today, week: currentWeek, day: currentDay, dayName, phase, sets: [], cycleId: currentCycleId };
+            currentRecord = {
+                date: today, week: currentWeek, day: currentDay, dayName: dayName,
+                phase: phase, sets: [], cycleId: currentCycleId
+            };
         }
 
         const setsContainer = document.getElementById(`sets-container-${sanitizedName}`);
@@ -760,114 +690,132 @@
             const setsData = Array.from(setRows).map(row => {
                 const weightInput = row.querySelector('input[data-type="weight"]');
                 const repsInput = row.querySelector('input[data-type="reps"]');
-                return (weightInput.value && repsInput.value) ? { weight: parseFloat(weightInput.value), reps: parseInt(repsInput.value) } : null;
+                if (weightInput.value && repsInput.value) {
+                    return { weight: parseFloat(weightInput.value), reps: parseInt(repsInput.value) };
+                }
+                return null;
             }).filter(Boolean);
             currentRecord.sets = setsData;
         }
 
         if (recordIndex > -1) {
-            if (currentRecord.sets.length > 0) {
-                records[sanitizedName][recordIndex] = currentRecord;
-            } else {
-                 records[sanitizedName].splice(recordIndex, 1);
-            }
+            records[sanitizedName][recordIndex] = currentRecord;
         } else if (currentRecord.sets.length > 0) {
             records[sanitizedName].push(currentRecord);
         }
 
+        if (currentRecord.sets.length === 0 && recordIndex > -1) {
+            records[sanitizedName].splice(recordIndex, 1);
+        }
+
         localStorage.setItem('workoutRecords', JSON.stringify(records));
-        updateGoalTexts(); 
     }
     
-    // [NEW in v13.4]
-    function updateGoalTexts() {
-        const allRecords = JSON.parse(localStorage.getItem('workoutRecords')) || {};
-        const { originalWeekData } = getWeekInfo(currentWeek, currentCycleId);
-        const dayData = originalWeekData[currentDay];
-        if (!dayData) return;
-
-        dayData.routine.forEach(exercise => {
-            const sanitizedName = getSanitizedName(exercise);
-            const goalSpan = document.getElementById(`goal-text-${sanitizedName}`);
-            if (goalSpan) {
-                let newGoalText;
-                if (exercise.type === '메인') {
-                    newGoalText = getMainGoalText(exercise, currentWeek, currentCycleId, allRecords);
-                } else if (exercise.type === '보조' || exercise.type === '마무리') {
-                    newGoalText = getSmartAssistanceGoal(exercise, allRecords);
-                } else {
-                    newGoalText = exercise.staticGoal;
-                }
-                if (newGoalText) {
-                    goalSpan.innerHTML = newGoalText.replace("최대 반복", "최대 반복(AMRAP)");
-                }
-            }
-        });
-    }
-
     function loadMostRecentRecordForSession(exercise) {
         const sanitizedName = getSanitizedName(exercise);
         const records = JSON.parse(localStorage.getItem('workoutRecords')) || {};
         const exerciseRecords = records[sanitizedName];
+
         if (!exerciseRecords?.length) return null;
-        return exerciseRecords.find(r => r.week === currentWeek && r.day === currentDay && r.cycleId === currentCycleId) || null;
+
+        const sessionRecords = exerciseRecords.filter(r => 
+            r.week === currentWeek && r.day === currentDay && r.cycleId === currentCycleId
+        );
+
+        return sessionRecords.sort((a, b) => new Date(b.date) - new Date(a.date))[0] || null;
     }
 
     function openRecordPopup(sanitizedName, exerciseName) {
         const allRecords = JSON.parse(localStorage.getItem('workoutRecords')) || {};
-        const exerciseData = (allRecords[sanitizedName] || []).sort((a, b) => ((a.cycleId || 1) - (b.cycleId || 1)) || (a.week - b.week));
+        const exerciseData = (allRecords[sanitizedName] || []).sort((a, b) => {
+            if ((a.cycleId || 1) !== (b.cycleId || 1)) return (a.cycleId || 1) - (b.cycleId || 1);
+            return a.week - b.week;
+        });
 
         const modal = document.getElementById('record-popup-modal');
-        modal.querySelector('#record-popup-title').textContent = `${exerciseName} 기록`;
+        const modalTitle = document.getElementById('record-popup-title');
+
+        modalTitle.textContent = `${exerciseName} 기록`;
 
         if (exerciseData.length > 0) {
             renderProgressChart(exerciseData, 'record-popup-chart');
             renderRecordsTable(exerciseData, 'record-popup-table-container');
         } else {
+            const chartCanvas = document.getElementById('record-popup-chart');
+            const chartCtx = chartCanvas.getContext('2d');
             if (popupChartInstance) popupChartInstance.destroy();
-            document.getElementById('record-popup-chart').getContext('2d').clearRect(0, 0, 300, 150);
+            chartCtx.clearRect(0, 0, chartCanvas.width, chartCanvas.height);
             document.getElementById('record-popup-table-container').innerHTML = `<p class="p-4 text-center text-slate-500">이 운동에 대한 기록이 아직 없습니다.</p>`;
         }
+
         modal.classList.remove('hidden');
     }
 
+    // UI RENDERING
     function renderWorkout() {
         const { phase, method, originalWeekData } = getWeekInfo(currentWeek, currentCycleId);
         const cycleTypeText = (currentCycleId % 2 === 1) ? '블록 주기화' : '주간 파동형 주기화';
         cycleInfoBadge.textContent = `(사이클 ${currentCycleId}: ${cycleTypeText})`;
         const allRecords = JSON.parse(localStorage.getItem('workoutRecords')) || {};
 
+
         const dayData = originalWeekData[currentDay];
-        if (!dayData) {
-            workoutList.innerHTML = '';
-            return;
-        };
+        if (!dayData) return;
 
         workoutTitle.textContent = `${currentWeek}주차: ${dayData.name}`;
-        workoutPhaseBadge.className = `px-4 py-1.5 text-base font-semibold rounded-full self-start ${phaseColors[phase]}`;
         workoutPhaseBadge.textContent = phase;
+        workoutPhaseBadge.className = `px-4 py-1.5 text-base font-semibold rounded-full self-start ${phaseColors[phase]}`;
         workoutPhaseDescription.textContent = phaseDescriptions[phase];
 
         workoutList.innerHTML = '';
         dayData.routine.forEach(exercise => {
-            const sanitizedName = getSanitizedName(exercise);
-            const recordForSession = loadMostRecentRecordForSession(exercise);
+            let currentExercise = JSON.parse(JSON.stringify(exercise)); 
+
+            if (exercise.name === '사이드 래터럴 레이즈 머신') {
+                 if (phase === '축적 주기') {
+                    currentExercise.name = '케이블 X-레이즈';
+                    currentExercise.tip = '측면 삼각근을 최대로 이완(Stretch)시켜 자극하는 것이 목표입니다. 케이블 풀리를 중간 높이로 설정하고, 발목 스트랩을 양 손목에 착용합니다. 벤치에 누워 반대편 케이블을 손목 스트랩에 교차하여 연결한 뒤, 팔꿈치를 살짝 구부린 상태를 유지하며 큰 원을 그리듯 팔을 벌려 측면 어깨가 최대로 늘어나는 것을 느끼세요.';
+                    currentExercise.staticGoal = '🔥 목표: 0kg x 12-15회.';
+                    currentExercise.increment = 5;
+                } else { 
+                    currentExercise.name = '뉴텍 스탠딩 사이드 레터럴 레이즈';
+                    currentExercise.tip = '어깨 관절을 머신의 회전축에 맞추고, 한 손씩 수행하여 측면 삼각근을 완벽하게 고립합니다. 반대 손으로 몸을 지지하여 반동을 통제하세요.';
+                }
+            }
+            
+            const sanitizedName = getSanitizedName(currentExercise);
+            const recordForSession = loadMostRecentRecordForSession(currentExercise);
             
             const card = document.createElement('div');
             card.className = 'bg-white rounded-xl shadow-lg hover:shadow-xl transition-shadow p-4 sm:p-5 flex flex-col card-enter';
             
+            const isMain = currentExercise.type === '메인';
             let goalText;
-            if (exercise.type === '메인') {
-                goalText = getMainGoalText(exercise, currentWeek, currentCycleId, allRecords);
-            } else if (exercise.type === '보조' || exercise.type === '마무리') {
-                goalText = getSmartAssistanceGoal(exercise, allRecords);
-            } else { 
-                goalText = exercise.staticGoal;
-            }
 
-            const methodText = (exercise.type === '메인') ? method : exercise.sets;
-            const goalTextHTML = goalText ? `<br><span id="goal-text-${sanitizedName}" class="font-bold text-red-600">${goalText.replace("최대 반복", "최대 반복(AMRAP)")}</span>` : '';
-            const tipHTML = `${exercise.tip}${goalTextHTML}`;
+            if (isMain && exercise.name !== '사이드 래터럴 레이즈 머신') {
+                goalText = getMainGoalText(currentExercise, currentWeek, currentCycleId, allRecords);
+            } else if (currentExercise.type === '보조' || currentExercise.type === '마무리' || exercise.name === '사이드 래터럴 레이즈 머신') {
+                goalText = getSmartAssistanceGoal(currentExercise, allRecords);
+            } else { 
+                goalText = currentExercise.staticGoal;
+            }
+            if(!goalText && currentExercise.staticGoal) goalText = currentExercise.staticGoal;
+
+
+            const methodText = (isMain && exercise.name !== '사이드 래터럴 레이즈 머신') ? method : currentExercise.sets;
+            const tipHTML = goalText ? `${currentExercise.tip} <br><span class="font-bold text-red-600">${goalText.replace("최대 반복", "최대 반복(AMRAP)")}</span>` : currentExercise.tip;
+
+            let alternativesHTML = '';
+            if (currentExercise.alternatives && currentExercise.alternatives.length > 0) {
+                alternativesHTML = `
+                    <div class="mt-4 pt-3 border-t border-slate-200">
+                        <h5 class="text-sm font-bold text-slate-700 mb-2">대체 운동:</h5>
+                        <ul class="list-disc list-inside text-sm text-slate-600 space-y-1">
+                            ${currentExercise.alternatives.map(alt => `<li>${alt}</li>`).join('')}
+                        </ul>
+                    </div>
+                `;
+            }
 
             card.innerHTML = `
                 <div class="flex-1">
@@ -875,11 +823,11 @@
                         <div class="flex-grow">
                              <div class="flex items-center gap-3 flex-wrap">
                                 <span class="text-xs sm:text-sm font-bold uppercase py-1 px-3 rounded-full whitespace-nowrap ${
-                                    exercise.type.includes('웜업') || exercise.type.includes('선피로') ? 'bg-amber-100 text-amber-800' :
-                                    exercise.type === '메인' ? 'bg-blue-100 text-blue-800' : 'bg-slate-100 text-slate-800'
-                                }">${exercise.type}</span>
-                                <h4 class="text-lg sm:text-xl font-bold text-slate-900">${exercise.name}</h4>
-                                <span class="text-xs font-semibold bg-gray-200 text-gray-700 px-2 py-0.5 rounded-full whitespace-nowrap">#${exercise.movement_pattern}</span>
+                                    currentExercise.type.includes('웜업') || currentExercise.type.includes('선피로') ? 'bg-amber-100 text-amber-800' :
+                                    isMain ? 'bg-blue-100 text-blue-800' : 'bg-slate-100 text-slate-800'
+                                }">${currentExercise.type}</span>
+                                <h4 class="text-lg sm:text-xl font-bold text-slate-900">${currentExercise.name}</h4>
+                                <span class="text-xs font-semibold bg-gray-200 text-gray-700 px-2 py-0.5 rounded-full whitespace-nowrap">#${currentExercise.movement_pattern}</span>
                             </div>
                         </div>
                     </div>
@@ -888,13 +836,14 @@
                         <p class="text-sm sm:text-base font-semibold text-slate-500">훈련 방식: ${methodText}</p>
                         <button class="show-record-popup-btn flex-shrink-0 p-2 text-slate-400 hover:text-blue-600 transition" 
                                data-sanitized-name="${sanitizedName}" 
-                               data-exercise-name="${exercise.name}"
-                               title="${exercise.name} 기록 보기">
+                               data-exercise-name="${currentExercise.name}"
+                               title="${currentExercise.name} 기록 보기">
                              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" class="bi bi-bar-chart-line-fill" viewBox="0 0 16 16">
                                  <path d="M11 2a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1v12h.5a.5.5 0 0 1 0 1H.5a.5.5 0 0 1 0-1H1v-3a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1v3h1V7a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1v7h1V2z"/>
                              </svg>
                          </button>
                     </div>
+                     ${alternativesHTML}
                 </div>
                 <div id="sets-container-${sanitizedName}" class="space-y-3 mt-4"></div>
                 <div class="mt-4">
@@ -906,21 +855,23 @@
             const setsContainer = card.querySelector(`#sets-container-${sanitizedName}`);
             const dataToRender = recordForSession?.sets || [];
             if (dataToRender.length > 0) {
-                dataToRender.forEach((set, index) => addSetRow(setsContainer, exercise, index + 1, set));
+                dataToRender.forEach((set, index) => addSetRow(setsContainer, currentExercise, index + 1, set));
             } else {
-                addSetRow(setsContainer, exercise, 1);
+                addSetRow(setsContainer, currentExercise, 1);
             }
             
             card.querySelector('.add-set-btn').addEventListener('click', () => {
                 const currentSetCount = setsContainer.querySelectorAll('.set-row').length;
-                addSetRow(setsContainer, exercise, currentSetCount + 1);
+                addSetRow(setsContainer, currentExercise, currentSetCount + 1);
             });
         });
         
         document.querySelectorAll('.show-record-popup-btn').forEach(btn => {
             btn.addEventListener('click', (e) => {
                 const targetBtn = e.currentTarget;
-                openRecordPopup(targetBtn.dataset.sanitizedName, targetBtn.dataset.exerciseName);
+                const sanitizedName = targetBtn.dataset.sanitizedName;
+                const exerciseName = targetBtn.dataset.exerciseName;
+                openRecordPopup(sanitizedName, exerciseName);
             });
         });
     }
@@ -935,14 +886,19 @@
             <input type="number" data-type="reps" value="${setData.reps}" placeholder="횟수" class="w-full p-2.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition text-lg">
             <span class="font-semibold text-slate-400">회</span>
             <button type="button" class="delete-set-btn p-2 text-slate-400 hover:text-red-500 transition">
-                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path d="M5.5 5.5A.5.5 0 0 1 6 6v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5m2.5 0a.5.5 0 0 1 .5.5v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5m3 .5a.5.5 0 0 0-1 0v6a.5.5 0 0 0 1 0z"/><path fill-rule="evenodd" d="M14.5 3a1 1 0 0 1-1 1H13v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V4h-.5a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1H6a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1h3.5a1 1 0 0 1 1 1zM4.118 4 4 4.059V13a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1V4.059L11.882 4zM2.5 3h11V2h-11z"/></svg>
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+                    <path d="M5.5 5.5A.5.5 0 0 1 6 6v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5zm2.5 0a.5.5 0 0 1 .5.5v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5zm3 .5a.5.5 0 0 0-1 0v6a.5.5 0 0 0 1 0V6z"/>
+                    <path fill-rule="evenodd" d="M14.5 3a1 1 0 0 1-1 1H13v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V4h-.5a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1H6a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1h3.5a1 1 0 0 1 1 1v1zM4.118 4 4 4.059V13a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1V4.059L11.882 4H4.118zM2.5 3V2h11v1h-11z"/>
+                </svg>
             </button>
         `;
         container.appendChild(setRow);
 
+        const weightInput = setRow.querySelector('input[data-type="weight"]');
+        const repsInput = setRow.querySelector('input[data-type="reps"]');
         const saveDebounced = debounce(() => saveAllSets(exercise), 500);
-        setRow.querySelector('input[data-type="weight"]').addEventListener('input', saveDebounced);
-        setRow.querySelector('input[data-type="reps"]').addEventListener('input', saveDebounced);
+        weightInput.addEventListener('input', saveDebounced);
+        repsInput.addEventListener('input', saveDebounced);
 
         setRow.querySelector('.delete-set-btn').addEventListener('click', () => {
             setRow.remove();
@@ -953,20 +909,29 @@
         });
     }
     
+    // UI NAVIGATION & STATE
     function updateActiveButtons() {
-        document.querySelectorAll('#week-selector button').forEach(btn => btn.classList.toggle('week-btn-active', parseInt(btn.dataset.week) === currentWeek));
-        document.querySelectorAll('#day-selector button').forEach(btn => btn.classList.toggle('day-btn-active', btn.dataset.day === currentDay));
+        document.querySelectorAll('#week-selector button').forEach(btn => {
+            btn.classList.toggle('week-btn-active', parseInt(btn.dataset.week) === currentWeek);
+            btn.classList.toggle('bg-slate-100', parseInt(btn.dataset.week) !== currentWeek);
+        });
+        document.querySelectorAll('#day-selector button').forEach(btn => {
+            btn.classList.toggle('day-btn-active', btn.dataset.day === currentDay);
+             btn.classList.toggle('bg-slate-100', btn.dataset.day !== currentDay);
+        });
     }
     
     function showView(viewName) {
-        ['today', 'plan', 'records', 'bodycomp'].forEach(view => {
-            const viewEl = document.getElementById(`view-${view}`);
-            const tabEl = document.getElementById(`tab-${view}`);
-            if (viewEl) viewEl.classList.toggle('hidden', view !== viewName);
-            if (tabEl) {
-                tabEl.classList.toggle('tab-active', view === viewName);
-                tabEl.classList.toggle('text-slate-500', view !== viewName);
-            }
+        document.getElementById('view-today').classList.toggle('hidden', viewName !== 'today');
+        document.getElementById('view-plan').classList.toggle('hidden', viewName !== 'plan');
+        document.getElementById('view-records').classList.toggle('hidden', viewName !== 'records');
+        
+        document.getElementById('tab-today').classList.toggle('tab-active', viewName === 'today');
+        document.getElementById('tab-plan').classList.toggle('tab-active', viewName === 'plan');
+        document.getElementById('tab-records').classList.toggle('tab-active', viewName === 'records');
+        
+        ['today', 'plan', 'records'].forEach(tab => {
+            document.getElementById(`tab-${tab}`).classList.toggle('text-slate-500', viewName !== tab);
         });
 
         if (viewName === 'records') {
@@ -975,8 +940,6 @@
             renderRecords();
         } else if (viewName === 'plan') {
             createPlanTable();
-        } else if (viewName === 'bodycomp') {
-            renderBodycompView();
         }
     }
 
@@ -1003,17 +966,19 @@
         }
     }
     
+    // [NEW in v7.0.5] Movement Pattern Analysis Logic
     function renderMovementPatternAnalysis() {
         const allRecords = JSON.parse(localStorage.getItem('workoutRecords')) || {};
         const cycleInfo = JSON.parse(localStorage.getItem('workoutCycleInfo')) || { cycleId: 1 };
         
         const isBlock = (cycleInfo.cycleId % 2 === 1);
+        const weeksToAnalyze = isBlock ? 3 : 6;
         const feedbackPeriodText = isBlock ? "최근 3주" : "최근 6주";
 
         const recentRecords = [];
         const endDate = new Date();
         const startDate = new Date();
-        startDate.setDate(endDate.getDate() - ((isBlock ? 3 : 6) * 7));
+        startDate.setDate(endDate.getDate() - (weeksToAnalyze * 7));
 
         for (const key in allRecords) {
             allRecords[key].forEach(record => {
@@ -1025,109 +990,214 @@
         }
         
         const exerciseMap = new Map();
-        Object.values(workoutPlan).forEach(week => Object.values(week).forEach(day => day.routine.forEach(ex => exerciseMap.set(getSanitizedName(ex), ex))));
+        Object.values(workoutPlan).forEach(week => {
+            Object.values(week).forEach(day => {
+                day.routine.forEach(ex => {
+                    const sanitizedName = getSanitizedName(ex);
+                    if (!exerciseMap.has(sanitizedName)) {
+                         exerciseMap.set(sanitizedName, ex);
+                    }
+                });
+            });
+        });
 
-        const patternVolumes = { horizontal_push: 0, horizontal_pull: 0, vertical_push: 0, vertical_pull: 0, squat: 0, hip_hinge: 0 };
+        const patternVolumes = {
+            horizontal_push: 0, horizontal_pull: 0,
+            vertical_push: 0, vertical_pull: 0,
+            squat: 0, hip_hinge: 0,
+        };
 
         recentRecords.forEach(record => {
             const exerciseInfo = exerciseMap.get(record.sanitizedName);
             if (exerciseInfo && patternVolumes.hasOwnProperty(exerciseInfo.movement_pattern)) {
-                patternVolumes[exerciseInfo.movement_pattern] += record.sets.reduce((sum, set) => sum + (set.weight * set.reps), 0);
+                const volume = record.sets.reduce((sum, set) => sum + (set.weight * set.reps), 0);
+                patternVolumes[exerciseInfo.movement_pattern] += volume;
             }
         });
         
-        const ctx = document.getElementById('movementPatternChart').getContext('2d');
-        if (movementPatternChart) movementPatternChart.destroy();
+        // Chart Rendering
+        const chartCanvas = document.getElementById('movementPatternChart');
+        const ctx = chartCanvas.getContext('2d');
+        if (movementPatternChart) {
+            movementPatternChart.destroy();
+        }
         movementPatternChart = new Chart(ctx, {
             type: 'bar',
             data: {
                 labels: ['수평 밀기/당기기', '수직 밀기/당기기', '스쿼트/힙힌지'],
                 datasets: [
-                    { label: '밀기/스쿼트 (전면)', data: [patternVolumes.horizontal_push, patternVolumes.vertical_push, patternVolumes.squat], backgroundColor: 'rgba(59, 130, 246, 0.7)' },
-                    { label: '당기기/힙힌지 (후면)', data: [patternVolumes.horizontal_pull, patternVolumes.vertical_pull, patternVolumes.hip_hinge], backgroundColor: 'rgba(239, 68, 68, 0.7)' }
+                    {
+                        label: '밀기/스쿼트 (전면)',
+                        data: [patternVolumes.horizontal_push, patternVolumes.vertical_push, patternVolumes.squat],
+                        backgroundColor: 'rgba(59, 130, 246, 0.7)',
+                    },
+                    {
+                        label: '당기기/힙힌지 (후면)',
+                        data: [patternVolumes.horizontal_pull, patternVolumes.vertical_pull, patternVolumes.hip_hinge],
+                        backgroundColor: 'rgba(239, 68, 68, 0.7)',
+                    }
                 ]
             },
-            options: { responsive: true, maintainAspectRatio: false, indexAxis: 'y' }
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                indexAxis: 'y',
+                scales: {
+                    x: {
+                        title: { display: true, text: '총 볼륨 (kg)' },
+                        stacked: false,
+                    },
+                    y: {
+                        stacked: false,
+                    }
+                },
+                plugins: {
+                    title: {
+                        display: true,
+                        text: `주요 움직임 패턴 볼륨 균형 (${feedbackPeriodText})`
+                    },
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                let label = context.dataset.label || '';
+                                if (label) {
+                                    label += ': ';
+                                }
+                                if (context.parsed.x !== null) {
+                                    label += new Intl.NumberFormat('ko-KR').format(context.parsed.x) + ' kg';
+                                }
+                                return label;
+                            }
+                        }
+                    }
+                }
+            }
         });
 
+        // AI Feedback Generation
         let feedback = `${cycleInfo.cycleId} 사이클(${isBlock ? '블록' : '파동형'} 주기)의 ${feedbackPeriodText}간 훈련을 분석했습니다. `;
         let issues = [];
-        const checkBalance = (a, b, nameA, nameB) => { if ((a + b) > 100 && (a / (a + b) > 0.625 || a / (a + b) < 0.375)) issues.push(`${nameA}과 ${nameB}의 불균형이 감지됩니다.`) };
-        checkBalance(patternVolumes.horizontal_push, patternVolumes.horizontal_pull, '수평 밀기', '수평 당기기');
-        checkBalance(patternVolumes.vertical_push, patternVolumes.vertical_pull, '수직 밀기', '수직 당기기');
-        checkBalance(patternVolumes.squat, patternVolumes.hip_hinge, '스쿼트', '힙힌지');
+
+        function checkBalance(push, pull, pushName, pullName) {
+            const total = push + pull;
+            if (total < 100) return; // Ignore if volume is negligible
+            const ratio = push / total;
+            if (ratio > 0.625 || ratio < 0.375) { // ~25% imbalance
+                 issues.push(`${pushName}과 ${pullName}의 불균형이 감지됩니다. 장기적으로는 부상 위험을 높일 수 있습니다.`);
+            }
+        }
         
-        if (issues.length > 0) feedback += issues.join(' ');
-        else if (recentRecords.length === 0) feedback = "아직 분석할 데이터가 충분하지 않습니다.";
-        else feedback += "주요 움직임 패턴 간 훈련 볼륨이 이상적인 균형을 이루고 있습니다.";
+        checkBalance(patternVolumes.horizontal_push, patternVolumes.horizontal_pull, '수평 밀기(가슴)', '수평 당기기(등)');
+        checkBalance(patternVolumes.vertical_push, patternVolumes.vertical_pull, '수직 밀기(어깨)', '수직 당기기(등 너비)');
+        checkBalance(patternVolumes.squat, patternVolumes.hip_hinge, '스쿼트(대퇴사두)', '힙힌지(후면사슬)');
+
+        if (issues.length > 0) {
+            feedback += issues.join(' ');
+        } else if (recentRecords.length === 0) {
+            feedback = "아직 분석할 데이터가 충분하지 않습니다. 훈련을 기록하고 다시 확인해주세요.";
+        } else {
+            feedback += "주요 움직임 패턴 간 훈련 볼륨이 매우 이상적인 균형을 이루고 있습니다. 훌륭한 훈련 분배입니다!";
+        }
         document.getElementById('ai-feedback-text').textContent = feedback;
     }
 
+    // RECORDS VIEW LOGIC
     function populateExerciseSelector() {
         const exerciseGroupMap = new Map();
         Object.values(workoutPlan).forEach(weekData => {
-            Object.values(weekData).forEach(day => {
-                day.routine.forEach(ex => {
-                    const baseName = ex.name;
-                    if (!exerciseGroupMap.has(baseName)) exerciseGroupMap.set(baseName, { name: baseName, ids: new Set() });
-                    exerciseGroupMap.get(baseName).ids.add(getSanitizedName(ex));
-                });
+            ['pull', 'leg', 'push'].forEach(day => {
+                if (weekData[day]?.routine) {
+                    weekData[day].routine.forEach(ex => {
+                        const baseName = ex.name;
+                        const sanitizedId = getSanitizedName(ex);
+                        if (!exerciseGroupMap.has(baseName)) {
+                            exerciseGroupMap.set(baseName, { name: baseName, ids: new Set() });
+                        }
+                        exerciseGroupMap.get(baseName).ids.add(sanitizedId);
+
+                        if (baseName === '사이드 래터럴 레이즈 머신') {
+                            const variation1 = getSanitizedName({name: '뉴텍 스탠딩 사이드 레터럴 레이즈', type: ex.type});
+                            const variation2 = getSanitizedName({name: '케이블 X-레이즈', type: ex.type});
+                            exerciseGroupMap.get(baseName).name = '사이드 래터럴 레이즈 (종합)';
+                            exerciseGroupMap.get(baseName).ids.add(variation1).add(variation2);
+                        }
+                    });
+                }
             });
         });
-        
+
         const currentSelected = exerciseSelector.value;
         exerciseSelector.innerHTML = '<option value="">-- 운동 선택 --</option>';
-        Array.from(exerciseGroupMap.values()).sort((a,b) => a.name.localeCompare(b.name)).forEach(group => {
-            const option = document.createElement('option');
-            option.value = Array.from(group.ids).join(',');
-            option.textContent = group.name;
-            exerciseSelector.appendChild(option);
-        });
+        Array.from(exerciseGroupMap.values())
+            .sort((a, b) => a.name.localeCompare(b.name))
+            .forEach(group => {
+                const option = document.createElement('option');
+                option.value = Array.from(group.ids).join(',');
+                option.textContent = group.name;
+                exerciseSelector.appendChild(option);
+            });
         if(currentSelected) exerciseSelector.value = currentSelected;
     }
 
     function renderRecords() {
         const selectedIdsString = exerciseSelector.value;
-        if (!selectedIdsString) {
+        const hasRecords = Object.keys(JSON.parse(localStorage.getItem('workoutRecords') || '{}')).length > 0;
+
+        if (!hasRecords || !selectedIdsString) {
             recordsContent.classList.add('hidden');
             noRecordsDiv.classList.remove('hidden');
+            if (chartInstance) chartInstance.destroy();
             return;
         }
 
         const selectedIds = selectedIdsString.split(',');
-        const allRecords = JSON.parse(localStorage.getItem('workoutRecords')) || {};
-        const combinedData = selectedIds.flatMap(id => allRecords[id] || []).sort((a, b) => ((a.cycleId || 1) - (b.cycleId || 1)) || (a.week - b.week));
+        const allRecords = JSON.parse(localStorage.getItem('workoutRecords'));
+        const combinedData = selectedIds.flatMap(id => allRecords[id] || []);
         
         if (combinedData.length === 0) {
             recordsContent.classList.add('hidden');
             noRecordsDiv.classList.remove('hidden');
-            noRecordsDiv.innerHTML = `<p class="text-slate-500">이 운동에 대한 기록이 없습니다.</p>`;
+            noRecordsDiv.innerHTML = `<p class="text-slate-500 text-lg">아직 이 운동에 대한 기록이 없습니다.</p><p class="text-slate-500 mt-2">'오늘의 운동' 탭에서 운동을 기록해주세요.</p>`;
+            if (chartInstance) chartInstance.destroy();
             return;
         }
 
         recordsContent.classList.remove('hidden');
         noRecordsDiv.classList.add('hidden');
+
+        const exerciseData = combinedData.sort((a, b) => {
+            if ((a.cycleId || 1) !== (b.cycleId || 1)) return (a.cycleId || 1) - (b.cycleId || 1);
+            return a.week - b.week;
+        });
         
         const originalName = Array.from(exerciseSelector.options).find(opt => opt.value === selectedIdsString).textContent;
         chartTitle.textContent = `${originalName} 중량 변화 추이 (Top Set 기준)`;
-        renderProgressChart(combinedData, 'progressChart');
-        renderRecordsTable(combinedData, 'records-table-container');
+        renderProgressChart(exerciseData, 'progressChart');
+        renderRecordsTable(exerciseData, 'records-table-container');
     }
     
     function renderProgressChart(data, canvasId) {
         const chartCanvas = document.getElementById(canvasId);
         const ctx = chartCanvas.getContext('2d');
-        const allInbodyRecords = JSON.parse(localStorage.getItem('inbodyRecords')) || [];
         
-        let targetChartInstance = (canvasId === 'progressChart') ? chartInstance : popupChartInstance;
-        if (targetChartInstance) targetChartInstance.destroy();
+        let targetChartInstance = null;
+        if (canvasId === 'progressChart') {
+            if (chartInstance) chartInstance.destroy();
+        } else if (canvasId === 'record-popup-chart') {
+            if (popupChartInstance) popupChartInstance.destroy();
+        }
 
         const labels = data.map(d => `C${d.cycleId || 1}-${d.week}주`);
-        const topSetData = data.map(d => (d.sets?.length > 0) ? d.sets.reduce((max, set) => set.weight > max.weight ? set : max, { weight: 0 }).weight : null);
+        const topSetData = data.map(d => {
+            if (!d.sets || d.sets.length === 0) return null;
+            const topSet = d.sets.reduce((max, set) => set.weight > max.weight ? set : max, { weight: 0 });
+            return topSet.weight > 0 ? topSet.weight : null;
+        });
+
         const e1RMData = data.map(d => {
             if (!d.sets || d.sets.length === 0) return null;
-            const topSet = d.sets.reduce((max, set) => set.weight > max.weight ? set : max, { weight: 0, reps: 0 });
-            return calculateEpley1RM(topSet.weight, topSet.reps);
+            const topSet = d.sets.reduce((max, set) => set.weight > max.weight ? set : max, { weight: 0 });
+            return topSet.weight > 0 ? calculateEpley1RM(topSet.weight, topSet.reps) : null;
         });
 
         const newChart = new Chart(ctx, {
@@ -1135,13 +1205,37 @@
             data: {
                 labels: labels,
                 datasets: [
-                    { label: 'Top Set 중량 (kg)', data: topSetData, borderColor: '#3b82f6', yAxisID: 'y' },
-                    { label: '추정 1RM (kg)', data: e1RMData, borderColor: '#ef4444', borderDash: [5, 5], yAxisID: 'y' }
+                    {
+                        label: 'Top Set 중량 (kg)',
+                        data: topSetData,
+                        borderColor: '#3b82f6',
+                        backgroundColor: '#3b82f6',
+                        tension: 0.1,
+                        yAxisID: 'y'
+                    },
+                    {
+                        label: '추정 1RM (kg)',
+                        data: e1RMData,
+                        borderColor: '#ef4444',
+                        backgroundColor: '#ef4444',
+                        tension: 0.1,
+                        borderDash: [5, 5],
+                        yAxisID: 'y'
+                    }
                 ]
             },
             options: {
-                responsive: true, maintainAspectRatio: false,
-                scales: { y: { beginAtZero: true, title: { display: true, text: '중량 (kg)' } } },
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        title: {
+                            display: true,
+                            text: '중량 (kg)'
+                        }
+                    }
+                },
                 plugins: {
                     tooltip: {
                         callbacks: {
@@ -1150,18 +1244,7 @@
                                 const record = data[dataIndex];
                                 if (!record || !record.sets) return '';
                                 const topSet = record.sets.reduce((max, set) => set.weight > max.weight ? set : max, { weight: 0, reps: 0 });
-                                let tooltipText = `Top Set: ${topSet.weight}kg x ${topSet.reps}회`;
-
-                                if (allInbodyRecords.length > 0) {
-                                    const recordDate = new Date(record.date);
-                                    const closestInbody = allInbodyRecords.reduce((prev, curr) => 
-                                        Math.abs(new Date(curr.date) - recordDate) < Math.abs(new Date(prev.date) - recordDate) ? curr : prev
-                                    );
-                                    if (closestInbody) {
-                                         tooltipText += `\n\n(측정일: ${closestInbody.date})\n체중: ${closestInbody.weight}kg | 근육량: ${closestInbody.smm}kg`;
-                                    }
-                                }
-                                return tooltipText;
+                                return `Top Set: ${topSet.weight}kg x ${topSet.reps}회`;
                             }
                         }
                     }
@@ -1169,198 +1252,77 @@
             }
         });
         
-        if (canvasId === 'progressChart') { chartInstance = newChart; }
-        else { popupChartInstance = newChart; }
+        if (canvasId === 'progressChart') {
+            chartInstance = newChart;
+        } else if (canvasId === 'record-popup-chart') {
+            popupChartInstance = newChart;
+        }
     }
 
     function renderRecordsTable(data, containerId) {
         const container = document.getElementById(containerId);
-        container.innerHTML = `
-            <table class="w-full text-left border-collapse">
-                <thead class="bg-slate-100">
-                    <tr>
-                        <th class="p-3 font-semibold text-slate-700 text-sm">날짜</th>
-                        <th class="p-3 font-semibold text-slate-700 text-sm">사이클</th>
-                        <th class="p-3 font-semibold text-slate-700 text-sm">주차</th>
-                        <th class="p-3 font-semibold text-slate-700 text-sm">요일</th>
-                        <th class="p-3 font-semibold text-slate-700 text-sm">세트 상세</th>
-                    </tr>
-                </thead>
-                <tbody class="text-sm">
-                    ${data.map(record => `
-                        <tr class="border-b border-slate-200">
-                            <td class="p-3 text-slate-600">${record.date}</td>
-                            <td class="p-3 text-slate-600">${record.cycleId || 1}</td>
-                            <td class="p-3 text-slate-600">${record.week}</td>
-                            <td class="p-3 text-slate-600">${record.dayName} (${record.phase})</td>
-                            <td class="p-3 text-slate-600">${(record.sets || []).map(set => `${set.weight}kg x ${set.reps}회`).join('<br>')}</td>
-                        </tr>
-                    `).join('')}
-                </tbody>
-            </table>
-        `;
-    }
+        if (!data || data.length === 0) {
+            container.innerHTML = `<p class="p-4 text-center text-slate-500">기록이 없습니다.</p>`;
+            return;
+        }
 
+        const table = document.createElement('table');
+        table.className = 'w-full text-left border-collapse';
+        table.innerHTML = `
+            <thead class="bg-slate-100">
+                <tr>
+                    <th class="p-3 font-semibold text-slate-700 text-sm">날짜</th>
+                    <th class="p-3 font-semibold text-slate-700 text-sm">사이클</th>
+                    <th class="p-3 font-semibold text-slate-700 text-sm">주차</th>
+                    <th class="p-3 font-semibold text-slate-700 text-sm">요일</th>
+                    <th class="p-3 font-semibold text-slate-700 text-sm">세트 상세</th>
+                </tr>
+            </thead>
+            <tbody class="text-sm">
+                ${data.map(record => `
+                    <tr class="border-b border-slate-200">
+                        <td class="p-3 text-slate-600 whitespace-nowrap">${record.date}</td>
+                        <td class="p-3 text-slate-600">${record.cycleId || 1}</td>
+                        <td class="p-3 text-slate-600">${record.week}</td>
+                        <td class="p-3 text-slate-600">${record.dayName} (${record.phase})</td>
+                        <td class="p-3 text-slate-600">${(record.sets || []).map(set => `${set.weight}kg x ${set.reps}회`).join('<br>')}</td>
+                    </tr>
+                `).join('')}
+            </tbody>
+        `;
+        container.innerHTML = '';
+        container.appendChild(table);
+    }
+    
     function debounce(func, wait) {
         let timeout;
-        return (...args) => {
+        return function executedFunction(...args) {
+            const later = () => {
+                clearTimeout(timeout);
+                func(...args);
+            };
             clearTimeout(timeout);
-            timeout = setTimeout(() => func.apply(this, args), wait);
+            timeout = setTimeout(later, wait);
         };
     }
 
-    function saveInbodyRecord(record) {
-        let records = JSON.parse(localStorage.getItem('inbodyRecords')) || [];
-        const recordIndex = records.findIndex(r => r.date === record.date);
-        if (recordIndex > -1) {
-            records[recordIndex] = record;
-        } else {
-            records.push(record);
-        }
-        records.sort((a, b) => new Date(a.date) - new Date(b.date));
-        localStorage.setItem('inbodyRecords', JSON.stringify(records));
-    }
-
-    function renderBodycompView() {
-        const records = JSON.parse(localStorage.getItem('inbodyRecords')) || [];
-        renderInbodyChart(records);
-        renderInbodyTable(records);
-    }
-
-    function renderInbodyChart(data) {
-        const ctx = document.getElementById('inbodyChart').getContext('2d');
-        if (inbodyChart) inbodyChart.destroy();
-        inbodyChart = new Chart(ctx, {
-            type: 'line',
-            data: {
-                labels: data.map(d => d.date),
-                datasets: [
-                    { label: '체중 (kg)', data: data.map(d => d.weight), borderColor: '#3b82f6', yAxisID: 'yWeight' },
-                    { label: '골격근량 (kg)', data: data.map(d => d.smm), borderColor: '#16a34a', yAxisID: 'yWeight' },
-                    { label: '체지방률 (%)', data: data.map(d => d.fatPercentage), borderColor: '#ef4444', yAxisID: 'yFat' }
-                ]
-            },
-            options: {
-                responsive: true, maintainAspectRatio: false,
-                scales: {
-                    yWeight: { type: 'linear', position: 'left', title: { display: true, text: 'kg' } },
-                    yFat: { type: 'linear', position: 'right', title: { display: true, text: '%' }, grid: { drawOnChartArea: false } }
-                }
-            }
-        });
-    }
-
-    function renderInbodyTable(data) {
-        const container = document.getElementById('inbody-table-container');
-        if (!data || data.length === 0) {
-            container.innerHTML = `<p class="p-4 text-center text-slate-500">아직 인바디 기록이 없습니다.</p>`;
-            return;
-        }
-        container.innerHTML = `
-            <table class="w-full text-left border-collapse">
-                <thead class="bg-slate-100">
-                    <tr>
-                        <th class="p-3 font-semibold text-slate-700 text-sm">측정일</th>
-                        <th class="p-3 font-semibold text-slate-700 text-sm">체중(kg)</th>
-                        <th class="p-3 font-semibold text-slate-700 text-sm">골격근량(kg)</th>
-                        <th class="p-3 font-semibold text-slate-700 text-sm">체지방률(%)</th>
-                        <th class="p-3 font-semibold text-slate-700 text-sm">삭제</th>
-                    </tr>
-                </thead>
-                <tbody class="text-sm">
-                    ${data.slice().reverse().map(record => `
-                        <tr class="border-b border-slate-200">
-                            <td class="p-3 text-slate-600">${record.date}</td>
-                            <td class="p-3 text-slate-600">${record.weight}</td>
-                            <td class="p-3 text-slate-600">${record.smm}</td>
-                            <td class="p-3 text-slate-600">${record.fatPercentage}</td>
-                            <td class="p-3"><button class="delete-inbody-btn text-red-500 hover:text-red-700" data-date="${record.date}">삭제</button></td>
-                        </tr>
-                    `).join('')}
-                </tbody>
-            </table>
-        `;
-    }
-
-    function deleteInbodyRecord(date) {
-        let records = JSON.parse(localStorage.getItem('inbodyRecords')) || [];
-        records = records.filter(r => r.date !== date);
-        localStorage.setItem('inbodyRecords', JSON.stringify(records));
-        renderBodycompView();
-    }
-    
-    // [NEW in v14.0] Import logic
-    function handleDataImport() {
-        const jsonString = importDataTextarea.value;
-        if (!jsonString) {
-            showImportFeedback('텍스트 영역에 데이터가 없습니다.', 'error');
-            return;
-        }
-
-        let data;
-        try {
-            data = JSON.parse(jsonString);
-        } catch (error) {
-            showImportFeedback('유효하지 않은 JSON 형식입니다. 파일 내용을 다시 확인해주세요.', 'error');
-            return;
-        }
-
-        // Data Structure Validation
-        const requiredKeys = ['workoutRecords', 'workoutState', 'workoutCycleInfo', 'inbodyRecords'];
-        const hasAllKeys = requiredKeys.every(key => key in data);
-
-        if (!hasAllKeys) {
-            showImportFeedback('필수 데이터가 누락되었습니다. (required: workoutRecords, workoutState, etc.)', 'error');
-            return;
-        }
-        
-        if (confirm('정말로 데이터를 불러오시겠습니까? 현재 앱에 저장된 모든 기록을 덮어쓰게 됩니다.')) {
-            localStorage.setItem('workoutRecords', JSON.stringify(data.workoutRecords || {}));
-            localStorage.setItem('workoutState', JSON.stringify(data.workoutState || {}));
-            localStorage.setItem('workoutCycleInfo', JSON.stringify(data.workoutCycleInfo || {}));
-            localStorage.setItem('inbodyRecords', JSON.stringify(data.inbodyRecords || []));
-            
-            showImportFeedback('데이터를 성공적으로 불러왔습니다! 2초 후 앱을 새로고침합니다.', 'success');
-            setTimeout(() => {
-                window.location.reload();
-            }, 2000);
-        }
-    }
-
-    // [NEW in v14.0] Helper for import feedback
-    function showImportFeedback(message, type = 'info') {
-        importFeedback.textContent = message;
-        if (type === 'error') {
-            importFeedback.className = 'text-sm mt-3 h-5 text-red-600 font-semibold';
-        } else if (type === 'success') {
-            importFeedback.className = 'text-sm mt-3 h-5 text-green-600 font-semibold';
-        } else {
-            importFeedback.className = 'text-sm mt-3 h-5 text-slate-500';
-        }
-    }
-
-    // [NEW in v14.1] Function to save data as a file
-    function saveDataAsFile() {
-        const dataStr = exportDataTextarea.value;
-        const blob = new Blob([dataStr], { type: 'application/json' });
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        const today = new Date().toISOString().slice(0, 10);
-        a.href = url;
-        a.download = `26w-growth-program-backup-${today}.json`;
-        document.body.appendChild(a);
-        a.click();
-        document.body.removeChild(a);
-        URL.revokeObjectURL(url);
-    }
-
+    // INITIALIZATION & EVENT LISTENERS
     function initApp() {
         const savedState = JSON.parse(localStorage.getItem('workoutState')) || {};
         currentWeek = savedState.currentWeek || 1;
         currentDay = savedState.currentDay || 'pull';
-        currentCycleId = (JSON.parse(localStorage.getItem('workoutCycleInfo')) || { cycleId: 1 }).cycleId;
+        
+        const cycleInfo = JSON.parse(localStorage.getItem('workoutCycleInfo')) || { cycleId: 1 };
+        currentCycleId = cycleInfo.cycleId;
 
-        weekSelector.innerHTML = Array.from({length: 13}, (_, i) => `<button data-week="${i + 1}" class="p-2 px-4 rounded-lg font-semibold text-sm sm:text-base transition duration-200 hover:bg-slate-200 flex-grow text-center shadow-md">${i + 1}주</button>`).join('');
+        weekSelector.innerHTML = '';
+        for (let i = 1; i <= 13; i++) {
+            const button = document.createElement('button');
+            button.textContent = `${i}주`;
+            button.dataset.week = i;
+            button.className = 'p-2 px-4 rounded-lg font-semibold text-sm sm:text-base transition duration-200 hover:bg-slate-200 flex-grow text-center shadow-md';
+            weekSelector.appendChild(button);
+        }
 
         weekSelector.addEventListener('click', (e) => {
             if (e.target.tagName === 'BUTTON') {
@@ -1385,10 +1347,15 @@
         resetAllButton.addEventListener('click', () => resetAllModal.classList.remove('hidden'));
         cancelResetAll.addEventListener('click', () => resetAllModal.classList.add('hidden'));
         confirmResetAll.addEventListener('click', () => {
-            if(confirm('정말로 모든 데이터를 삭제하고 초기화하시겠습니까? 이 작업은 되돌릴 수 없습니다.')) {
-                localStorage.clear();
-                window.location.reload();
-            }
+            localStorage.removeItem('workoutRecords');
+            localStorage.removeItem('workoutState');
+            localStorage.removeItem('workoutCycleInfo');
+            currentWeek = 1;
+            currentDay = 'pull';
+            currentCycleId = 1;
+            initApp();
+            showView('today');
+            resetAllModal.classList.add('hidden');
         });
 
         newCycleButton.addEventListener('click', () => newCycleModal.classList.remove('hidden'));
@@ -1406,93 +1373,32 @@
         
         exportDataButton.addEventListener('click', () => {
             const dataToExport = {
-                contextPrompt: `프로그램 버전: v14.1`,
+                contextPrompt: CONTEXT_PROMPT,
                 workoutRecords: JSON.parse(localStorage.getItem('workoutRecords') || '{}'),
                 workoutState: JSON.parse(localStorage.getItem('workoutState') || '{}'),
                 workoutCycleInfo: JSON.parse(localStorage.getItem('workoutCycleInfo') || '{}'),
-                inbodyRecords: JSON.parse(localStorage.getItem('inbodyRecords') || '[]'),
             };
             exportDataTextarea.value = JSON.stringify(dataToExport, null, 2);
             exportModal.classList.remove('hidden');
         });
         copyExportDataButton.addEventListener('click', () => {
-            exportDataTextarea.select(); document.execCommand('copy');
+            exportDataTextarea.select();
+            document.execCommand('copy');
             copyExportDataButton.textContent = '복사 완료!';
             setTimeout(() => { copyExportDataButton.textContent = '전체 복사'; }, 2000);
         });
         closeExportModalButton.addEventListener('click', () => exportModal.classList.add('hidden'));
+        
         closeRecordPopupButton.addEventListener('click', () => recordPopupModal.classList.add('hidden'));
 
-        // [NEW in v14.1] Add event listener for the save button
-        saveExportDataButton.addEventListener('click', saveDataAsFile);
-
-        // Import event listeners
-        importDataButton.addEventListener('click', () => {
-            importModal.classList.remove('hidden');
-            importDataTextarea.value = '';
-            importFileInput.value = '';
-            showImportFeedback('');
-        });
-        closeImportModalButton.addEventListener('click', () => importModal.classList.add('hidden'));
-        confirmImportButton.addEventListener('click', handleDataImport);
-        importFileInput.addEventListener('change', (event) => {
-            const file = event.target.files[0];
-            if (!file) return;
-            const reader = new FileReader();
-            reader.onload = (e) => {
-                importDataTextarea.value = e.target.result;
-            };
-            reader.readAsText(file);
-        });
-
-
-        inbodyForm.addEventListener('submit', (e) => {
-            e.preventDefault();
-            const record = {
-                date: document.getElementById('inbody-date').value,
-                weight: parseFloat(document.getElementById('inbody-weight').value),
-                smm: parseFloat(document.getElementById('inbody-smm').value),
-                fatPercentage: parseFloat(document.getElementById('inbody-fat').value)
-            };
-            if (!record.date) { return; }
-            saveInbodyRecord(record);
-            renderBodycompView();
-            inbodyForm.reset();
-            document.getElementById('inbody-date').valueAsDate = new Date();
-        });
-
-        document.getElementById('inbody-table-container').addEventListener('click', e => {
-            if (e.target.classList.contains('delete-inbody-btn')) {
-                if (confirm('이 기록을 삭제하시겠습니까?')) {
-                    deleteInbodyRecord(e.target.dataset.date);
-                }
-            }
-        });
-
-        document.getElementById('inbody-date').valueAsDate = new Date();
-        
         updateActiveButtons();
         renderWorkout();
         showView('today');
     }
-
-    // Replace native confirm with a simple version for now to avoid blocking issues in some environments.
-    // In a real app, you would build a custom modal for confirmations.
-    const originalConfirm = window.confirm;
-    window.confirm = function(message) {
-        try {
-            return originalConfirm(message);
-        } catch (e) {
-            console.warn("`confirm` dialog was blocked. Defaulting to true. Consider implementing a custom modal.");
-            return true;
-        }
-    };
 
     document.addEventListener('DOMContentLoaded', initApp);
 </script>
 
 </body>
 </html>
-
-
 
