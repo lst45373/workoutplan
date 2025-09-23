@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>26주 장기 성장 프로그램 | 인터랙티브 플래너 (v13.4.1)</title>
+    <title>26주 장기 성장 프로그램 | 인터랙티브 플래너 (v14.1)</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
@@ -198,6 +198,7 @@
                             <p class="text-slate-500 mt-2">운동을 선택하고 기록을 확인해주세요.</p>
                         </div>
                         <div class="mt-10 pt-8 border-t border-slate-200 space-y-4">
+                            <h3 class="text-xl font-bold text-slate-800">데이터 및 설정 관리</h3>
                             <button id="new-cycle-button" class="w-full bg-blue-100 text-blue-700 font-bold p-3 sm:p-4 rounded-lg hover:bg-blue-200 transition duration-200 flex items-center justify-center gap-2 text-base sm:text-lg shadow-md hover:shadow-lg">
                                 <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" class="bi bi-arrow-repeat" viewBox="0 0 16 16">
                                   <path d="M11.534 7h3.932a.25.25 0 0 1 .192.41l-1.966 2.36a.25.25 0 0 1-.384 0l-1.966-2.36a.25.25 0 0 1 .192-.41zm-11 2h3.932a.25.25 0 0 0 .192-.41L2.692 6.23a.25.25 0 0 0-.384 0L.342 8.59A.25.25 0 0 0 .534 9z"></path>
@@ -209,7 +210,14 @@
                                 <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" class="bi bi-archive" viewBox="0 0 16 16">
                                     <path d="M0 2a1 1 0 0 1 1-1h14a1 1 0 0 1 1 1v2a1 1 0 0 1-1 1v7.5a2.5 2.5 0 0 1-2.5 2.5h-9A2.5 2.5 0 0 1 1 12.5V5a1 1 0 0 1-1-1V2zm2 3v7.5A1.5 1.5 0 0 0 3.5 14h9a1.5 1.5 0 0 0 1.5-1.5V5H2zm13-3H1v2h14V2zM5 7.5a.5.5 0 0 1 .5-.5h5a.5.5 0 0 1 0 1h-5a.5.5 0 0 1-.5-.5z"/>
                                 </svg>
-                                내 훈련 기록 보관하기 (아카이브)
+                                내 훈련 기록 내보내기 (Export)
+                            </button>
+                            <button id="import-data-button" class="w-full bg-purple-100 text-purple-700 font-bold p-3 sm:p-4 rounded-lg hover:bg-purple-200 transition duration-200 flex items-center justify-center gap-2 text-base sm:text-lg shadow-md hover:shadow-lg">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" class="bi bi-upload" viewBox="0 0 16 16">
+                                    <path d="M.5 9.9a.5.5 0 0 1 .5.5v2.5a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-2.5a.5.5 0 0 1 1 0v2.5a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2v-2.5a.5.5 0 0 1 .5-.5z"/>
+                                    <path d="M7.646 1.146a.5.5 0 0 1 .708 0l3 3a.5.5 0 0 1-.708.708L8.5 2.707V11.5a.5.5 0 0 1-1 0V2.707L5.354 4.854a.5.5 0 1 1-.708-.708l3-3z"/>
+                                </svg>
+                                훈련 기록 불러오기 (Import)
                             </button>
                             <button id="reset-all-button" class="w-full bg-red-100 text-red-700 font-bold p-3 sm:p-4 rounded-lg hover:bg-red-200 transition duration-200 flex items-center justify-center gap-2 text-base sm:text-lg shadow-md hover:shadow-lg">
                                 <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" class="bi bi-trash" viewBox="0 0 16 16"><path d="M5.5 5.5A.5.5 0 0 1 6 6v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5m2.5 0a.5.5 0 0 1 .5.5v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5m3 .5a.5.5 0 0 0-1 0v6a.5.5 0 0 0 1 0z"></path><path d="M14.5 3a1 1 0 0 1-1 1H13v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V4h-.5a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1H6a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1h3.5a1 1 0 0 1 1 1zM4.118 4 4 4.059V13a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1V4.059L11.882 4zM2.5 3h11V2h-11z"></path></svg>
@@ -283,12 +291,30 @@
             <div class="bg-white rounded-xl p-6 md:p-8 shadow-2xl max-w-2xl w-full flex flex-col" style="height: 90vh;">
                 <div class="flex-shrink-0">
                     <h3 class="text-xl sm:text-2xl font-bold mb-2 text-slate-900">프로젝트 아카이브 내보내기</h3>
-                    <p class="text-slate-600 mb-4 text-sm sm:text-base">아래 내용을 모두 복사하여 백업하거나, 다음 업데이트 논의를 위해 공유해 주세요.</p>
+                    <p class="text-slate-600 mb-4 text-sm sm:text-base">아래 내용을 복사하거나 파일로 저장하여 데이터를 안전하게 백업하세요.</p>
                 </div>
                 <textarea id="export-data-textarea" readonly class="w-full flex-grow p-4 border border-slate-300 rounded-lg bg-slate-50 text-sm font-mono resize-none"></textarea>
                 <div class="flex justify-end gap-3 mt-4 flex-shrink-0">
+                    <button id="save-export-data-button" class="px-4 py-2 sm:px-5 sm:py-2.5 rounded-lg bg-green-600 text-white font-bold hover:bg-green-700 transition shadow-md">파일로 저장 (.json)</button>
                     <button id="copy-export-data-button" class="px-4 py-2 sm:px-5 sm:py-2.5 rounded-lg bg-blue-600 text-white font-bold hover:bg-blue-700 transition shadow-md">전체 복사</button>
                     <button id="close-export-modal-button" class="px-4 py-2 sm:px-5 sm:py-2.5 rounded-lg bg-slate-200 text-slate-800 font-bold hover:bg-slate-300 transition shadow-md">닫기</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- [NEW in v14.0] Import Modal -->
+        <div id="import-modal" class="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center hidden z-50 p-4 modal-enter">
+            <div class="bg-white rounded-xl p-6 md:p-8 shadow-2xl max-w-2xl w-full flex flex-col" style="height: 90vh;">
+                <div class="flex-shrink-0">
+                    <h3 class="text-xl sm:text-2xl font-bold mb-2 text-slate-900">훈련 기록 불러오기</h3>
+                    <p class="text-slate-600 mb-4 text-sm sm:text-base">백업한 JSON 파일을 선택하거나, 파일 내용을 아래에 직접 붙여넣으세요. <strong class="text-red-600">주의: 현재 모든 기록을 덮어씁니다.</strong></p>
+                    <input type="file" id="import-file-input" accept=".json,text/plain" class="mb-4 block w-full text-sm text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-purple-50 file:text-purple-700 hover:file:bg-purple-100"/>
+                </div>
+                <textarea id="import-data-textarea" class="w-full flex-grow p-4 border border-slate-300 rounded-lg bg-slate-50 text-sm font-mono resize-none" placeholder="여기에 JSON 데이터를 붙여넣으세요..."></textarea>
+                <div id="import-feedback" class="text-sm mt-3 h-5"></div>
+                <div class="flex justify-end gap-3 mt-4 flex-shrink-0">
+                    <button id="close-import-modal-button" class="px-4 py-2 sm:px-5 sm:py-2.5 rounded-lg bg-slate-200 text-slate-800 font-bold hover:bg-slate-300 transition shadow-md">취소</button>
+                    <button id="confirm-import-button" class="px-4 py-2 sm:px-5 sm:py-2.5 rounded-lg bg-purple-600 text-white font-bold hover:bg-purple-700 transition shadow-md">불러오기</button>
                 </div>
             </div>
         </div>
@@ -383,8 +409,8 @@
                 { type: '웜업', name: '랫풀다운 (가볍게)', sets: '2세트', tip: '견갑을 아래로 누르는 움직임에 집중하여 등을 활성화시킵니다.', staticGoal: '🔥 목표: 30-40kg x 12-15회.', alternatives: ['어시스트 풀업', '가벼운 케이블 로우'], movement_pattern: 'vertical_pull'},
                 { type: '메인', name: '랫풀다운 (맥그립 중간)', sets: '탑/백오프 세트', tip: '광배근 전체의 볼륨과 매스를 키우는 올라운더 그립. 가슴을 열고 팔꿈치를 아래쪽 옆구리로 당긴다는 느낌으로 수행합니다.', baseTopSet: 65, unit: '총', alternatives: ['뉴트럴 그립 풀업', '시티드 케이블 로우 (V-바)'], movement_pattern: 'vertical_pull'},
                 { type: '메인', name: '원 암 시티드 케이블 로우', sets: '탑/백오프 세트', tip: '케이블의 지속적인 장력으로 광배근을 고립합니다. 당기면서 상체를 살짝 회전시켜 수축감을 극대화하고, 이완 시에는 최대한 늘려주세요.', baseTopSet: 40, alternatives: ['원 암 덤벨 로우', 'T-바 로우 (원 암)'], movement_pattern: 'horizontal_pull'},
-                { type: '메인', name: '해머스트랭스 프론트 풀다운 (파나타 스타일)', sets: '탑/백오프 세트', tip: '광배근을 최대 이완시켜 너비감을 극대화하는 것이 목표입니다. 상체를 살짝 뒤로 젖혀 가슴을 열고, 팔이 벌어지는 궤적을 따라 광배근 바깥쪽이 최대로 늘어나는 것을 느끼고, 명치 쪽으로 강하게 당겨 수축하세요.', baseTopSet: 30, unit: '한쪽', alternatives: ['와이드 그립 풀업', '와이드 그립 랫풀다운'], movement_pattern: 'vertical_pull'},
-                { type: '보조', name: '백 익스텐션', sets: '3~4세트', tip: '허리 라인의 선명함과 깊이감을 만듭니다. 엉덩이와 등의 힘으로 상체를 들어올리고, 허리가 과하게 꺾이지 않도록 주의합니다.', staticGoal: '🔥 목표: 맨몸 또는 10kg 원판 x 15-20회.', increment: 2.5, alternatives: ['굿모닝 (가볍게)', '리버스 하이퍼익스텐션'], movement_pattern: 'hip_hinge'},
+                { type: '메인', name: '해머스트랭스 프론트 풀다운 (파나타 스타일)', sets: '탑/백오프 세트', tip: "원 암 방식으로 견갑골을 최대로 움직여, 일반 풀다운으로는 불가능한 '최대 이완' 지점을 공략해 등 너비감을 만드는 운동입니다.<br>스트랩형 원핸드 그립 연결 후, 운동하는 쪽 어깨를 앞으로 최대한 밀어내 광배근 바깥쪽의 최대 이완 지점을 찾고, 그 지점에서부터 팔꿈치를 골반 쪽으로 당겨 등 하부까지 수축합니다.", baseTopSet: 30, unit: '한쪽', alternatives: ['와이드 그립 풀업', '와이드 그립 랫풀다운'], movement_pattern: 'vertical_pull'},
+                { type: '보조', name: '백 익텐션', sets: '3~4세트', tip: '허리 라인의 선명함과 깊이감을 만듭니다. 엉덩이와 등의 힘으로 상체를 들어올리고, 허리가 과하게 꺾이지 않도록 주의합니다.', staticGoal: '🔥 목표: 맨몸 또는 10kg 원판 x 15-20회.', increment: 2.5, alternatives: ['굿모닝 (가볍게)', '리버스 하이퍼익스텐션'], movement_pattern: 'hip_hinge'},
                 { type: '마무리', name: '뉴텍 오버헤드 트라이셉스 익스텐션', sets: '2~3세트', tip: '시작 저항이 매우 강한 머신입니다. 처음에는 원판 없이 시작하여 자극에 적응하세요. 팔꿈치를 고정하고, 천천히 이완하며 삼두근 장두가 최대로 늘어나는 것을 느끼는 것이 핵심입니다.', staticGoal: '🔥 목표: 0kg x 8-10회.', increment: 5, alternatives: ['케이블 오버헤드 익스텐션 (로프)', '덤벨 오버헤드 익스텐션'], movement_pattern: 'isolation_triceps'}
             ]},
              leg: { name: '레그(Leg) C', routine: [
@@ -472,6 +498,17 @@
     const recordPopupModal = document.getElementById('record-popup-modal');
     const closeRecordPopupButton = document.getElementById('close-record-popup-button');
     const inbodyForm = document.getElementById('inbody-form');
+    // [NEW in v14.0] Import Elements
+    const importDataButton = document.getElementById('import-data-button');
+    const importModal = document.getElementById('import-modal');
+    const importFileInput = document.getElementById('import-file-input');
+    const importDataTextarea = document.getElementById('import-data-textarea');
+    const importFeedback = document.getElementById('import-feedback');
+    const closeImportModalButton = document.getElementById('close-import-modal-button');
+    const confirmImportButton = document.getElementById('confirm-import-button');
+    // [NEW in v14.1] Save Export Button Element
+    const saveExportDataButton = document.getElementById('save-export-data-button');
+
 
     const phaseDescriptions = {
         '강화 주기': '최대 근력(Strength) 증진. 메인 운동은 \'탑/백오프 세트\' 방식으로 진행하며, 점진적으로 더 무거운 무게에 도전하는 것이 목표입니다.',
@@ -1251,6 +1288,71 @@
         localStorage.setItem('inbodyRecords', JSON.stringify(records));
         renderBodycompView();
     }
+    
+    // [NEW in v14.0] Import logic
+    function handleDataImport() {
+        const jsonString = importDataTextarea.value;
+        if (!jsonString) {
+            showImportFeedback('텍스트 영역에 데이터가 없습니다.', 'error');
+            return;
+        }
+
+        let data;
+        try {
+            data = JSON.parse(jsonString);
+        } catch (error) {
+            showImportFeedback('유효하지 않은 JSON 형식입니다. 파일 내용을 다시 확인해주세요.', 'error');
+            return;
+        }
+
+        // Data Structure Validation
+        const requiredKeys = ['workoutRecords', 'workoutState', 'workoutCycleInfo', 'inbodyRecords'];
+        const hasAllKeys = requiredKeys.every(key => key in data);
+
+        if (!hasAllKeys) {
+            showImportFeedback('필수 데이터가 누락되었습니다. (required: workoutRecords, workoutState, etc.)', 'error');
+            return;
+        }
+        
+        if (confirm('정말로 데이터를 불러오시겠습니까? 현재 앱에 저장된 모든 기록을 덮어쓰게 됩니다.')) {
+            localStorage.setItem('workoutRecords', JSON.stringify(data.workoutRecords || {}));
+            localStorage.setItem('workoutState', JSON.stringify(data.workoutState || {}));
+            localStorage.setItem('workoutCycleInfo', JSON.stringify(data.workoutCycleInfo || {}));
+            localStorage.setItem('inbodyRecords', JSON.stringify(data.inbodyRecords || []));
+            
+            showImportFeedback('데이터를 성공적으로 불러왔습니다! 2초 후 앱을 새로고침합니다.', 'success');
+            setTimeout(() => {
+                window.location.reload();
+            }, 2000);
+        }
+    }
+
+    // [NEW in v14.0] Helper for import feedback
+    function showImportFeedback(message, type = 'info') {
+        importFeedback.textContent = message;
+        if (type === 'error') {
+            importFeedback.className = 'text-sm mt-3 h-5 text-red-600 font-semibold';
+        } else if (type === 'success') {
+            importFeedback.className = 'text-sm mt-3 h-5 text-green-600 font-semibold';
+        } else {
+            importFeedback.className = 'text-sm mt-3 h-5 text-slate-500';
+        }
+    }
+
+    // [NEW in v14.1] Function to save data as a file
+    function saveDataAsFile() {
+        const dataStr = exportDataTextarea.value;
+        const blob = new Blob([dataStr], { type: 'application/json' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        const today = new Date().toISOString().slice(0, 10);
+        a.href = url;
+        a.download = `26w-growth-program-backup-${today}.json`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+    }
 
     function initApp() {
         const savedState = JSON.parse(localStorage.getItem('workoutState')) || {};
@@ -1283,8 +1385,10 @@
         resetAllButton.addEventListener('click', () => resetAllModal.classList.remove('hidden'));
         cancelResetAll.addEventListener('click', () => resetAllModal.classList.add('hidden'));
         confirmResetAll.addEventListener('click', () => {
-            localStorage.clear();
-            window.location.reload();
+            if(confirm('정말로 모든 데이터를 삭제하고 초기화하시겠습니까? 이 작업은 되돌릴 수 없습니다.')) {
+                localStorage.clear();
+                window.location.reload();
+            }
         });
 
         newCycleButton.addEventListener('click', () => newCycleModal.classList.remove('hidden'));
@@ -1302,7 +1406,7 @@
         
         exportDataButton.addEventListener('click', () => {
             const dataToExport = {
-                contextPrompt: CONTEXT_PROMPT,
+                contextPrompt: `프로그램 버전: v14.1`,
                 workoutRecords: JSON.parse(localStorage.getItem('workoutRecords') || '{}'),
                 workoutState: JSON.parse(localStorage.getItem('workoutState') || '{}'),
                 workoutCycleInfo: JSON.parse(localStorage.getItem('workoutCycleInfo') || '{}'),
@@ -1319,6 +1423,29 @@
         closeExportModalButton.addEventListener('click', () => exportModal.classList.add('hidden'));
         closeRecordPopupButton.addEventListener('click', () => recordPopupModal.classList.add('hidden'));
 
+        // [NEW in v14.1] Add event listener for the save button
+        saveExportDataButton.addEventListener('click', saveDataAsFile);
+
+        // Import event listeners
+        importDataButton.addEventListener('click', () => {
+            importModal.classList.remove('hidden');
+            importDataTextarea.value = '';
+            importFileInput.value = '';
+            showImportFeedback('');
+        });
+        closeImportModalButton.addEventListener('click', () => importModal.classList.add('hidden'));
+        confirmImportButton.addEventListener('click', handleDataImport);
+        importFileInput.addEventListener('change', (event) => {
+            const file = event.target.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                importDataTextarea.value = e.target.result;
+            };
+            reader.readAsText(file);
+        });
+
+
         inbodyForm.addEventListener('submit', (e) => {
             e.preventDefault();
             const record = {
@@ -1327,7 +1454,7 @@
                 smm: parseFloat(document.getElementById('inbody-smm').value),
                 fatPercentage: parseFloat(document.getElementById('inbody-fat').value)
             };
-            if (!record.date) { alert('날짜를 선택해주세요.'); return; }
+            if (!record.date) { return; }
             saveInbodyRecord(record);
             renderBodycompView();
             inbodyForm.reset();
@@ -1349,9 +1476,23 @@
         showView('today');
     }
 
+    // Replace native confirm with a simple version for now to avoid blocking issues in some environments.
+    // In a real app, you would build a custom modal for confirmations.
+    const originalConfirm = window.confirm;
+    window.confirm = function(message) {
+        try {
+            return originalConfirm(message);
+        } catch (e) {
+            console.warn("`confirm` dialog was blocked. Defaulting to true. Consider implementing a custom modal.");
+            return true;
+        }
+    };
+
     document.addEventListener('DOMContentLoaded', initApp);
 </script>
 
 </body>
 </html>
+
+
 
