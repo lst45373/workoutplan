@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>26주 장기 성장 프로그램 | 인터랙티브 플래너 (v20.0)</title>
+    <title>26주 장기 성장 프로그램 | 인터랙티브 플래너 (v20.2)</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
@@ -742,22 +742,20 @@
 
             card.innerHTML = `
                 <div class="flex-1">
-                     <div class="flex items-start justify-between gap-3 mb-3 flex-wrap">
-                        <div class="flex items-center gap-3 flex-wrap">
-                            <span class="text-xs font-bold uppercase py-1 px-3 rounded-full ${exercise.type.includes('웜업') || exercise.type.includes('회복') ? 'bg-amber-100 text-amber-800' : exercise.type === '메인' ? 'bg-blue-100 text-blue-800' : 'bg-slate-100 text-slate-800'}">${exercise.type}</span>
-                            <h4 class="text-lg sm:text-xl font-bold text-slate-900">${exercise.name}</h4>
-                            ${movementPatternTag}
-                        </div>
-                        <button data-action="view-history" data-exercise-name="${exercise.name}" class="p-2 text-slate-400 hover:text-blue-500 transition" title="과거 기록 보기">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" class="bi bi-clock-history" viewBox="0 0 16 16">
-                                <path d="M8.515 1.019A7 7 0 0 0 8 1V0a8 8 0 0 1 .589.022l-.074.997zm2.004.45a7.003 7.003 0 0 0-.985-.299l.219-.976c.383.086.76.2 1.126.342l-.36.933zm1.37.71a7.01 7.01 0 0 0-.439-.27l.493-.87a8.025 8.025 0 0 1 .979.654l-.615.789a6.996 6.996 0 0 0-.418-.302zm1.834 1.798a6.99 6.99 0 0 0-.653-.796l.724-.69c.27.285.52.59.747.91l-.818.576zm.744 1.352a7.08 7.08 0 0 0-.214-.468l.893-.45a7.986 7.986 0 0 1 .45 1.088l-.95.313a7.023 7.023 0 0 0-.179-.483zM12 8.5a.5.5 0 0 1-.5.5H8.5V4.5a.5.5 0 0 1 1 0V8h3a.5.5 0 0 1 .5.5z"/>
-                                <path d="M8 3.5a.5.5 0 0 0-1 0V9a.5.5 0 0 0 .252.434l3.5 2a.5.5 0 0 0 .496-.868L8 8.71V3.5z"/>
-                                <path d="M8.5 5.5a.5.5 0 0 0-1 0v3.362l-1.591 1.193a.5.5 0 1 0 .638.742L8.5 9.362V5.5z"/>
-                            </svg>
-                        </button>
+                     <div class="flex items-center gap-3 mb-3 flex-wrap">
+                        <span class="text-xs font-bold uppercase py-1 px-3 rounded-full ${exercise.type.includes('웜업') || exercise.type.includes('회복') ? 'bg-amber-100 text-amber-800' : exercise.type === '메인' ? 'bg-blue-100 text-blue-800' : 'bg-slate-100 text-slate-800'}">${exercise.type}</span>
+                        <h4 class="text-lg sm:text-xl font-bold text-slate-900">${exercise.name}</h4>
+                        ${movementPatternTag}
                     </div>
                     <p class="text-slate-600 text-sm sm:text-base">${tipContent}<br><span class="font-bold text-red-600">${goalText}</span></p>
-                    <p class="text-sm font-semibold text-slate-500 mt-3">훈련 방식: ${methodText} &nbsp;&nbsp; | &nbsp;&nbsp; <span class="font-bold text-sky-700">${restText}</span></p>
+                    <div class="flex justify-between items-center mt-3">
+                         <p class="text-sm font-semibold text-slate-500">훈련 방식: ${methodText} &nbsp;&nbsp; | &nbsp;&nbsp; <span class="font-bold text-sky-700">${restText}</span></p>
+                         <button data-action="view-history" data-exercise-name="${exercise.name}" class="p-2 text-slate-400 hover:text-blue-500 transition" title="과거 기록 보기">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" class="bi bi-table" viewBox="0 0 16 16">
+                                <path d="M0 2a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2V2zm15 2h-4v3h4V4zm0 4h-4v3h4V8zm0 4h-4v3h3a1 1 0 0 0 1-1v-2zm-5 3v-3H6v3h4zm-5 0v-3H1v2a1 1 0 0 0 1 1h3zm-4-4h4V8H1v3zm0-4h4V4H1v3zm5-3v3h4V4H6zm5 0v3h4V4h-4z"/>
+                            </svg>
+                         </button>
+                    </div>
                 </div>
                 ${alternativesHTML}
                 <div data-container-for="${sanitizedName}" class="space-y-3 mt-4"></div>
@@ -1422,3 +1420,4 @@
 </script>
 </body>
 </html>
+
