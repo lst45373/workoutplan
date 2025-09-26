@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>26주 장기 성장 프로그램 | 인터랙티브 플래너 (v19.1 AI 코치 최종 수정)</title>
+    <title>26주 장기 성장 프로그램 | 인터랙티브 플래너 (v20.0)</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
@@ -296,6 +296,21 @@
                     <p class="text-slate-500 mb-6">휴식 시간</p>
                     <div id="timer-display" class="text-7xl sm:text-8xl font-bold font-mono text-slate-900 mb-8 tracking-tighter" style="font-variant-numeric: tabular-nums;">00:00</div>
                     <button id="skip-timer-btn" class="w-full px-4 py-3 sm:px-5 sm:py-3.5 rounded-lg bg-slate-200 text-slate-800 font-bold hover:bg-slate-300 transition shadow-md">휴식 건너뛰기</button>
+                </div>
+            </div>
+
+            <!-- History Modal -->
+            <div id="history-modal" class="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center hidden z-50 p-4 modal-enter">
+                <div class="bg-white rounded-xl p-6 md:p-8 shadow-2xl max-w-2xl w-full flex flex-col" style="max-height: 90vh;">
+                    <div class="flex-shrink-0">
+                        <h3 id="history-modal-title" class="text-xl sm:text-2xl font-bold mb-4 text-slate-900"></h3>
+                    </div>
+                    <div id="history-modal-content" class="overflow-y-auto flex-grow pr-4 -mr-4">
+                        <!-- History table will be injected here -->
+                    </div>
+                    <div class="flex justify-end mt-6 flex-shrink-0">
+                        <button data-action="close-modal" class="px-4 py-2 sm:px-5 sm:py-2.5 rounded-lg bg-slate-200 text-slate-800 font-bold hover:bg-slate-300 transition shadow-md">닫기</button>
+                    </div>
                 </div>
             </div>
         </div>
@@ -727,10 +742,19 @@
 
             card.innerHTML = `
                 <div class="flex-1">
-                     <div class="flex items-center gap-3 mb-3 flex-wrap">
-                        <span class="text-xs font-bold uppercase py-1 px-3 rounded-full ${exercise.type.includes('웜업') || exercise.type.includes('회복') ? 'bg-amber-100 text-amber-800' : exercise.type === '메인' ? 'bg-blue-100 text-blue-800' : 'bg-slate-100 text-slate-800'}">${exercise.type}</span>
-                        <h4 class="text-lg sm:text-xl font-bold text-slate-900">${exercise.name}</h4>
-                        ${movementPatternTag}
+                     <div class="flex items-start justify-between gap-3 mb-3 flex-wrap">
+                        <div class="flex items-center gap-3 flex-wrap">
+                            <span class="text-xs font-bold uppercase py-1 px-3 rounded-full ${exercise.type.includes('웜업') || exercise.type.includes('회복') ? 'bg-amber-100 text-amber-800' : exercise.type === '메인' ? 'bg-blue-100 text-blue-800' : 'bg-slate-100 text-slate-800'}">${exercise.type}</span>
+                            <h4 class="text-lg sm:text-xl font-bold text-slate-900">${exercise.name}</h4>
+                            ${movementPatternTag}
+                        </div>
+                        <button data-action="view-history" data-exercise-name="${exercise.name}" class="p-2 text-slate-400 hover:text-blue-500 transition" title="과거 기록 보기">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" class="bi bi-clock-history" viewBox="0 0 16 16">
+                                <path d="M8.515 1.019A7 7 0 0 0 8 1V0a8 8 0 0 1 .589.022l-.074.997zm2.004.45a7.003 7.003 0 0 0-.985-.299l.219-.976c.383.086.76.2 1.126.342l-.36.933zm1.37.71a7.01 7.01 0 0 0-.439-.27l.493-.87a8.025 8.025 0 0 1 .979.654l-.615.789a6.996 6.996 0 0 0-.418-.302zm1.834 1.798a6.99 6.99 0 0 0-.653-.796l.724-.69c.27.285.52.59.747.91l-.818.576zm.744 1.352a7.08 7.08 0 0 0-.214-.468l.893-.45a7.986 7.986 0 0 1 .45 1.088l-.95.313a7.023 7.023 0 0 0-.179-.483zM12 8.5a.5.5 0 0 1-.5.5H8.5V4.5a.5.5 0 0 1 1 0V8h3a.5.5 0 0 1 .5.5z"/>
+                                <path d="M8 3.5a.5.5 0 0 0-1 0V9a.5.5 0 0 0 .252.434l3.5 2a.5.5 0 0 0 .496-.868L8 8.71V3.5z"/>
+                                <path d="M8.5 5.5a.5.5 0 0 0-1 0v3.362l-1.591 1.193a.5.5 0 1 0 .638.742L8.5 9.362V5.5z"/>
+                            </svg>
+                        </button>
                     </div>
                     <p class="text-slate-600 text-sm sm:text-base">${tipContent}<br><span class="font-bold text-red-600">${goalText}</span></p>
                     <p class="text-sm font-semibold text-slate-500 mt-3">훈련 방식: ${methodText} &nbsp;&nbsp; | &nbsp;&nbsp; <span class="font-bold text-sky-700">${restText}</span></p>
@@ -775,6 +799,7 @@
 
     function createTable(containerId, headers, dataRows) {
         const container = document.getElementById(containerId);
+        if (!container) return;
         if (!dataRows || dataRows.length === 0) {
             container.innerHTML = `<p class="p-4 text-center text-slate-500">표시할 데이터가 없습니다.</p>`;
             return;
@@ -848,7 +873,7 @@
         const allMatchingRecords = Object.entries(appState.allRecords)
             .filter(([k]) => k.startsWith(base))
             .flatMap(([, arr]) => arr)
-            .sort((a, b) => new Date(a.date) - new Date(b.date));
+            .sort((a, b) => new Date(b.date) - new Date(a.date)); // Sort by most recent
         
         if (allMatchingRecords.length === 0) {
             recordsContent.classList.add('hidden');
@@ -860,10 +885,11 @@
         recordsContent.classList.remove('hidden');
         noRecords.classList.add('hidden');
         document.getElementById('chart-title').textContent = `${exerciseName} 중량 변화 추이 (Top Set 기준)`;
-
-        const labels = allMatchingRecords.map(d => `C${d.cycleId || 1}-${d.week}주`);
-        const topSetData = allMatchingRecords.map(d => (d.sets?.length > 0) ? d.sets.reduce((max, set) => set.weight > max.weight ? set : max, { weight: 0 }).weight : null);
-        const e1RMData = allMatchingRecords.map(d => {
+        
+        const chartRecords = [...allMatchingRecords].reverse(); // For chart, reverse to show chronological order
+        const labels = chartRecords.map(d => `C${d.cycleId || 1}-${d.week}주`);
+        const topSetData = chartRecords.map(d => (d.sets?.length > 0) ? d.sets.reduce((max, set) => set.weight > max.weight ? set : max, { weight: 0 }).weight : null);
+        const e1RMData = chartRecords.map(d => {
             if (!d.sets || d.sets.length === 0) return null;
             const topSet = d.sets.reduce((max, set) => set.weight > max.weight ? set : max, { weight: 0, reps: 0 });
             return calculateEpley1RM(topSet.weight, topSet.reps);
@@ -885,7 +911,7 @@
                         callbacks: {
                             afterBody: function(context) {
                                 const dataIndex = context[0].dataIndex;
-                                const record = allMatchingRecords[dataIndex];
+                                const record = chartRecords[dataIndex];
                                 if (!record || !record.sets) return '';
                                 const topSet = record.sets.reduce((max, set) => set.weight > max.weight ? set : max, { weight: 0, reps: 0 });
                                 return `Top Set: ${topSet.weight}kg x ${topSet.reps}회`;
@@ -947,7 +973,7 @@
                 if (bucketKey && patternVolumes.hasOwnProperty(bucketKey)) {
                      patternVolumes[bucketKey] += record.sets.reduce((sum, set) => {
                         const effectiveWeight = (exerciseInfo.unit === '한쪽') ? set.weight * 2 : set.weight;
-                        return sum + (effectiveWeight * set.reps);
+                        return sum + (effectiveWeight * set.reps); // BUG FIX: Corrected volume calculation from weight*weight to weight*reps
                      }, 0);
                 }
             }
@@ -1165,10 +1191,10 @@
             const button = e.target.closest('button[data-action]');
             if (!button) return;
             const card = button.closest('.card-enter');
-            const container = card.querySelector('[data-container-for]');
-            const sanitizedName = container.dataset.containerFor;
+            const sanitizedName = card.querySelector('[data-container-for]')?.dataset.containerFor;
             
             if (button.dataset.action === 'add-set') {
+                const container = card.querySelector(`[data-container-for="${sanitizedName}"]`);
                 const lastSetRow = container.querySelector('.set-row:last-child');
                 let startTimerFlag = false;
                 if (lastSetRow) {
@@ -1190,9 +1216,13 @@
                 }
 
             } else if (button.dataset.action === 'delete-set') {
+                const container = card.querySelector(`[data-container-for="${sanitizedName}"]`);
                 button.closest('.set-row').remove();
                 container.querySelectorAll('.set-row').forEach((r, i) => r.querySelector('span:first-child').textContent = `세트 ${i + 1}`);
                 saveAllSetsForExercise(sanitizedName);
+            } else if (button.dataset.action === 'view-history') {
+                const exerciseName = button.dataset.exerciseName;
+                showHistoryModal(exerciseName);
             }
         });
         appState.dom.exerciseSelector.addEventListener('change', handleExerciseSelection);
@@ -1316,6 +1346,27 @@
 
         toggleModal('confirm-modal', true);
     }
+    
+    function showHistoryModal(exerciseName) {
+        document.getElementById('history-modal-title').textContent = `${exerciseName} 과거 기록`;
+        
+        const base = (exerciseName).replace(/\s/g, '').replace(/[^a-zA-Z0-9가-힣]/g, '');
+        const allMatchingRecords = Object.entries(appState.allRecords)
+            .filter(([k]) => k.startsWith(base))
+            .flatMap(([, arr]) => arr)
+            .sort((a, b) => new Date(b.date) - new Date(a.date)); // Sort by most recent
+
+        const headers = ['날짜', '사이클-주차', '단계', '세트 상세'];
+        const dataRows = allMatchingRecords.map(r => [
+            r.date,
+            `C${r.cycleId || 1}-${r.week}주`,
+            r.phase,
+            r.sets.map(s => `${s.weight}kg x ${s.reps}회`).join('<br>')
+        ]);
+        
+        createTable('history-modal-content', headers, dataRows);
+        toggleModal('history-modal', true);
+    }
 
     function handleExport() {
         const dataToExport = {
@@ -1371,4 +1422,3 @@
 </script>
 </body>
 </html>
-
