@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>26주 장기 성장 프로그램 | 인터랙티브 플래너 (v17.0 최종 안정화)</title>
+    <title>26주 장기 성장 프로그램 | 인터랙티브 플래너 (v18.0 Grand Finale)</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
@@ -294,7 +294,7 @@
                 <div class="bg-white rounded-2xl p-6 md:p-8 shadow-2xl max-w-sm w-full text-center">
                     <h3 id="timer-exercise-name" class="text-xl sm:text-2xl font-bold mb-2 text-slate-800"></h3>
                     <p class="text-slate-500 mb-6">휴식 시간</p>
-                    <div id="timer-display" class="text-7xl sm:text-8xl font-bold font-mono text-slate-900 mb-8 tracking-tighter">00:00</div>
+                    <div id="timer-display" class="text-7xl sm:text-8xl font-bold font-mono text-slate-900 mb-8 tracking-tighter" style="font-variant-numeric: tabular-nums;">00:00</div>
                     <button id="skip-timer-btn" class="w-full px-4 py-3 sm:px-5 sm:py-3.5 rounded-lg bg-slate-200 text-slate-800 font-bold hover:bg-slate-300 transition shadow-md">휴식 건너뛰기</button>
                 </div>
             </div>
@@ -442,6 +442,12 @@
     const formatTime = (seconds) => `${String(Math.floor(seconds / 60)).padStart(2, '0')}:${String(seconds % 60).padStart(2, '0')}`;
     let audioCtx;
     try { audioCtx = new (window.AudioContext || window.webkitAudioContext)(); } catch(e) { console.warn("Web Audio API is not supported in this browser."); }
+    const toLocalISODate = (d = new Date()) => {
+        const y = d.getFullYear();
+        const m = String(d.getMonth() + 1).padStart(2, '0');
+        const day = String(d.getDate()).padStart(2, '0');
+        return `${y}-${m}-${day}`;
+    };
 
     // --- CORE LOGIC FUNCTIONS ---
     function playBeepSound() {
@@ -513,9 +519,11 @@
             
             const setMatch = originalExercise.sets.match(/(\d+)/);
             let deloadSetText = '';
-            if (setMatch) {
+            if (setMatch && setMatch[1]) {
                 const deloadSets = Math.ceil(parseInt(setMatch[1]) / 2);
                 deloadSetText = ` (약 ${deloadSets}세트)`;
+            } else {
+                 deloadSetText = ` (약 1-2세트)`;
             }
             
             return `🔥 디로딩 목표: ${minDeload}-${maxDeload}kg${deloadSetText}`;
@@ -567,14 +575,15 @@
         }
         
         const unitText = exercise.unit ? (exercise.unit === '총' ? '(전체 중량)' : '(한쪽 원판)') : '';
+        const unitLabel = `(단위: ${exercise.unit === '총' ? '전체중량' : exercise.unit === '한쪽' ? '한쪽 원판' : 'kg'})`;
 
         if (phase === '강화 주기') {
             let goalWeight = roundToNearest2point5(targetWeight);
             if (lastTopSet.reps >= 6 && goalWeight <= lastTopSet.weight) goalWeight = lastTopSet.weight + 2.5;
             let backoffWeight = roundToNearest2point5(goalWeight * 0.8);
-            return `🔥 강화 목표: ${unitText} 탑 ${Math.max(10, goalWeight)}kg x 최대 반복 / 백오프 ${Math.max(10, backoffWeight)}kg x 8-10회.`;
+            return `🔥 강화 목표: ${unitText} 탑 ${Math.max(10, goalWeight)}kg x 최대 반복 / 백오프 ${Math.max(10, backoffWeight)}kg x 8-10회 ${unitLabel}`;
         } else {
-            return `🔥 축적 목표: ${unitText} 워킹 세트 ${roundToNearest2point5(e1RM * 0.7)}kg x 8-12회 (3-4세트).`;
+            return `🔥 축적 목표: ${unitText} 워킹 세트 ${roundToNearest2point5(e1RM * 0.7)}kg x 8-12회 (3-4세트) ${unitLabel}`;
         }
     }
 
@@ -722,8 +731,16 @@
     }
 
     function updateActiveButtons() {
-        appState.dom.weekSelector.querySelectorAll('button').forEach(btn => btn.classList.toggle('week-btn-active', parseInt(btn.dataset.week) === appState.currentWeek));
-        appState.dom.daySelector.querySelectorAll('button').forEach(btn => btn.classList.toggle('day-btn-active', btn.dataset.day === appState.currentDay));
+        appState.dom.weekSelector.querySelectorAll('button').forEach(btn => {
+            const isPressed = parseInt(btn.dataset.week) === appState.currentWeek;
+            btn.classList.toggle('week-btn-active', isPressed);
+            btn.setAttribute('aria-pressed', isPressed);
+        });
+        appState.dom.daySelector.querySelectorAll('button').forEach(btn => {
+            const isPressed = btn.dataset.day === appState.currentDay;
+            btn.classList.toggle('day-btn-active', isPressed);
+            btn.setAttribute('aria-pressed', isPressed);
+        });
     }
 
     function createTable(containerId, headers, dataRows) {
@@ -797,14 +814,11 @@
             return;
         }
 
-        const sanitizedNameToFind = getSanitizedName({ name: exerciseName, type: '' }).slice(0, -4);
-        const allMatchingRecords = [];
-        for (const key in appState.allRecords) {
-            if (key.includes(sanitizedNameToFind)) {
-                allMatchingRecords.push(...appState.allRecords[key]);
-            }
-        }
-        allMatchingRecords.sort((a,b) => new Date(a.date) - new Date(b.date));
+        const base = (exerciseName).replace(/\s/g, '').replace(/[^a-zA-Z0-9가-힣]/g, '');
+        const allMatchingRecords = Object.entries(appState.allRecords)
+            .filter(([k]) => k.startsWith(base))
+            .flatMap(([, arr]) => arr)
+            .sort((a, b) => new Date(a.date) - new Date(b.date));
         
         if (allMatchingRecords.length === 0) {
             recordsContent.classList.add('hidden');
@@ -826,7 +840,7 @@
                 labels: labels,
                 datasets: [{ label: 'Top Set 중량 (kg)', data: topSetData, borderColor: '#3b82f6' }]
             },
-            options: { scales: { y: { beginAtZero: true } } }
+            options: { scales: { y: { beginAtZero: true, suggestedMin: 0 } } }
         });
         
         const headers = ['날짜', '사이클', '주차', '요일', '세트 상세'];
@@ -922,8 +936,8 @@
             },
             options: {
                 scales: {
-                    yWeight: { type: 'linear', position: 'left', title: { display: true, text: 'kg' } },
-                    yFat: { type: 'linear', position: 'right', title: { display: true, text: '%' }, grid: { drawOnChartArea: false } }
+                    yWeight: { type: 'linear', position: 'left', title: { display: true, text: 'kg' }, suggestedMin: 0 },
+                    yFat: { type: 'linear', position: 'right', title: { display: true, text: '%' }, grid: { drawOnChartArea: false }, suggestedMin: 0 }
                 }
             }
         });
@@ -954,7 +968,7 @@
         } else {
             const { phase, originalWeekData } = getWeekInfo(currentWeek, currentCycleId);
             const newRecord = { 
-                date: new Date().toISOString().split('T')[0], week: currentWeek, day: currentDay, 
+                date: toLocalISODate(), week: currentWeek, day: currentDay, 
                 dayName: originalWeekData[currentDay].name, phase, cycleId: currentCycleId, sets: setsData 
             };
             if (recordIndex > -1) appState.allRecords[sanitizedName][recordIndex] = newRecord;
@@ -1187,10 +1201,22 @@
             
             switch(button.id) {
                 case 'save-export-data-button': saveDataAsFile(); break;
-                case 'copy-export-data-button':
-                    document.getElementById('export-data-textarea').select(); document.execCommand('copy');
-                    button.textContent = '복사 완료!'; setTimeout(() => { button.textContent = '전체 복사'; }, 2000);
-                    break;
+                case 'copy-export-data-button': {
+                  const txt = document.getElementById('export-data-textarea').value;
+                  (async () => {
+                    try {
+                      await navigator.clipboard.writeText(txt);
+                      button.textContent = '복사 완료!';
+                    } catch {
+                      document.getElementById('export-data-textarea').select();
+                      document.execCommand('copy');
+                      button.textContent = '복사 완료!';
+                    } finally {
+                      setTimeout(() => { button.textContent = '전체 복사'; }, 2000);
+                    }
+                  })();
+                  break;
+                }
                 case 'confirm-import-button': handleImport(); break;
                  case 'skip-timer-btn':
                     if (appState.timerInterval) {
@@ -1217,7 +1243,9 @@
 
     function toggleModal(modalId, show) {
         const modal = document.getElementById(modalId);
-        if (modal) modal.classList.toggle('hidden', !show);
+        if (!modal) return;
+        modal.classList.toggle('hidden', !show);
+        document.body.style.overflow = show ? 'hidden' : '';
     }
     
     function showConfirmModal(title, message, btnClass, onConfirm) {
@@ -1250,7 +1278,7 @@
         const url = URL.createObjectURL(blob);
         const a = document.createElement('a');
         a.href = url;
-        a.download = `26w-growth-program-backup-${new Date().toISOString().slice(0, 10)}.json`;
+        a.download = `26w-growth-program-backup-${toLocalISODate()}.json`;
         a.click();
         URL.revokeObjectURL(url);
     }
