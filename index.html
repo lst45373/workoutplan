@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>26주 장기 성장 프로그램 | 인터랙티브 플래너 (v18.1 1RM 차트 복원)</title>
+    <title>26주 장기 성장 프로그램 | 인터랙티브 플래너 (v18.3 UI 정리)</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
@@ -449,7 +449,7 @@
         return `${y}-${m}-${day}`;
     };
     const calculateEpley1RM = (weight, reps) => {
-        if (reps < 1) return 0;
+        if (!weight || !reps || reps < 1) return 0;
         if (reps === 1) return weight;
         return weight * (1 + reps / 30);
     };
@@ -558,37 +558,57 @@
         if (phase === '디로딩 주간') return null;
 
         const sanitizedName = getSanitizedName(exercise);
-        const exerciseRecords = appState.allRecords[sanitizedName] || [];
         
-        let targetWeight = exercise.baseTopSet, e1RM = exercise.baseTopSet * (1 + 6 / 30);
-        let lastTopSet = { weight: exercise.baseTopSet, reps: 0 };
+        const allPastRecords = (appState.allRecords[sanitizedName] || [])
+            .filter(r => (r.cycleId < cycleId || (r.cycleId === cycleId && r.week < week)));
 
-        const refRecords = exerciseRecords
-            .filter(r => (r.cycleId < cycleId || (r.cycleId === cycleId && r.week < week)) && r.phase === '강화 주기' && getWeekInfo(r.week, r.cycleId).type === type)
-            .sort((a, b) => (b.cycleId - a.cycleId) || (b.week - a.week));
-
-        if (refRecords.length > 0) {
-            let topSet = { weight: 0, reps: 0 };
-            refRecords[0].sets?.forEach(set => { if (set.weight > topSet.weight) topSet = set; });
-            if (topSet.weight > 0) {
-                lastTopSet = topSet;
-                let change = 1.0;
-                if (topSet.reps > 10) change = 1.05; else if (topSet.reps >= 8) change = 1.025; else if (topSet.reps >= 6) change = 1.0125; else if (topSet.reps <= 4) change = 0.95;
-                targetWeight = topSet.weight * change;
-                e1RM = topSet.weight * (1 + topSet.reps / 30);
-            }
+        let peakE1RM = 0;
+        if (allPastRecords.length > 0) {
+             allPastRecords.forEach(record => {
+                record.sets.forEach(set => {
+                    const currentSetE1RM = calculateEpley1RM(set.weight, set.reps);
+                    if (currentSetE1RM > peakE1RM) {
+                        peakE1RM = currentSetE1RM;
+                    }
+                });
+            });
+        } else {
+            peakE1RM = calculateEpley1RM(exercise.baseTopSet, 6); // 기록 없을 시 초기값
         }
+
+        let lastTopSet = { weight: 0, reps: 0 };
+        const lastStrengthRecord = allPastRecords
+            .filter(r => r.phase === '강화 주기' && getWeekInfo(r.week, r.cycleId).type === type)
+            .sort((a, b) => (b.cycleId - a.cycleId) || (b.week - a.week))[0];
+
+        if (lastStrengthRecord) {
+            let topSet = { weight: 0, reps: 0 };
+            lastStrengthRecord.sets?.forEach(set => {
+                if (set.weight > topSet.weight) topSet = set;
+            });
+            if (topSet.weight > 0) lastTopSet = topSet;
+        }
+
+        let change = 1.0;
+        if (lastTopSet.reps > 10) change = 1.05;
+        else if (lastTopSet.reps >= 8) change = 1.025;
+        else if (lastTopSet.reps >= 6) change = 1.0125;
+        else if (lastTopSet.reps === 5) change = 1.0;
+        else if (lastTopSet.reps <= 4) change = 0.95;
+
+        let targetWeight = (peakE1RM / (1 + 6/30)) * change;
         
         const unitText = exercise.unit ? (exercise.unit === '총' ? '(전체 중량)' : '(한쪽 원판)') : '';
-        const unitLabel = `(단위: ${exercise.unit === '총' ? '전체중량' : exercise.unit === '한쪽' ? '한쪽 원판' : 'kg'})`;
 
         if (phase === '강화 주기') {
             let goalWeight = roundToNearest2point5(targetWeight);
-            if (lastTopSet.reps >= 6 && goalWeight <= lastTopSet.weight) goalWeight = lastTopSet.weight + 2.5;
+            if (lastTopSet.reps >= 6 && goalWeight <= lastTopSet.weight) {
+                goalWeight = lastTopSet.weight + 2.5;
+            }
             let backoffWeight = roundToNearest2point5(goalWeight * 0.8);
-            return `🔥 강화 목표: ${unitText} 탑 ${Math.max(10, goalWeight)}kg x 최대 반복 / 백오프 ${Math.max(10, backoffWeight)}kg x 8-10회 ${unitLabel}`;
-        } else {
-            return `🔥 축적 목표: ${unitText} 워킹 세트 ${roundToNearest2point5(e1RM * 0.7)}kg x 8-12회 (3-4세트) ${unitLabel}`;
+            return `🔥 강화 목표: ${unitText} 탑 ${Math.max(10, goalWeight)}kg x 최대 반복 / 백오프 ${Math.max(10, backoffWeight)}kg x 8-10회`;
+        } else { // 축적 주기
+            return `🔥 축적 목표: ${unitText} 워킹 세트 ${roundToNearest2point5(peakE1RM * 0.7)}kg x 8-12회`;
         }
     }
 
@@ -681,13 +701,16 @@
             } else {
                 if (exercise.type === '메인' && exercise.baseTopSet) {
                     goalText = getMainGoalText(exercise, currentWeek, currentCycleId) || exercise.staticGoal || '';
-                } else if (exercise.type !== '웜업') {
-                    goalText = getSmartAssistanceGoal_Aegis_v15(exercise);
+                    methodText = method;
+                     if (phase === '축적 주기') {
+                        methodText += ' (3-4세트)';
+                    }
                 } else {
-                    goalText = exercise.staticGoal || '';
+                     goalText = getSmartAssistanceGoal_Aegis_v15(exercise);
+                     tipContent = exercise.tip;
+                     methodText = exercise.sets;
                 }
-                tipContent = exercise.tip;
-                methodText = (exercise.type === '메인' && exercise.baseTopSet) ? method : exercise.sets;
+                 if (!tipContent) tipContent = exercise.tip;
             }
             const restTime = getRestTime(exercise, phase);
             const restText = `권장 휴식: ${Math.floor(restTime / 60)}분 ${restTime % 60}초`;
@@ -739,12 +762,12 @@
         appState.dom.weekSelector.querySelectorAll('button').forEach(btn => {
             const isPressed = parseInt(btn.dataset.week) === appState.currentWeek;
             btn.classList.toggle('week-btn-active', isPressed);
-            btn.setAttribute('aria-pressed', isPressed);
+            btn.setAttribute('aria-pressed', String(isPressed));
         });
         appState.dom.daySelector.querySelectorAll('button').forEach(btn => {
             const isPressed = btn.dataset.day === appState.currentDay;
             btn.classList.toggle('day-btn-active', isPressed);
-            btn.setAttribute('aria-pressed', isPressed);
+            btn.setAttribute('aria-pressed', String(isPressed));
         });
     }
 
