@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>26주 장기 성장 프로그램 | 인터랙티브 플래너 (v18.0 Grand Finale)</title>
+    <title>26주 장기 성장 프로그램 | 인터랙티브 플래너 (v18.1 1RM 차트 복원)</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
@@ -448,6 +448,11 @@
         const day = String(d.getDate()).padStart(2, '0');
         return `${y}-${m}-${day}`;
     };
+    const calculateEpley1RM = (weight, reps) => {
+        if (reps < 1) return 0;
+        if (reps === 1) return weight;
+        return weight * (1 + reps / 30);
+    };
 
     // --- CORE LOGIC FUNCTIONS ---
     function playBeepSound() {
@@ -833,14 +838,37 @@
 
         const labels = allMatchingRecords.map(d => `C${d.cycleId || 1}-${d.week}주`);
         const topSetData = allMatchingRecords.map(d => (d.sets?.length > 0) ? d.sets.reduce((max, set) => set.weight > max.weight ? set : max, { weight: 0 }).weight : null);
+        const e1RMData = allMatchingRecords.map(d => {
+            if (!d.sets || d.sets.length === 0) return null;
+            const topSet = d.sets.reduce((max, set) => set.weight > max.weight ? set : max, { weight: 0, reps: 0 });
+            return calculateEpley1RM(topSet.weight, topSet.reps);
+        });
         
         initializeChart('progressChart', {
             type: 'line',
             data: {
                 labels: labels,
-                datasets: [{ label: 'Top Set 중량 (kg)', data: topSetData, borderColor: '#3b82f6' }]
+                datasets: [
+                    { label: 'Top Set 중량 (kg)', data: topSetData, borderColor: '#3b82f6', yAxisID: 'y' },
+                    { label: '추정 1RM (kg)', data: e1RMData, borderColor: '#ef4444', borderDash: [5, 5], yAxisID: 'y' }
+                ]
             },
-            options: { scales: { y: { beginAtZero: true, suggestedMin: 0 } } }
+            options: { 
+                scales: { y: { beginAtZero: true, suggestedMin: 0, title: { display: true, text: '중량 (kg)' } } },
+                plugins: {
+                    tooltip: {
+                        callbacks: {
+                            afterBody: function(context) {
+                                const dataIndex = context[0].dataIndex;
+                                const record = allMatchingRecords[dataIndex];
+                                if (!record || !record.sets) return '';
+                                const topSet = record.sets.reduce((max, set) => set.weight > max.weight ? set : max, { weight: 0, reps: 0 });
+                                return `Top Set: ${topSet.weight}kg x ${topSet.reps}회`;
+                            }
+                        }
+                    }
+                }
+            }
         });
         
         const headers = ['날짜', '사이클', '주차', '요일', '세트 상세'];
