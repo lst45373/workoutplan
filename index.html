@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>26주 장기 성장 프로그램 | 인터랙티브 플래너 (v16.3 알림음 추가)</title>
+    <title>26주 장기 성장 프로그램 | 인터랙티브 플래너 (v17.0 최종 안정화)</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
@@ -658,7 +658,7 @@
             const sanitizedName = getSanitizedName(exercise);
             
             let goalText, tipContent, methodText;
-            const originalExercise = findOriginalExercise(exercise.name);
+            const originalExercise = findOriginalExercise(exercise.name) || exercise;
 
             if (phase === '디로딩 주간') {
                 goalText = getDeloadGoalText(exercise);
@@ -858,12 +858,28 @@
         const exerciseMap = new Map();
         Object.values(workoutPlan).forEach(week => Object.values(week).forEach(day => day.routine.forEach(ex => exerciseMap.set(getSanitizedName(ex), ex))));
        
+        const patternAlias = {
+          isolation_chest: 'horizontal_push',
+          isolation_triceps: 'horizontal_push',
+          isolation_shoulder: 'vertical_push',
+          isolation_biceps: 'horizontal_pull',
+          isolation_back: 'vertical_pull',
+          isolation_quads: 'squat',
+          isolation_hams: 'hip_hinge',
+          isolation_glutes: 'hip_hinge',
+          isolation_calves: 'squat'
+        };
+
         const patternVolumes = { horizontal_push: 0, horizontal_pull: 0, vertical_push: 0, vertical_pull: 0, squat: 0, hip_hinge: 0 };
 
         recentRecords.forEach(record => {
             const exerciseInfo = exerciseMap.get(record.sanitizedName);
-            if (exerciseInfo && patternVolumes.hasOwnProperty(exerciseInfo.movement_pattern)) {
-                patternVolumes[exerciseInfo.movement_pattern] += record.sets.reduce((sum, set) => sum + (set.weight * set.reps), 0);
+             if (exerciseInfo && exerciseInfo.movement_pattern) {
+                const key = exerciseInfo.movement_pattern;
+                const bucketKey = patternVolumes.hasOwnProperty(key) ? key : patternAlias[key];
+                if (bucketKey && patternVolumes.hasOwnProperty(bucketKey)) {
+                     patternVolumes[bucketKey] += record.sets.reduce((sum, set) => sum + (set.weight * set.reps), 0);
+                }
             }
         });
         
@@ -1005,6 +1021,7 @@
             if (remaining <= 0) {
                 clearInterval(appState.timerInterval);
                 appState.timerInterval = null;
+                if (navigator.vibrate) navigator.vibrate([150, 100, 150]);
                 playBeepSound();
                 document.body.style.animation = 'flash 0.5s 2';
                 setTimeout(() => {
@@ -1034,6 +1051,12 @@
             importDataButton: document.getElementById('import-data-button'),
             resetAllButton: document.getElementById('reset-all-button'),
         };
+
+        document.body.addEventListener('click', () => {
+            if (audioCtx && audioCtx.state === 'suspended') {
+                audioCtx.resume();
+            }
+        }, { once: true });
 
         loadState();
         
