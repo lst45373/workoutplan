@@ -553,44 +553,92 @@
     }
 
     function getMainGoalText(exercise, week, cycleId) {
-        if (!exercise.baseTopSet) return null;
-        const { phase, type } = getWeekInfo(week, cycleId);
-        if (phase === '디로딩 주간') return null;
+    if (!exercise.baseTopSet) return null;
+    const { phase, type } = getWeekInfo(week, cycleId);
+    if (phase === '디로딩 주간') return null;
 
-        const sanitizedName = getSanitizedName(exercise);
-        const exerciseRecords = appState.allRecords[sanitizedName] || [];
-        
-        let targetWeight = exercise.baseTopSet, e1RM = exercise.baseTopSet * (1 + 6 / 30);
-        let lastTopSet = { weight: exercise.baseTopSet, reps: 0 };
+    const sanitizedName = getSanitizedName(exercise);
+    
+    // 강화/축적 주기 구분 없이 모든 과거 기록을 가져옴
+    const allPastRecords = (appState.allRecords[sanitizedName] || [])
+        .filter(r => (r.cycleId < cycleId || (r.cycleId === cycleId && r.week < week)));
 
-        const refRecords = exerciseRecords
-            .filter(r => (r.cycleId < cycleId || (r.cycleId === cycleId && r.week < week)) && r.phase === '강화 주기' && getWeekInfo(r.week, r.cycleId).type === type)
-            .sort((a, b) => (b.cycleId - a.cycleId) || (b.week - a.week));
+    // 모든 세트를 통틀어 '역대 최고 e1RM'을 계산
+    let peakE1RM = calculateEpley1RM(exercise.baseTopSet, 6); // 초기값
+    let boosterApplied = false;
 
-        if (refRecords.length > 0) {
-            let topSet = { weight: 0, reps: 0 };
-            refRecords[0].sets?.forEach(set => { if (set.weight > topSet.weight) topSet = set; });
-            if (topSet.weight > 0) {
-                lastTopSet = topSet;
-                let change = 1.0;
-                if (topSet.reps > 10) change = 1.05; else if (topSet.reps >= 8) change = 1.025; else if (topSet.reps >= 6) change = 1.0125; else if (topSet.reps <= 4) change = 0.95;
-                targetWeight = topSet.weight * change;
-                e1RM = topSet.weight * (1 + topSet.reps / 30);
+    allPastRecords.forEach(record => {
+        record.sets.forEach(set => {
+            const currentSetE1RM = calculateEpley1RM(set.weight, set.reps);
+            if (currentSetE1RM > peakE1RM) {
+                peakE1RM = currentSetE1RM;
             }
-        }
-        
-        const unitText = exercise.unit ? (exercise.unit === '총' ? '(전체 중량)' : '(한쪽 원판)') : '';
-        const unitLabel = `(단위: ${exercise.unit === '총' ? '전체중량' : exercise.unit === '한쪽' ? '한쪽 원판' : 'kg'})`;
+        });
+    });
 
-        if (phase === '강화 주기') {
-            let goalWeight = roundToNearest2point5(targetWeight);
-            if (lastTopSet.reps >= 6 && goalWeight <= lastTopSet.weight) goalWeight = lastTopSet.weight + 2.5;
-            let backoffWeight = roundToNearest2point5(goalWeight * 0.8);
-            return `🔥 강화 목표: ${unitText} 탑 ${Math.max(10, goalWeight)}kg x 최대 반복 / 백오프 ${Math.max(10, backoffWeight)}kg x 8-10회 ${unitLabel}`;
-        } else {
-            return `🔥 축적 목표: ${unitText} 워킹 세트 ${roundToNearest2point5(e1RM * 0.7)}kg x 8-12회 (3-4세트) ${unitLabel}`;
+    // 가장 최근 '강화 주기' 기록을 찾아 '전략적 가중치'를 계산
+    let lastTopSet = { weight: exercise.baseTopSet, reps: 0 };
+    const lastStrengthRecord = allPastRecords
+        .filter(r => r.phase === '강화 주기' && getWeekInfo(r.week, r.cycleId).type === type)
+        .sort((a, b) => (b.cycleId - a.cycleId) || (b.week - a.week))[0];
+
+    if (lastStrengthRecord) {
+        let topSet = { weight: 0, reps: 0 };
+        lastStrengthRecord.sets?.forEach(set => {
+            if (set.weight > topSet.weight) topSet = set;
+        });
+        if (topSet.weight > 0) {
+            lastTopSet = topSet;
         }
     }
+    
+    // 축적 주기 '만점' 부스터 로직 추가
+    const lastAccumulationRecord = allPastRecords
+        .filter(r => r.phase === '축적 주기' && getWeekInfo(r.week, r.cycleId).type === type)
+        .sort((a, b) => (b.cycleId - a.cycleId) || (b.week - a.week))[0];
+        
+    if(lastAccumulationRecord) {
+        const accumulationGoalText = roundToNearest2point5(peakE1RM * 0.7) + "kg x 8-12회";
+        const goalWeight = parseFloat(accumulationGoalText.match(/(\d+\.?\d*)kg/)[1]);
+        const maxReps = 12;
+        const maxSets = parseInt((findOriginalExercise(exercise.name)?.sets.match(/~(\d+)/)?.[1] || 3));
+
+        const isMaxedOut = lastAccumulationRecord.sets.length >= maxSets && 
+                            lastAccumulationRecord.sets.every(s => s.weight >= goalWeight && s.reps >= maxReps);
+        
+        if (isMaxedOut) {
+            boosterApplied = true;
+        }
+    }
+
+    let change = 1.0;
+    if (lastTopSet.reps > 10) change = 1.05;
+    else if (lastTopSet.reps >= 8) change = 1.025;
+    else if (lastTopSet.reps >= 6) change = 1.0125;
+    else if (lastTopSet.reps <= 4) change = 0.95;
+    
+    let targetWeight = (peakE1RM / (1 + 6/30));
+    
+    if (boosterApplied) {
+        targetWeight *= 1.0125;
+    }
+    targetWeight *= change;
+    
+    const unitText = exercise.unit ? (exercise.unit === '총' ? '(전체 중량)' : '(한쪽 원판)') : '';
+    const unitLabel = `(단위: ${exercise.unit === '총' ? '전체중량' : exercise.unit === '한쪽' ? '한쪽 원판' : 'kg'})`;
+    const boosterIcon = boosterApplied ? '🚀 ' : '';
+
+    if (phase === '강화 주기') {
+        let goalWeight = roundToNearest2point5(targetWeight);
+        if (lastTopSet.reps >= 6 && goalWeight <= lastTopSet.weight) {
+            goalWeight = lastTopSet.weight + 2.5; // 정체 방지 로직
+        }
+        let backoffWeight = roundToNearest2point5(goalWeight * 0.8);
+        return `${boosterIcon}🔥 강화 목표: ${unitText} 탑 ${Math.max(10, goalWeight)}kg x 최대 반복 / 백오프 ${Math.max(10, backoffWeight)}kg x 8-10회 ${unitLabel}`;
+    } else { // 축적 주기
+        return `🔥 축적 목표: ${unitText} 워킹 세트 ${roundToNearest2point5(peakE1RM * 0.7)}kg x 8-12회 (3-4세트) ${unitLabel}`;
+    }
+}
 
     function getSmartAssistanceGoal_Aegis_v15(exercise) {
         const { staticGoal: initialGoal, increment, sets: setsString } = exercise;
