@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>26주 장기 성장 프로그램 | 인터랙티브 플래너 (v15.8 기능 복원)</title>
+    <title>26주 장기 성장 프로그램 | 인터랙티브 플래너 (v16.0 휴식 타이머)</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
@@ -13,6 +13,10 @@
         .day-btn-active { background-color: #2563eb; color: white; box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1); }
         .card-enter, .modal-enter { animation: fadeIn 0.5s ease-in-out; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes flash { 
+            0%, 100% { background-color: #f1f5f9; } 
+            50% { background-color: #dcfce7; }
+        }
         ::-webkit-scrollbar { width: 8px; }
         ::-webkit-scrollbar-track { background: #f1f5f9; }
         ::-webkit-scrollbar-thumb { background: #94a3b8; border-radius: 4px; }
@@ -284,6 +288,16 @@
                     </div>
                 </div>
             </div>
+
+            <!-- Timer Modal -->
+            <div id="timer-modal" class="fixed inset-0 bg-black bg-opacity-80 flex flex-col items-center justify-center hidden z-50 p-4 modal-enter">
+                <div class="bg-white rounded-2xl p-6 md:p-8 shadow-2xl max-w-sm w-full text-center">
+                    <h3 id="timer-exercise-name" class="text-xl sm:text-2xl font-bold mb-2 text-slate-800"></h3>
+                    <p class="text-slate-500 mb-6">휴식 시간</p>
+                    <div id="timer-display" class="text-7xl sm:text-8xl font-bold font-mono text-slate-900 mb-8 tracking-tighter">00:00</div>
+                    <button id="skip-timer-btn" class="w-full px-4 py-3 sm:px-5 sm:py-3.5 rounded-lg bg-slate-200 text-slate-800 font-bold hover:bg-slate-300 transition shadow-md">휴식 건너뛰기</button>
+                </div>
+            </div>
         </div>
     </div>
 
@@ -417,12 +431,15 @@
         currentWeek: 1, currentDay: 'pull', currentCycleId: 1,
         allRecords: {}, inbodyRecords: [], charts: {}, dom: {},
         pendingImportData: null,
+        currentRoutine: [],
+        timerInterval: null
     };
 
     // --- UTILITY FUNCTIONS ---
     const getSanitizedName = (ex) => (ex.name + (ex.type || '')).replace(/\s/g, '').replace(/[^a-zA-Z0-9가-힣]/g, '');
     const debounce = (func, wait) => { let t; return (...a) => { clearTimeout(t); t = setTimeout(() => func.apply(this, a), wait); }; };
     const roundToNearest2point5 = (num) => Math.round(num / 2.5) * 2.5;
+    const formatTime = (seconds) => `${String(Math.floor(seconds / 60)).padStart(2, '0')}:${String(seconds % 60).padStart(2, '0')}`;
 
     // --- CORE LOGIC FUNCTIONS ---
     function findOriginalExercise(exerciseName) {
@@ -433,6 +450,16 @@
             }
         }
         return null;
+    }
+
+    function getRestTime(exercise, phase) {
+        if (exercise.type === '메인') {
+            return phase === '강화 주기' ? 150 : 90;
+        }
+        if (exercise.type === '보조' || exercise.type === '마무리') {
+            return 90;
+        }
+        return 60; // 웜업, 선피로, 디로딩 등
     }
 
     function getDeloadGoalText(exercise) {
@@ -597,6 +624,7 @@
             }
         }
         
+        appState.currentRoutine = routine; // Store current routine for timer logic
         if (!routine.length) { 
             return;
         }
@@ -624,6 +652,8 @@
                 tipContent = exercise.tip;
                 methodText = (exercise.type === '메인' && exercise.baseTopSet) ? method : exercise.sets;
             }
+            const restTime = getRestTime(exercise, phase);
+            const restText = `권장 휴식: ${Math.floor(restTime / 60)}분 ${restTime % 60}초`;
 
             const alternativesHTML = originalExercise?.alternatives?.length > 0 ? `
                 <div class="mt-4 pt-4 border-t border-slate-200">
@@ -641,7 +671,7 @@
                         ${movementPatternTag}
                     </div>
                     <p class="text-slate-600 text-sm sm:text-base">${tipContent}<br><span class="font-bold text-red-600">${goalText}</span></p>
-                    <p class="text-sm font-semibold text-slate-500 mt-3">훈련 방식: ${methodText}</p>
+                    <p class="text-sm font-semibold text-slate-500 mt-3">훈련 방식: ${methodText} &nbsp;&nbsp; | &nbsp;&nbsp; <span class="font-bold text-sky-700">${restText}</span></p>
                 </div>
                 ${alternativesHTML}
                 <div data-container-for="${sanitizedName}" class="space-y-3 mt-4"></div>
@@ -865,7 +895,7 @@
     }
     
     // Data Handling & Initialization...
-    function saveAllSetsForExercise(sanitizedName) {
+    function saveAllSetsForExercise(sanitizedName, isTimerTrigger) {
         const setsContainer = document.querySelector(`[data-container-for="${sanitizedName}"]`);
         if (!setsContainer) return;
 
@@ -892,6 +922,17 @@
             else appState.allRecords[sanitizedName].push(newRecord);
         }
         localStorage.setItem('workoutRecords', JSON.stringify(appState.allRecords));
+
+        if(isTimerTrigger) {
+            const exercise = appState.currentRoutine.find(ex => getSanitizedName(ex) === sanitizedName);
+            if (exercise) {
+                const { phase } = getWeekInfo(appState.currentWeek, appState.currentCycleId);
+                const maxSets = parseInt((exercise.sets.match(/(\d+)$/)?.[0] || 1));
+                if (setsData.length < maxSets) {
+                    startTimer(exercise, phase);
+                }
+            }
+        }
     }
 
     function loadState() {
@@ -934,6 +975,33 @@
         form.querySelector('#inbody-date').valueAsDate = new Date();
     }
     
+    function startTimer(exercise, phase) {
+        if (appState.timerInterval) {
+            clearInterval(appState.timerInterval);
+        }
+        const duration = getRestTime(exercise, phase);
+        let remaining = duration;
+        const modal = document.getElementById('timer-modal');
+        document.getElementById('timer-exercise-name').textContent = exercise.name;
+        const displayEl = document.getElementById('timer-display');
+        displayEl.textContent = formatTime(remaining);
+        toggleModal('timer-modal', true);
+
+        appState.timerInterval = setInterval(() => {
+            remaining--;
+            displayEl.textContent = formatTime(remaining);
+            if (remaining <= 0) {
+                clearInterval(appState.timerInterval);
+                appState.timerInterval = null;
+                document.body.style.animation = 'flash 0.5s 2';
+                setTimeout(() => {
+                    toggleModal('timer-modal', false);
+                    document.body.style.animation = '';
+                }, 1000);
+            }
+        }, 1000);
+    }
+
     function initApp() {
         appState.dom = {
             mainTabs: document.getElementById('main-tabs'),
@@ -975,10 +1043,25 @@
                 updateActiveButtons();
             }
         });
-        appState.dom.workoutList.addEventListener('input', debounce(e => {
+
+        const debouncedSave = debounce((sanitizedName, isTimerTrigger) => {
+            saveAllSetsForExercise(sanitizedName, isTimerTrigger);
+        }, 350);
+
+        appState.dom.workoutList.addEventListener('input', e => {
+            if (!e.target.matches('input[data-type]')) return;
+            const setRow = e.target.closest('.set-row');
+            const weightInput = setRow.querySelector('input[data-type="weight"]');
+            const repsInput = setRow.querySelector('input[data-type="reps"]');
             const sanitizedName = e.target.closest('.card-enter').querySelector('[data-container-for]').dataset.containerFor;
-            saveAllSetsForExercise(sanitizedName);
-        }, 500));
+            
+            const isTimerTrigger = weightInput.value && repsInput.value && !setRow.dataset.timerTriggered;
+            if (isTimerTrigger) {
+                setRow.dataset.timerTriggered = 'true';
+            }
+            debouncedSave(sanitizedName, isTimerTrigger);
+        });
+
         appState.dom.workoutList.addEventListener('click', e => {
             const button = e.target.closest('button[data-action]');
             if (!button) return;
@@ -988,7 +1071,7 @@
             else if (button.dataset.action === 'delete-set') {
                 button.closest('.set-row').remove();
                 container.querySelectorAll('.set-row').forEach((r, i) => r.querySelector('span:first-child').textContent = `세트 ${i + 1}`);
-                saveAllSetsForExercise(sanitizedName);
+                saveAllSetsForExercise(sanitizedName, false);
             }
         });
         appState.dom.exerciseSelector.addEventListener('change', handleExerciseSelection);
@@ -1058,6 +1141,13 @@
                     button.textContent = '복사 완료!'; setTimeout(() => { button.textContent = '전체 복사'; }, 2000);
                     break;
                 case 'confirm-import-button': handleImport(); break;
+                 case 'skip-timer-btn':
+                    if (appState.timerInterval) {
+                        clearInterval(appState.timerInterval);
+                        appState.timerInterval = null;
+                        toggleModal('timer-modal', false);
+                    }
+                    break;
             }
         });
         
@@ -1085,7 +1175,6 @@
         const actionBtn = document.getElementById('confirm-modal-action-btn');
         actionBtn.className = `px-4 py-2 sm:px-5 sm:py-2.5 rounded-lg text-white font-bold transition shadow-md ${btnClass}`;
         
-        // Clone and replace the button to remove old event listeners
         const newActionBtn = actionBtn.cloneNode(true);
         actionBtn.parentNode.replaceChild(newActionBtn, actionBtn);
         newActionBtn.addEventListener('click', onConfirm);
