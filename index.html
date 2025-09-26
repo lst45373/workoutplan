@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>26주 장기 성장 프로그램 | 인터랙티브 플래너 (v16.2 타이머 로직 수정)</title>
+    <title>26주 장기 성장 프로그램 | 인터랙티브 플래너 (v16.3 알림음 추가)</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
@@ -440,8 +440,31 @@
     const debounce = (func, wait) => { let t; return (...a) => { clearTimeout(t); t = setTimeout(() => func.apply(this, a), wait); }; };
     const roundToNearest2point5 = (num) => Math.round(num / 2.5) * 2.5;
     const formatTime = (seconds) => `${String(Math.floor(seconds / 60)).padStart(2, '0')}:${String(seconds % 60).padStart(2, '0')}`;
+    let audioCtx;
+    try { audioCtx = new (window.AudioContext || window.webkitAudioContext)(); } catch(e) { console.warn("Web Audio API is not supported in this browser."); }
 
     // --- CORE LOGIC FUNCTIONS ---
+    function playBeepSound() {
+        if (!audioCtx) return;
+        function beep(frequency, duration) {
+            const oscillator = audioCtx.createOscillator();
+            const gainNode = audioCtx.createGain();
+            oscillator.connect(gainNode);
+            gainNode.connect(audioCtx.destination);
+            
+            gainNode.gain.setValueAtTime(0, audioCtx.currentTime);
+            gainNode.gain.linearRampToValueAtTime(1, audioCtx.currentTime + 0.01);
+            oscillator.frequency.setValueAtTime(frequency, audioCtx.currentTime);
+            oscillator.type = 'sine';
+            
+            oscillator.start(audioCtx.currentTime);
+            gainNode.gain.exponentialRampToValueAtTime(0.00001, audioCtx.currentTime + duration/1000);
+            oscillator.stop(audioCtx.currentTime + duration/1000);
+        }
+        beep(880, 100);
+        setTimeout(() => beep(880, 100), 150);
+    }
+    
     function findOriginalExercise(exerciseName) {
         for (let i = 1; i <= 3; i++) {
             for (const day of Object.values(workoutPlan[i])) {
@@ -982,6 +1005,7 @@
             if (remaining <= 0) {
                 clearInterval(appState.timerInterval);
                 appState.timerInterval = null;
+                playBeepSound();
                 document.body.style.animation = 'flash 0.5s 2';
                 setTimeout(() => {
                     toggleModal('timer-modal', false);
