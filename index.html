@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>26주 장기 성장 프로그램 | 인터랙티브 플래너 (v16.0 휴식 타이머)</title>
+    <title>26주 장기 성장 프로그램 | 인터랙티브 플래너 (v16.2 타이머 로직 수정)</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
@@ -14,7 +14,7 @@
         .card-enter, .modal-enter { animation: fadeIn 0.5s ease-in-out; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
         @keyframes flash { 
-            0%, 100% { background-color: #f1f5f9; } 
+            0%, 100% { background-color: transparent; } 
             50% { background-color: #dcfce7; }
         }
         ::-webkit-scrollbar { width: 8px; }
@@ -895,7 +895,7 @@
     }
     
     // Data Handling & Initialization...
-    function saveAllSetsForExercise(sanitizedName, isTimerTrigger) {
+    function saveAllSetsForExercise(sanitizedName) {
         const setsContainer = document.querySelector(`[data-container-for="${sanitizedName}"]`);
         if (!setsContainer) return;
 
@@ -922,17 +922,6 @@
             else appState.allRecords[sanitizedName].push(newRecord);
         }
         localStorage.setItem('workoutRecords', JSON.stringify(appState.allRecords));
-
-        if(isTimerTrigger) {
-            const exercise = appState.currentRoutine.find(ex => getSanitizedName(ex) === sanitizedName);
-            if (exercise) {
-                const { phase } = getWeekInfo(appState.currentWeek, appState.currentCycleId);
-                const maxSets = parseInt((exercise.sets.match(/(\d+)$/)?.[0] || 1));
-                if (setsData.length < maxSets) {
-                    startTimer(exercise, phase);
-                }
-            }
-        }
     }
 
     function loadState() {
@@ -1044,34 +1033,49 @@
             }
         });
 
-        const debouncedSave = debounce((sanitizedName, isTimerTrigger) => {
-            saveAllSetsForExercise(sanitizedName, isTimerTrigger);
+        const debouncedSave = debounce((sanitizedName) => {
+            saveAllSetsForExercise(sanitizedName);
         }, 350);
 
         appState.dom.workoutList.addEventListener('input', e => {
-            if (!e.target.matches('input[data-type]')) return;
-            const setRow = e.target.closest('.set-row');
-            const weightInput = setRow.querySelector('input[data-type="weight"]');
-            const repsInput = setRow.querySelector('input[data-type="reps"]');
-            const sanitizedName = e.target.closest('.card-enter').querySelector('[data-container-for]').dataset.containerFor;
-            
-            const isTimerTrigger = weightInput.value && repsInput.value && !setRow.dataset.timerTriggered;
-            if (isTimerTrigger) {
-                setRow.dataset.timerTriggered = 'true';
+             if (e.target.matches('input[data-type]')) {
+                const sanitizedName = e.target.closest('.card-enter').querySelector('[data-container-for]').dataset.containerFor;
+                debouncedSave(sanitizedName);
             }
-            debouncedSave(sanitizedName, isTimerTrigger);
         });
 
         appState.dom.workoutList.addEventListener('click', e => {
             const button = e.target.closest('button[data-action]');
             if (!button) return;
-            const container = button.closest('.card-enter').querySelector('[data-container-for]');
+            const card = button.closest('.card-enter');
+            const container = card.querySelector('[data-container-for]');
             const sanitizedName = container.dataset.containerFor;
-            if (button.dataset.action === 'add-set') addSetRow(container, container.querySelectorAll('.set-row').length + 1);
-            else if (button.dataset.action === 'delete-set') {
+            
+            if (button.dataset.action === 'add-set') {
+                const lastSetRow = container.querySelector('.set-row:last-child');
+                let startTimerFlag = false;
+                if (lastSetRow) {
+                    const weightInput = lastSetRow.querySelector('input[data-type="weight"]');
+                    const repsInput = lastSetRow.querySelector('input[data-type="reps"]');
+                    if (weightInput.value && repsInput.value) {
+                       startTimerFlag = true;
+                    }
+                }
+
+                addSetRow(container, container.querySelectorAll('.set-row').length + 1);
+                
+                if(startTimerFlag) {
+                    const exercise = appState.currentRoutine.find(ex => getSanitizedName(ex) === sanitizedName);
+                    if (exercise) {
+                        const { phase } = getWeekInfo(appState.currentWeek, appState.currentCycleId);
+                        startTimer(exercise, phase);
+                    }
+                }
+
+            } else if (button.dataset.action === 'delete-set') {
                 button.closest('.set-row').remove();
                 container.querySelectorAll('.set-row').forEach((r, i) => r.querySelector('span:first-child').textContent = `세트 ${i + 1}`);
-                saveAllSetsForExercise(sanitizedName, false);
+                saveAllSetsForExercise(sanitizedName);
             }
         });
         appState.dom.exerciseSelector.addEventListener('change', handleExerciseSelection);
