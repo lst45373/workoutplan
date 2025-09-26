@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>26주 장기 성장 프로그램 | 인터랙티브 플래너 (v18.3 UI 정리)</title>
+    <title>26주 장기 성장 프로그램 | 인터랙티브 플래너 (v19.1 AI 코치 최종 수정)</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
@@ -691,26 +691,28 @@
             card.className = 'bg-white rounded-xl shadow-lg p-4 sm:p-5 flex flex-col card-enter';
             const sanitizedName = getSanitizedName(exercise);
             
-            let goalText, tipContent, methodText;
+            let goalText, tipContent;
             const originalExercise = findOriginalExercise(exercise.name) || exercise;
+
+            let methodText;
+            if (phase === '축적 주기' && exercise.type === '메인') {
+                methodText = `${method} (3-4세트)`;
+            } else {
+                methodText = (exercise.type === '메인' && exercise.baseTopSet && phase !== '디로딩 주간') ? method : exercise.sets;
+            }
 
             if (phase === '디로딩 주간') {
                 goalText = getDeloadGoalText(exercise);
                 tipContent = originalExercise?.tip || "전략적 회복에 집중하세요.";
-                methodText = exercise.sets;
             } else {
                 if (exercise.type === '메인' && exercise.baseTopSet) {
                     goalText = getMainGoalText(exercise, currentWeek, currentCycleId) || exercise.staticGoal || '';
-                    methodText = method;
-                     if (phase === '축적 주기') {
-                        methodText += ' (3-4세트)';
-                    }
+                } else if (exercise.type !== '웜업') {
+                    goalText = getSmartAssistanceGoal_Aegis_v15(exercise);
                 } else {
-                     goalText = getSmartAssistanceGoal_Aegis_v15(exercise);
-                     tipContent = exercise.tip;
-                     methodText = exercise.sets;
+                    goalText = exercise.staticGoal || '';
                 }
-                 if (!tipContent) tipContent = exercise.tip;
+                tipContent = exercise.tip;
             }
             const restTime = getRestTime(exercise, phase);
             const restText = `권장 휴식: ${Math.floor(restTime / 60)}분 ${restTime % 60}초`;
@@ -943,7 +945,10 @@
                 const key = exerciseInfo.movement_pattern;
                 const bucketKey = patternVolumes.hasOwnProperty(key) ? key : patternAlias[key];
                 if (bucketKey && patternVolumes.hasOwnProperty(bucketKey)) {
-                     patternVolumes[bucketKey] += record.sets.reduce((sum, set) => sum + (set.weight * set.reps), 0);
+                     patternVolumes[bucketKey] += record.sets.reduce((sum, set) => {
+                        const effectiveWeight = (exerciseInfo.unit === '한쪽') ? set.weight * 2 : set.weight;
+                        return sum + (effectiveWeight * set.reps);
+                     }, 0);
                 }
             }
         });
