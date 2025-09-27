@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>26주 장기 성장 프로그램 | 인터랙티브 플래너 (v20.2)</title>
+    <title>26주 장기 성장 프로그램 | 인터랙티브 플래너 (v20.8)</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
@@ -400,7 +400,7 @@
             push: { name: '푸쉬(Push) C', routine: [
                 { type: '웜업', name: '해머스트랭스 래터럴 로우', sets: '4세트', tip: '견갑을 안정화시키고 후면을 활성화합니다. 가볍게 당기며 날개뼈 주변을 예열하세요.', staticGoal: '🔥 목표: 한쪽 20kg x 10회.', movement_pattern: 'horizontal_pull' },
                 { type: '웜업', name: '팩덱 플라이', sets: '3세트', tip: '가슴 근육을 선피로시켜 프레스 시 자극을 극대화합니다.', staticGoal: '🔥 목표: 60kg x 10-12회.', alternatives: ['가벼운 케이블 플라이', '덤벨 플라이'], movement_pattern: 'isolation_chest' },
-                { type: '메인', name: '너틸러스 인클라인 프레스 (뉴트럴 그립)', sets: '탑/백오프 세트', tip: '너틸러스 머신의 독특한 궤적과 뉴트럴 그립을 활용하여 윗가슴에 새로운 자극을 줍니다. 어깨 관절의 부담을 줄이면서 가슴 상부를 공략하는 것이 핵심입니다.', baseTopSet: 60, unit: '총', alternatives: ['뉴트럴 그립 덤벨 인클라인 프레스'], movement_pattern: 'horizontal_push'},
+                { type: '메인', name: '뉴트럴 그립 덤벨 인클라인 프레스', sets: '탑/백오프 세트', tip: '벤치 각도를 30도로 설정합니다. 어깨 관절의 부담을 줄이면서 윗가슴 상부(쇄골지)를 집중적으로 공략하는 것이 핵심입니다. 등을 벤치에 단단히 고정하고, 팔꿈치를 과도하게 벌리지 말고 몸통에 가까운 궤적으로 움직이세요. 덤벨을 내릴 때 윗가슴이 최대로 늘어나는 것을 느끼고, 들어 올릴 때는 윗가슴을 강하게 쥐어짠다는 느낌에 집중하세요.', baseTopSet: 26, unit: '한쪽', alternatives: ['로우 인클라인 스미스 프레스', '인클라인 바벨 프레스'], movement_pattern: 'horizontal_push'},
                 { type: '메인', name: '너틸러스 체스트 프레스 (뉴트럴)', sets: '탑/백오프 세트', tip: 'V자 그립으로 가슴 중앙부를 강하게 수축시킵니다. 등을 패드에 기대 안정성을 확보하고, 프레스 동작 마지막에 견갑을 살짝 전인(내밀어)시켜 가슴 안쪽까지 완전히 쥐어짜주세요.', baseTopSet: 70, unit: '총', alternatives: ['뉴트럴 그립 덤벨 프레스', '클로즈 그립 벤치프레스'], movement_pattern: 'horizontal_push'},
                 { type: '메인', name: '사이드 래터럴 레이즈 머신', sets: '3~4세트', tip: '어깨 측면(측면 삼각근)을 완벽하게 고립하여 어깨 프레임을 넓히는 것이 목표입니다. 팔꿈치로 패드를 들어올린다는 느낌으로 수행하고, 승모근이 으쓱하지 않도록 통제하는 것이 핵심입니다.', staticGoal: '🔥 목표: 30kg x 10-15회.', increment: 10, alternatives: ['덤벨 사이드 레터럴 레이즈', '케이블 사이드 레터럴 레이즈'], movement_pattern: 'isolation_shoulder'},
                 { type: '보조', name: '딥스 머신', sets: '3~4세트', tip: '아랫가슴과 삼두근에 볼륨을 더합니다. 상체를 숙일수록 아랫가슴에 자극이 집중됩니다. 이완 시 견갑이 자연스럽게 상승하며 가슴이 최대로 늘어나는 것을 느끼세요.', staticGoal: '🔥 목표: 실패지점까지 x 3-4세트.', increment: 5, alternatives: ['딥스 (평행봉)', '디클라인 푸쉬업'], movement_pattern: 'horizontal_push' },
@@ -445,7 +445,6 @@
     let appState = {
         currentWeek: 1, currentDay: 'pull', currentCycleId: 1,
         allRecords: {}, inbodyRecords: [], charts: {}, dom: {},
-        pendingImportData: null,
         currentRoutine: [],
         timerInterval: null
     };
@@ -748,9 +747,9 @@
                         ${movementPatternTag}
                     </div>
                     <p class="text-slate-600 text-sm sm:text-base">${tipContent}<br><span class="font-bold text-red-600">${goalText}</span></p>
-                    <div class="flex justify-between items-center mt-3">
-                         <p class="text-sm font-semibold text-slate-500"> ${methodText} &nbsp;&nbsp; | &nbsp;&nbsp; <span class="font-bold text-sky-700">${restText}</span></p>
-                         <button data-action="view-history" data-exercise-name="${exercise.name}" class="p-2 text-slate-400 hover:text-blue-500 transition" title="과거 기록 보기">
+                    <div class="flex justify-between items-center mt-3 gap-2">
+                         <p class="text-sm font-semibold text-slate-500 flex-1 min-w-0">${methodText} &nbsp;&nbsp; | &nbsp;&nbsp; <span class="font-bold text-sky-700">${restText}</span></p>
+                         <button data-action="view-history" data-exercise-name="${exercise.name}" class="p-2 text-slate-400 hover:text-blue-500 transition flex-shrink-0" title="과거 기록 보기">
                             <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" class="bi bi-table" viewBox="0 0 16 16">
                                 <path d="M0 2a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2V2zm15 2h-4v3h4V4zm0 4h-4v3h4V8zm0 4h-4v3h3a1 1 0 0 0 1-1v-2zm-5 3v-3H6v3h4zm-5 0v-3H1v2a1 1 0 0 0 1 1h3zm-4-4h4V8H1v3zm0-4h4V4H1v3zm5-3v3h4V4H6zm5 0v3h4V4h-4z"/>
                             </svg>
@@ -1332,14 +1331,18 @@
         document.body.style.overflow = show ? 'hidden' : '';
     }
     
+    // --- BUG FIX v20.8: Reverted to the original stable modal confirmation logic ---
     function showConfirmModal(title, message, btnClass, onConfirm) {
         document.getElementById('confirm-modal-title').textContent = title;
         document.getElementById('confirm-modal-message').textContent = message;
         const actionBtn = document.getElementById('confirm-modal-action-btn');
         actionBtn.className = `px-4 py-2 sm:px-5 sm:py-2.5 rounded-lg text-white font-bold transition shadow-md ${btnClass}`;
         
+        // Create a clean clone of the button to remove any lingering event listeners
         const newActionBtn = actionBtn.cloneNode(true);
         actionBtn.parentNode.replaceChild(newActionBtn, actionBtn);
+        
+        // Add the single, correct event listener for this specific confirmation
         newActionBtn.addEventListener('click', onConfirm);
 
         toggleModal('confirm-modal', true);
