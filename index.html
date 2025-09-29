@@ -645,45 +645,56 @@
         }
     }
 
-function getSmartAssistanceGoal_Aegis_v15(exercise) {
+// --- BUG FIX v20.9.1: Aegis System v16 (Stateful, Recursive Goal Calculation) ---
+const aegisCache = new Map(); // 메모리 캐시 추가
+
+function getSmartAssistanceGoal_Aegis_v16(exercise, targetWeek, targetCycleId) {
     const { staticGoal: initialGoal, increment, sets: setsString } = exercise;
-    if (!initialGoal || !increment || !setsString) return initialGoal;
-    
     const sanitizedName = getSanitizedName(exercise);
-    const { currentWeek, currentCycleId } = appState;
 
-    // 1. 현재보다 과거의 모든 기록을 가져온다.
+    // 현재 계산 중인 목표 주차 및 사이클 ID (재귀 호출 시 사용)
+    const week = targetWeek !== undefined ? targetWeek : appState.currentWeek;
+    const cycleId = targetCycleId !== undefined ? targetCycleId : appState.currentCycleId;
+
+    // 캐시 키 생성 및 확인
+    const cacheKey = `${sanitizedName}-${cycleId}-${week}`;
+    if (aegisCache.has(cacheKey)) {
+        return aegisCache.get(cacheKey);
+    }
+
+    // 기본 조건: 이지스 시스템 적용 대상이 아니거나, 1주차인 경우 초기 목표 반환
+    if (!initialGoal || !increment || !setsString || week === 1) {
+        return initialGoal;
+    }
+
+    // 분석할 가장 최근 기록을 찾는다 (현재 주차보다 이전 기록만)
     const lastRecord = (appState.allRecords[sanitizedName] || [])
-        .filter(r => {
-            if (!r.sets || r.sets.length === 0) return false;
-            return (r.cycleId < currentCycleId) || (r.cycleId === currentCycleId && r.week < currentWeek);
-        })
+        .filter(r => (r.cycleId < cycleId) || (r.cycleId === cycleId && r.week < week))
         .sort((a, b) => (b.cycleId - a.cycleId) || (b.week - a.week))[0];
-        
-    if (!lastRecord) return initialGoal;
 
-    // 2. 가장 최근 기록이 수행될 '당시'의 운동 정보를 가져온다. (이것이 핵심!)
-    const { originalWeekData } = getWeekInfo(lastRecord.week, lastRecord.cycleId);
-    const originalExercise = Object.values(originalWeekData)
-        .flatMap(day => day.routine)
-        .find(ex => getSanitizedName(ex) === sanitizedName);
+    // 이전 기록이 없으면 초기 목표 반환
+    if (!lastRecord) {
+        return initialGoal;
+    }
 
-    // 3. '당시'의 목표를 기준으로 성공/실패를 판단한다.
-    const historicGoal = originalExercise ? originalExercise.staticGoal : initialGoal;
+    // --- 핵심 로직: 과거의 목표를 재귀적으로 계산하여 가져온다 ---
+    const historicGoal = getSmartAssistanceGoal_Aegis_v16(exercise, lastRecord.week, lastRecord.cycleId);
+
     const parsedW = parseWeightRange(historicGoal);
     const parsedR = historicGoal.match(/(\d+)\s*-\s*(\d+)회/);
-    if (!parsedW || !parsedR) return initialGoal;
-    
+
+    if (!parsedW || !parsedR) return historicGoal; // 이전 목표 계산이 잘못되면 그대로 반환
+
     const [ , minR, maxR ] = parsedR;
     const minWeightGoal = parsedW.min, maxWeightGoal = parsedW.max;
     const minRepsGoal = parseInt(minR), maxRepsGoal = parseInt(maxR);
-    const performedSets = lastRecord.sets;
 
-    // BUG FIX: 감량 조건 로직을 더 명확하고 엄격하게 수정
+    const performedSets = lastRecord.sets;
     const setsMatch = setsString.match(/(\d+)(?:~|-)?(\d+)?/);
     const minSetsGoal = setsMatch ? parseInt(setsMatch[1]) : 3;
     const maxSetsGoal = setsMatch ? parseInt(setsMatch[2] || setsMatch[1]) : minSetsGoal;
 
+    // --- 감량 및 증량 조건 판단 ---
     const qualityFail = performedSets.filter(s => s.weight < minWeightGoal).length > performedSets.length / 2;
     const repsFail = performedSets.some(s => s.weight >= minWeightGoal && s.reps < minRepsGoal);
     const performedVolume = performedSets.reduce((sum, set) => sum + (set.weight * set.reps), 0);
@@ -691,26 +702,30 @@ function getSmartAssistanceGoal_Aegis_v15(exercise) {
     const volumeFail = performedVolume < minTargetVolume;
     const setsFail = performedSets.length < minSetsGoal;
 
+    let newGoal = historicGoal; // 기본값은 이전 목표 유지
+
     if (qualityFail || repsFail || volumeFail || setsFail) {
-        return generateNewGoal(-increment);
-    }
-    
-    const didMaxSets = performedSets.length >= maxSetsGoal;
-    const allSetsPerfect = performedSets.every(s => s.weight >= maxWeightGoal && s.reps >= maxRepsGoal);
-
-    if (didMaxSets && allSetsPerfect) {
-        return generateNewGoal(increment);
-    }
-
-    return initialGoal;
-
-    function generateNewGoal(change) {
-        let newMin = Math.max(0, roundToNearest2point5(minWeightGoal + change));
-        let newMax = Math.max(0, roundToNearest2point5(maxWeightGoal + change));
-        if (newMin === 0 && newMax === 0) return initialGoal.replace(/[\d.\-]+\s*(kg|lbs)/ig, '');
+        // 감량 조건 충족
+        let newMin = Math.max(0, roundToNearest2point5(minWeightGoal - increment));
+        let newMax = Math.max(0, roundToNearest2point5(maxWeightGoal - increment));
+        if (newMin === 0 && newMax === 0) return historicGoal;
         const weightText = newMin === newMax ? `${newMin}kg` : `${newMin}-${newMax}kg`;
-        return initialGoal.replace(/([\d.]+)(?:-([\d.]+))?\s*(kg|lbs)/i, weightText);
+        newGoal = historicGoal.replace(/([\d.]+)(?:-([\d.]+))?\s*(kg|lbs)/i, weightText);
+    } else {
+        // 증량 조건 확인
+        const didMaxSets = performedSets.length >= maxSetsGoal;
+        const allSetsPerfect = performedSets.every(s => s.weight >= maxWeightGoal && s.reps >= maxRepsGoal);
+        if (didMaxSets && allSetsPerfect) {
+            let newMin = Math.max(0, roundToNearest2point5(minWeightGoal + increment));
+            let newMax = Math.max(0, roundToNearest2point5(maxWeightGoal + increment));
+            const weightText = newMin === newMax ? `${newMin}kg` : `${newMin}-${newMax}kg`;
+            newGoal = historicGoal.replace(/([\d.]+)(?:-([\d.]+))?\s*(kg|lbs)/i, weightText);
+        }
     }
+
+    // 계산된 최종 목표를 캐시에 저장하고 반환
+    aegisCache.set(cacheKey, newGoal);
+    return newGoal;
 }
 
     // --- RENDER & UI FUNCTIONS ---
@@ -766,7 +781,7 @@ function getSmartAssistanceGoal_Aegis_v15(exercise) {
                 if (exercise.type === '메인' && exercise.baseTopSet) {
                     goalText = getMainGoalText(exercise, currentWeek, currentCycleId) || exercise.staticGoal || '';
                 } else if (exercise.type !== '웜업') {
-                    goalText = getSmartAssistanceGoal_Aegis_v15(exercise);
+                    goalText = getSmartAssistanceGoal_Aegis_v16(exercise);
                 } else {
                     goalText = exercise.staticGoal || '';
                 }
@@ -1463,6 +1478,7 @@ function getSmartAssistanceGoal_Aegis_v15(exercise) {
 </script>
 </body>
 </html>
+
 
 
 
