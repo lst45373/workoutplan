@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>26주 장기 성장 프로그램 | 인터랙티브 플래너 (v20.9)</title>
+    <title>26주 장기 성장 프로그램 | 인터랙티브 플래너 (v20.8)</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
@@ -392,7 +392,7 @@
                 { type: '웜업', name: '노틸러스 이너 타이', sets: '2세트', tip: '고관절 내전근을 활성화합니다. (LBS 단위)', staticGoal: '🔥 목표: 100-130 LBS x 10-12회.', alternatives: ['케이블 어덕션', '코펜하겐 플랭크'], movement_pattern: 'isolation_quads' },
                 { type: '웜업', name: '노틸러스 아웃 타이', sets: '2세트', tip: '고관절 외전근(둔근)을 활성화합니다. (LBS 단위)', staticGoal: '🔥 목표: 100-130 LBS x 10-12회.', alternatives: ['케이블 어브덕션', '밴드 클램쉘'], movement_pattern: 'isolation_glutes' },
                 { type: '선피로', name: '노틸러스 레그 컬', sets: '3세트', tip: '가벼운 무게로 햄스트링에 먼저 자극을 줍니다. 펌핑감에 집중하세요.', staticGoal: '🔥 목표: 25-35kg x 15-20회.', movement_pattern: 'isolation_hams' },
-                { type: '메인', name: '레그 프레스 (햄스트링/둔근 타겟)', sets: '탑/백오프 세트', tip: '발을 발판 위쪽에 넓게 두어 내전근을 포함한 후면 사슬 전체의 볼륨감에 집중합니다. 엉덩이가 패드에서 뜨지 않는 깊이까지만 내려가세요.', baseTopSet: 160, unit: '총', alternatives: ['루마니안 데드리프트', '바벨 굿모닝'], movement_pattern: 'hip_hinge'},
+                { type: '메인', name: '레그 프레스 (햄스트링/둔근 타겟)', sets: '탑/백오프 세트', tip: '발을 발판 위쪽에 넓게 두어 내전근을 포함한 후면 사슬 전체의 볼륨감에 집중합니다. 엉덩이가 패드에서 뜨지 않는 깊이까지만 내려가세요.', baseTopSet: 160, unit: '총', alternatives: ['루마니안 데드리프트', '바벨 굿모닝'], movement_pattern: 'squat'},
                 { type: '메인', name: '뉴텍 V스쿼트 (리버스)', sets: '탑/백오프 세트', tip: '머신을 마주보고 서서 어깨를 고리 모양의 패드에 견착합니다. 발을 어깨너비 또는 약간 좁게 두고, 엉덩이를 뒤로 깊게 빼며 앉아 햄스트링과 둔근의 최대 이완과 고립에 집중하세요. 발뒤꿈치로 강하게 밀어 올라오며 둔근을 수축합니다.', baseTopSet: 80, unit: '총', alternatives: ['바벨 굿모닝', '케이블 풀 스루'], movement_pattern: 'hip_hinge' },
                 { type: '보조', name: '노틸러스 레그 컬', sets: '3~4세트', tip: '무거운 무게로 햄스트링 볼륨을 극대화합니다. 최대 수축 지점에서 1~2초 멈춰주세요.', staticGoal: '🔥 목표: 40-50kg x 12-15회.', increment: 5, alternatives: ['덤벨 레그 컬', '노르딕 햄스트링 컬'], movement_pattern: 'isolation_hams' },
                 { type: '마무리', name: '부티빌더 스탠딩 힙 쓰러스트', sets: '3~4세트', tip: '패드를 골반에 위치시키고, 발뒤꿈치로 강하게 밀어 엉덩이를 최대로 수축합니다. 정점에서 1~2초간 멈춰주세요.', staticGoal: '🔥 목표: 40-60kg x 12-15회.', increment: 5, alternatives: ['바벨 힙 쓰러스트', '케이블 풀 스루'], movement_pattern: 'hip_hinge' }
@@ -450,21 +450,10 @@
     };
 
     // --- UTILITY FUNCTIONS ---
-    const getSanitizedName = (ex) => (ex.name + (ex.type||'') + (ex.movement_pattern||'') + (ex.unit||'')).replace(/\s/g,'').replace(/[^a-zA-Z0-9가-힣]/g,'');
+    const getSanitizedName = (ex) => (ex.name + (ex.type || '')).replace(/\s/g, '').replace(/[^a-zA-Z0-9가-힣]/g, '');
     const debounce = (func, wait) => { let t; return (...a) => { clearTimeout(t); t = setTimeout(() => func.apply(this, a), wait); }; };
     const roundToNearest2point5 = (num) => Math.round(num / 2.5) * 2.5;
     const formatTime = (seconds) => `${String(Math.floor(seconds / 60)).padStart(2, '0')}:${String(seconds % 60).padStart(2, '0')}`;
-    const parseWeightRange = (text) => {
-        const kg = text.match(/([\d.]+)(?:-([\d.]+))?\s*kg/i);
-        const lbs = text.match(/([\d.]+)(?:-([\d.]+))?\s*(?:lbs|pounds)/i);
-        if (kg) return { unit: 'kg', min: parseFloat(kg[1]), max: parseFloat(kg[2] || kg[1]) };
-        if (lbs) { 
-            const min = parseFloat(lbs[1]) * 0.45359237; 
-            const max = parseFloat(lbs[2] || lbs[1]) * 0.45359237; 
-            return { unit: 'kg', min, max }; 
-        }
-        return null;
-    };
     let audioCtx;
     try { audioCtx = new (window.AudioContext || window.webkitAudioContext)(); } catch(e) { console.warn("Web Audio API is not supported in this browser."); }
     const toLocalISODate = (d = new Date()) => {
@@ -539,10 +528,8 @@
             workingSetWeight = roundToNearest2point5(e1RM * 0.7);
         } else if (originalExercise.staticGoal) { // 보조 운동
             const goalText = getSmartAssistanceGoal_Aegis_v15(originalExercise);
-            const parsed = parseWeightRange(goalText);
-            if (parsed) {
-                workingSetWeight = parsed.min;
-            }
+            const weightMatch = goalText.match(/([\d.]+)(?:-([\d.]+))?kg/);
+            if (weightMatch) workingSetWeight = parseFloat(weightMatch[1]);
         }
         
         if (workingSetWeight > 0) {
@@ -647,17 +634,19 @@
         const { currentWeek, currentCycleId } = appState;
 
         const lastRecord = (appState.allRecords[sanitizedName] || [])
-            .filter(r => r.sets?.length && (r.cycleId < currentCycleId || (r.cycleId === currentCycleId && r.week < currentWeek)))
-            .sort((a,b)=>(b.cycleId-a.cycleId)||(b.week-a.week))[0];
+            .filter(r => {
+                if (!r.sets || r.sets.length === 0) return false;
+                return (r.cycleId < currentCycleId) || (r.cycleId === currentCycleId && r.week < currentWeek);
+            })
+            .sort((a, b) => (b.cycleId - a.cycleId) || (b.week - a.week))[0];
             
         if (!lastRecord) return initialGoal;
 
-        const parsedW = parseWeightRange(initialGoal);
-        const parsedR = initialGoal.match(/(\d+)\s*-\s*(\d+)회/);
-        if (!parsedW || !parsedR) return initialGoal; // "실패지점까지" 같은 패턴은 그대로 유지
-
-        const [, minR, maxR] = parsedR;
-        const minWeightGoal = parsedW.min, maxWeightGoal = parsedW.max;
+        const goalParts = initialGoal.match(/([\d.]+)(?:-([\d.]+))?kg.*(\d+)-(\d+)회/);
+        if (!goalParts) return initialGoal;
+        
+        const [, minW, maxW, minR, maxR] = goalParts;
+        const minWeightGoal = parseFloat(minW), maxWeightGoal = parseFloat(maxW || minW);
         const minRepsGoal = parseInt(minR), maxRepsGoal = parseInt(maxR);
         const minSetsGoal = parseInt(setsString.match(/(\d+)/)[1]);
         const performedSets = lastRecord.sets;
@@ -666,19 +655,17 @@
         const repsFail = performedSets.some(s => s.weight >= minWeightGoal && s.reps < minRepsGoal);
         const performedVolume = performedSets.reduce((sum, set) => sum + (set.weight * set.reps), 0);
         const minTargetVolume = minWeightGoal * minRepsGoal * minSetsGoal;
-        
         if (qualityFail || repsFail || performedVolume < minTargetVolume) return generateNewGoal(-increment);
+        
         if (performedSets.every(s => s.weight >= maxWeightGoal && s.reps >= maxRepsGoal)) return generateNewGoal(increment);
 
         return initialGoal;
 
         function generateNewGoal(change) {
-            let newMin = Math.max(0, roundToNearest2point5(minWeightGoal + change));
-            let newMax = Math.max(0, roundToNearest2point5(maxWeightGoal + change));
-            if (newMin === 0 && newMax === 0) return initialGoal.replace(/[\d.\-]+\s*(kg|LBS)/ig, '');
-            const weightText = (newMin === newMax) ? `${newMin}kg` : `${newMin}-${newMax}kg`;
-            // LBS로 작성된 가이드도 kg으로 변환하여 표시 (앱 입력 단위가 kg이므로)
-            return initialGoal.replace(/([\d.]+)(?:-([\d.]+))?\s*(kg|LBS)/i, weightText);
+            let newMin = Math.max(0, minWeightGoal + change), newMax = Math.max(0, maxWeightGoal + change);
+            if (newMin === 0 && newMax === 0) return initialGoal.replace(/[\d.-]+kg/g, '');
+            const weightText = newMin === newMax ? `${newMin}kg` : `${newMin}-${newMax}kg`;
+            return initialGoal.replace(/([\d.]+)(?:-([\d.]+))?kg/, weightText);
         }
     }
 
