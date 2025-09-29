@@ -652,6 +652,7 @@ function getSmartAssistanceGoal_Aegis_v15(exercise) {
     const sanitizedName = getSanitizedName(exercise);
     const { currentWeek, currentCycleId } = appState;
 
+    // 1. 현재보다 과거의 모든 기록을 가져온다.
     const lastRecord = (appState.allRecords[sanitizedName] || [])
         .filter(r => {
             if (!r.sets || r.sets.length === 0) return false;
@@ -661,9 +662,16 @@ function getSmartAssistanceGoal_Aegis_v15(exercise) {
         
     if (!lastRecord) return initialGoal;
 
-    // BUG FIX: 더 안정적인 parseWeightRange 함수로 교체
-    const parsedW = parseWeightRange(initialGoal);
-    const parsedR = initialGoal.match(/(\d+)\s*-\s*(\d+)회/);
+    // 2. 가장 최근 기록이 수행될 '당시'의 운동 정보를 가져온다. (이것이 핵심!)
+    const { originalWeekData } = getWeekInfo(lastRecord.week, lastRecord.cycleId);
+    const originalExercise = Object.values(originalWeekData)
+        .flatMap(day => day.routine)
+        .find(ex => getSanitizedName(ex) === sanitizedName);
+
+    // 3. '당시'의 목표를 기준으로 성공/실패를 판단한다.
+    const historicGoal = originalExercise ? originalExercise.staticGoal : initialGoal;
+    const parsedW = parseWeightRange(historicGoal);
+    const parsedR = historicGoal.match(/(\d+)\s*-\s*(\d+)회/);
     if (!parsedW || !parsedR) return initialGoal;
     
     const [ , minR, maxR ] = parsedR;
@@ -1455,6 +1463,7 @@ function getSmartAssistanceGoal_Aegis_v15(exercise) {
 </script>
 </body>
 </html>
+
 
 
 
