@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>26주 장기 성장 프로그램 | 인터랙티브 플래너 (v20.8)</title>
+    <title>26주 장기 성장 프로그램 | 인터랙티브 플래너 (v20.9)</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
@@ -450,10 +450,21 @@
     };
 
     // --- UTILITY FUNCTIONS ---
-    const getSanitizedName = (ex) => (ex.name + (ex.type || '')).replace(/\s/g, '').replace(/[^a-zA-Z0-9가-힣]/g, '');
+    const getSanitizedName = (ex) => (ex.name + (ex.type||'') + (ex.movement_pattern||'') + (ex.unit||'')).replace(/\s/g,'').replace(/[^a-zA-Z0-9가-힣]/g,'');
     const debounce = (func, wait) => { let t; return (...a) => { clearTimeout(t); t = setTimeout(() => func.apply(this, a), wait); }; };
     const roundToNearest2point5 = (num) => Math.round(num / 2.5) * 2.5;
     const formatTime = (seconds) => `${String(Math.floor(seconds / 60)).padStart(2, '0')}:${String(seconds % 60).padStart(2, '0')}`;
+    const parseWeightRange = (text) => {
+        const kg = text.match(/([\d.]+)(?:-([\d.]+))?\s*kg/i);
+        const lbs = text.match(/([\d.]+)(?:-([\d.]+))?\s*(?:lbs|pounds)/i);
+        if (kg) return { unit: 'kg', min: parseFloat(kg[1]), max: parseFloat(kg[2] || kg[1]) };
+        if (lbs) { 
+            const min = parseFloat(lbs[1]) * 0.45359237; 
+            const max = parseFloat(lbs[2] || lbs[1]) * 0.45359237; 
+            return { unit: 'kg', min, max }; 
+        }
+        return null;
+    };
     let audioCtx;
     try { audioCtx = new (window.AudioContext || window.webkitAudioContext)(); } catch(e) { console.warn("Web Audio API is not supported in this browser."); }
     const toLocalISODate = (d = new Date()) => {
@@ -528,8 +539,10 @@
             workingSetWeight = roundToNearest2point5(e1RM * 0.7);
         } else if (originalExercise.staticGoal) { // 보조 운동
             const goalText = getSmartAssistanceGoal_Aegis_v15(originalExercise);
-            const weightMatch = goalText.match(/([\d.]+)(?:-([\d.]+))?kg/);
-            if (weightMatch) workingSetWeight = parseFloat(weightMatch[1]);
+            const parsed = parseWeightRange(goalText);
+            if (parsed) {
+                workingSetWeight = parsed.min;
+            }
         }
         
         if (workingSetWeight > 0) {
@@ -634,19 +647,17 @@
         const { currentWeek, currentCycleId } = appState;
 
         const lastRecord = (appState.allRecords[sanitizedName] || [])
-            .filter(r => {
-                if (!r.sets || r.sets.length === 0) return false;
-                return (r.cycleId < currentCycleId) || (r.cycleId === currentCycleId && r.week < currentWeek);
-            })
-            .sort((a, b) => (b.cycleId - a.cycleId) || (b.week - a.week))[0];
+            .filter(r => r.sets?.length && (r.cycleId < currentCycleId || (r.cycleId === currentCycleId && r.week < currentWeek)))
+            .sort((a,b)=>(b.cycleId-a.cycleId)||(b.week-a.week))[0];
             
         if (!lastRecord) return initialGoal;
 
-        const goalParts = initialGoal.match(/([\d.]+)(?:-([\d.]+))?kg.*(\d+)-(\d+)회/);
-        if (!goalParts) return initialGoal;
-        
-        const [, minW, maxW, minR, maxR] = goalParts;
-        const minWeightGoal = parseFloat(minW), maxWeightGoal = parseFloat(maxW || minW);
+        const parsedW = parseWeightRange(initialGoal);
+        const parsedR = initialGoal.match(/(\d+)\s*-\s*(\d+)회/);
+        if (!parsedW || !parsedR) return initialGoal; // "실패지점까지" 같은 패턴은 그대로 유지
+
+        const [, minR, maxR] = parsedR;
+        const minWeightGoal = parsedW.min, maxWeightGoal = parsedW.max;
         const minRepsGoal = parseInt(minR), maxRepsGoal = parseInt(maxR);
         const minSetsGoal = parseInt(setsString.match(/(\d+)/)[1]);
         const performedSets = lastRecord.sets;
@@ -655,17 +666,19 @@
         const repsFail = performedSets.some(s => s.weight >= minWeightGoal && s.reps < minRepsGoal);
         const performedVolume = performedSets.reduce((sum, set) => sum + (set.weight * set.reps), 0);
         const minTargetVolume = minWeightGoal * minRepsGoal * minSetsGoal;
-        if (qualityFail || repsFail || performedVolume < minTargetVolume) return generateNewGoal(-increment);
         
+        if (qualityFail || repsFail || performedVolume < minTargetVolume) return generateNewGoal(-increment);
         if (performedSets.every(s => s.weight >= maxWeightGoal && s.reps >= maxRepsGoal)) return generateNewGoal(increment);
 
         return initialGoal;
 
         function generateNewGoal(change) {
-            let newMin = Math.max(0, minWeightGoal + change), newMax = Math.max(0, maxWeightGoal + change);
-            if (newMin === 0 && newMax === 0) return initialGoal.replace(/[\d.-]+kg/g, '');
-            const weightText = newMin === newMax ? `${newMin}kg` : `${newMin}-${newMax}kg`;
-            return initialGoal.replace(/([\d.]+)(?:-([\d.]+))?kg/, weightText);
+            let newMin = Math.max(0, roundToNearest2point5(minWeightGoal + change));
+            let newMax = Math.max(0, roundToNearest2point5(maxWeightGoal + change));
+            if (newMin === 0 && newMax === 0) return initialGoal.replace(/[\d.\-]+\s*(kg|LBS)/ig, '');
+            const weightText = (newMin === newMax) ? `${newMin}kg` : `${newMin}-${newMax}kg`;
+            // LBS로 작성된 가이드도 kg으로 변환하여 표시 (앱 입력 단위가 kg이므로)
+            return initialGoal.replace(/([\d.]+)(?:-([\d.]+))?\s*(kg|LBS)/i, weightText);
         }
     }
 
@@ -1423,5 +1436,4 @@
 </script>
 </body>
 </html>
-
 
