@@ -621,11 +621,13 @@
         }
 
         let change = 1.0;
-        if (lastTopSet.reps > 10) change = 1.05;
-        else if (lastTopSet.reps >= 8) change = 1.025;
-        else if (lastTopSet.reps >= 6) change = 1.0125;
-        else if (lastTopSet.reps === 5) change = 1.0;
-        else if (lastTopSet.reps <= 4) change = 0.95;
+        if (lastTopSet.reps >= 11) change = 1.05;      // 11회 이상: +5.0%
+        else if (lastTopSet.reps >= 8) change = 1.025;   // 8-10회: +2.5%
+        else if (lastTopSet.reps >= 6) change = 1.0125;  // 6-7회: +1.25%
+        else if (lastTopSet.reps === 5) change = 1.0;     // 5회: 유지
+        else if (lastTopSet.reps === 4) change = 0.975;  // 4회: -2.5%
+        else if (lastTopSet.reps === 3) change = 0.95;    // 3회: -5.0%
+        else change = 0.90;                            // 2회 이하: -10.0%
 
         let targetWeight = (peakE1RM / (1 + 6/30)) * change;
         
@@ -1438,5 +1440,6 @@
 </script>
 </body>
 </html>
+
 
 
