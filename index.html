@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>26주 장기 성장 프로그램 | 인터랙티브 플래너 (v20.8)</title>
+    <title>26주 장기 성장 프로그램 | 인터랙티브 플래너 (v20.9)</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
@@ -392,7 +392,7 @@
                 { type: '웜업', name: '노틸러스 이너 타이', sets: '2세트', tip: '고관절 내전근을 활성화합니다. (LBS 단위)', staticGoal: '🔥 목표: 100-130 LBS x 10-12회.', alternatives: ['케이블 어덕션', '코펜하겐 플랭크'], movement_pattern: 'isolation_quads' },
                 { type: '웜업', name: '노틸러스 아웃 타이', sets: '2세트', tip: '고관절 외전근(둔근)을 활성화합니다. (LBS 단위)', staticGoal: '🔥 목표: 100-130 LBS x 10-12회.', alternatives: ['케이블 어브덕션', '밴드 클램쉘'], movement_pattern: 'isolation_glutes' },
                 { type: '선피로', name: '노틸러스 레그 컬', sets: '3세트', tip: '가벼운 무게로 햄스트링에 먼저 자극을 줍니다. 펌핑감에 집중하세요.', staticGoal: '🔥 목표: 25-35kg x 15-20회.', movement_pattern: 'isolation_hams' },
-                { type: '메인', name: '레그 프레스 (햄스트링/둔근 타겟)', sets: '탑/백오프 세트', tip: '발을 발판 위쪽에 넓게 두어 내전근을 포함한 후면 사슬 전체의 볼륨감에 집중합니다. 엉덩이가 패드에서 뜨지 않는 깊이까지만 내려가세요.', baseTopSet: 160, unit: '총', alternatives: ['루마니안 데드리프트', '바벨 굿모닝'], movement_pattern: 'squat'},
+                { type: '메인', name: '레그 프레스 (햄스트링/둔근 타겟)', sets: '탑/백오프 세트', tip: '발을 발판 위쪽에 넓게 두어 내전근을 포함한 후면 사슬 전체의 볼륨감에 집중합니다. 엉덩이가 패드에서 뜨지 않는 깊이까지만 내려가세요.', baseTopSet: 160, unit: '총', alternatives: ['루마니안 데드리프트', '바벨 굿모닝'], movement_pattern: 'hip_hinge'},
                 { type: '메인', name: '뉴텍 V스쿼트 (리버스)', sets: '탑/백오프 세트', tip: '머신을 마주보고 서서 어깨를 고리 모양의 패드에 견착합니다. 발을 어깨너비 또는 약간 좁게 두고, 엉덩이를 뒤로 깊게 빼며 앉아 햄스트링과 둔근의 최대 이완과 고립에 집중하세요. 발뒤꿈치로 강하게 밀어 올라오며 둔근을 수축합니다.', baseTopSet: 80, unit: '총', alternatives: ['바벨 굿모닝', '케이블 풀 스루'], movement_pattern: 'hip_hinge' },
                 { type: '보조', name: '노틸러스 레그 컬', sets: '3~4세트', tip: '무거운 무게로 햄스트링 볼륨을 극대화합니다. 최대 수축 지점에서 1~2초 멈춰주세요.', staticGoal: '🔥 목표: 40-50kg x 12-15회.', increment: 5, alternatives: ['덤벨 레그 컬', '노르딕 햄스트링 컬'], movement_pattern: 'isolation_hams' },
                 { type: '마무리', name: '부티빌더 스탠딩 힙 쓰러스트', sets: '3~4세트', tip: '패드를 골반에 위치시키고, 발뒤꿈치로 강하게 밀어 엉덩이를 최대로 수축합니다. 정점에서 1~2초간 멈춰주세요.', staticGoal: '🔥 목표: 40-60kg x 12-15회.', increment: 5, alternatives: ['바벨 힙 쓰러스트', '케이블 풀 스루'], movement_pattern: 'hip_hinge' }
@@ -468,6 +468,28 @@
         return weight * (1 + reps / 30);
     };
 
+    const parseWeightRange = (text) => {
+        if (!text) return null;
+        const kg = text.match(/([\d.]+)(?:-([\d.]+))?\s*kg/i);
+        const lbs = text.match(/([\d.]+)(?:-([\d.]+))?\s*(?:lbs|pounds)/i);
+        if (kg) return { unit: 'kg', min: parseFloat(kg[1]), max: parseFloat(kg[2] || kg[1]) };
+        if (lbs) {
+            const toKg = (x) => Math.round(x * 0.45359237 * 2) / 2; // 0.5kg 단위 반올림
+            const min = toKg(parseFloat(lbs[1]));
+            const max = toKg(parseFloat(lbs[2] || lbs[1]));
+            return { unit: 'kg', min, max };
+        }
+        return null;
+    };
+
+    const pickStrongestSet = (sets) => {
+        if (!sets || sets.length === 0) return { weight: 0, reps: 0, e1rm: 0 };
+        return sets.reduce((best, s) => {
+            const e = calculateEpley1RM(s.weight, s.reps);
+            return e > best.e1rm ? { ...s, e1rm: e } : best;
+        }, { weight: 0, reps: 0, e1rm: 0 });
+    };
+
     // --- CORE LOGIC FUNCTIONS ---
     function playBeepSound() {
         if (!audioCtx) return;
@@ -521,15 +543,15 @@
                 .filter(r => r.phase === '강화 주기').sort((a, b) => (b.cycleId - a.cycleId) || (b.week - a.week));
             let e1RM = originalExercise.baseTopSet * (1 + 6/30);
             if(refRecords.length > 0) {
-                let topSet = { weight: 0, reps: 0 };
-                refRecords[0].sets?.forEach(set => { if (set.weight > topSet.weight) topSet = set; });
-                if(topSet.weight > 0) e1RM = topSet.weight * (1 + topSet.reps / 30);
+                const topSet = pickStrongestSet(refRecords[0].sets);
+                if(topSet.weight > 0) e1RM = calculateEpley1RM(topSet.weight, topSet.reps);
             }
             workingSetWeight = roundToNearest2point5(e1RM * 0.7);
         } else if (originalExercise.staticGoal) { // 보조 운동
-            const goalText = getSmartAssistanceGoal_Aegis_v15(originalExercise);
-            const weightMatch = goalText.match(/([\d.]+)(?:-([\d.]+))?kg/);
-            if (weightMatch) workingSetWeight = parseFloat(weightMatch[1]);
+            const parsed = parseWeightRange(originalExercise.staticGoal);
+            if (parsed) {
+                workingSetWeight = parsed.min;
+            }
         }
         
         if (workingSetWeight > 0) {
@@ -579,12 +601,10 @@
         let peakE1RM = 0;
         if (allPastRecords.length > 0) {
              allPastRecords.forEach(record => {
-                record.sets.forEach(set => {
-                    const currentSetE1RM = calculateEpley1RM(set.weight, set.reps);
-                    if (currentSetE1RM > peakE1RM) {
-                        peakE1RM = currentSetE1RM;
-                    }
-                });
+                const strongestSet = pickStrongestSet(record.sets);
+                if (strongestSet.e1rm > peakE1RM) {
+                    peakE1RM = strongestSet.e1rm;
+                }
             });
         } else {
             peakE1RM = calculateEpley1RM(exercise.baseTopSet, 6); // 기록 없을 시 초기값
@@ -596,10 +616,7 @@
             .sort((a, b) => (b.cycleId - a.cycleId) || (b.week - a.week))[0];
 
         if (lastStrengthRecord) {
-            let topSet = { weight: 0, reps: 0 };
-            lastStrengthRecord.sets?.forEach(set => {
-                if (set.weight > topSet.weight) topSet = set;
-            });
+            const topSet = pickStrongestSet(lastStrengthRecord.sets);
             if (topSet.weight > 0) lastTopSet = topSet;
         }
 
@@ -642,11 +659,12 @@
             
         if (!lastRecord) return initialGoal;
 
-        const goalParts = initialGoal.match(/([\d.]+)(?:-([\d.]+))?kg.*(\d+)-(\d+)회/);
-        if (!goalParts) return initialGoal;
+        const parsedW = parseWeightRange(initialGoal);
+        const parsedR = initialGoal.match(/(\d+)\s*-\s*(\d+)회/);
+        if (!parsedW || !parsedR) return initialGoal;
         
-        const [, minW, maxW, minR, maxR] = goalParts;
-        const minWeightGoal = parseFloat(minW), maxWeightGoal = parseFloat(maxW || minW);
+        const [ , minR, maxR ] = parsedR;
+        const minWeightGoal = parsedW.min, maxWeightGoal = parsedW.max;
         const minRepsGoal = parseInt(minR), maxRepsGoal = parseInt(maxR);
         const minSetsGoal = parseInt(setsString.match(/(\d+)/)[1]);
         const performedSets = lastRecord.sets;
@@ -662,10 +680,11 @@
         return initialGoal;
 
         function generateNewGoal(change) {
-            let newMin = Math.max(0, minWeightGoal + change), newMax = Math.max(0, maxWeightGoal + change);
-            if (newMin === 0 && newMax === 0) return initialGoal.replace(/[\d.-]+kg/g, '');
+            let newMin = Math.max(0, roundToNearest2point5(minWeightGoal + change));
+            let newMax = Math.max(0, roundToNearest2point5(maxWeightGoal + change));
+            if (newMin === 0 && newMax === 0) return initialGoal.replace(/[\d.\-]+\s*(kg|lbs)/ig, '');
             const weightText = newMin === newMax ? `${newMin}kg` : `${newMin}-${newMax}kg`;
-            return initialGoal.replace(/([\d.]+)(?:-([\d.]+))?kg/, weightText);
+            return initialGoal.replace(/([\d.]+)(?:-([\d.]+))?\s*(kg|lbs)/i, weightText);
         }
     }
 
@@ -885,12 +904,8 @@
         
         const chartRecords = [...allMatchingRecords].reverse(); // For chart, reverse to show chronological order
         const labels = chartRecords.map(d => `C${d.cycleId || 1}-${d.week}주`);
-        const topSetData = chartRecords.map(d => (d.sets?.length > 0) ? d.sets.reduce((max, set) => set.weight > max.weight ? set : max, { weight: 0 }).weight : null);
-        const e1RMData = chartRecords.map(d => {
-            if (!d.sets || d.sets.length === 0) return null;
-            const topSet = d.sets.reduce((max, set) => set.weight > max.weight ? set : max, { weight: 0, reps: 0 });
-            return calculateEpley1RM(topSet.weight, topSet.reps);
-        });
+        const topSetData = chartRecords.map(d => pickStrongestSet(d.sets)?.weight || null);
+        const e1RMData = chartRecords.map(d => pickStrongestSet(d.sets)?.e1rm || null);
         
         initializeChart('progressChart', {
             type: 'line',
@@ -909,8 +924,8 @@
                             afterBody: function(context) {
                                 const dataIndex = context[0].dataIndex;
                                 const record = chartRecords[dataIndex];
-                                if (!record || !record.sets) return '';
-                                const topSet = record.sets.reduce((max, set) => set.weight > max.weight ? set : max, { weight: 0, reps: 0 });
+                                const topSet = pickStrongestSet(record.sets);
+                                if (!topSet || !topSet.weight) return '';
                                 return `Top Set: ${topSet.weight}kg x ${topSet.reps}회`;
                             }
                         }
@@ -1423,4 +1438,3 @@
 </script>
 </body>
 </html>
-
