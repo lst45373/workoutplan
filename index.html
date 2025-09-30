@@ -1544,10 +1544,10 @@ function getWeeklyExerciseStats(cycle = appState?.currentCycleId ?? 1,
     });
   }
 
-  // 정렬: 세트수 → 총 Reps → Max Kg
+  // 정렬: Max Kg  → 총 Reps → 세트수
   const list = [...stat.entries()]
     .map(([name, s]) => ({ name, ...s }))
-    .sort((a,b) => (b.sets - a.sets) || (b.reps - a.reps) || (b.kgMax - a.kgMax));
+    .sort((a,b) => (b.kgMax - a.kgMax) || (b.sets - a.sets) || (b.reps - a.reps));
 
   return { cycle, week, totalSets, totalKg, totalReps, list };
 }
@@ -1740,6 +1740,7 @@ function downloadInstagramCardPNG() {
 </script>
 </body>
 </html>
+
 
 
 
