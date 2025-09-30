@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>26주 장기 성장 프로그램 | 인터랙티브 플래너 (v20.9)</title>
+    <title>26주 장기 성장 프로그램 | 인터랙티브 플래너 (v2.1.0)</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
@@ -181,6 +181,7 @@
                         <div id="no-records" class="text-center py-16"></div>
                         <div class="mt-10 pt-8 border-t border-slate-200 space-y-4">
                             <h3 class="text-xl font-bold text-slate-800">데이터 및 설정 관리</h3>
+                            <div id="share-export-mount"></div>
                             <button id="new-cycle-button" class="w-full bg-blue-100 text-blue-700 font-bold p-3 sm:p-4 rounded-lg hover:bg-blue-200 transition duration-200 flex items-center justify-center gap-2 text-base sm:text-lg shadow-md hover:shadow-lg">
                                 <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" class="bi bi-arrow-repeat" viewBox="0 0 16 16">
                                   <path d="M11.534 7h3.932a.25.25 0 0 1 .192.41l-1.966 2.36a.25.25 0 0 1-.384 0l-1.966-2.36a.25.25 0 0 1 .192-.41zm-11 2h3.932a.25.25 0 0 0 .192-.41L2.692 6.23a.25.25 0 0 0-.384 0L.342 8.59A.25.25 0 0 0 .534 9z"></path>
@@ -1476,8 +1477,261 @@ function getSmartAssistanceGoal_Aegis_v16(exercise, targetWeek, targetCycleId) {
 
     document.addEventListener('DOMContentLoaded', initApp);
 </script>
+<script>
+(function () {
+  // ====== 안전 가드 & 준비 ======
+  function onReady(fn){
+    if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", fn, {once:true});
+    else fn();
+  }
+  // appState가 늦게 뜨는 경우를 대비한 재시도(최대 20회, 100ms 간격)
+  function whenAppStateReady(cb){
+    let tries = 0;
+    (function wait(){
+      if (window.appState && appState.allRecords) return cb();
+      if (++tries > 20) return cb(); // 그래도 진행(기능 일부만 동작 가능)
+      setTimeout(wait, 100);
+    })();
+  }
+
+  // ====== UI 만들기 ======
+function buildBar() {
+  // 카드들과 동일한 컨테이너 폭 + 좌우 패딩
+  const wrapper = document.createElement('div');
+  wrapper.className = "max-w-5xl mx-auto px-6";
+
+  // 버튼 묶음: 아래 카드들과 동일한 수직 간격 (mt-2 mb-4)
+  const bar = document.createElement('div');
+  bar.id = 'weekly-share-bar';
+  bar.className =
+    "mt-2 mb-4"; // 제목과의 위 간격/아래 첫 카드와의 간격을 카드들과 동일하게
+
+  // 내부를 그리드로 3등분(가운데 정렬, 반응형에서 1열→3열)
+  const grid = document.createElement('div');
+  grid.className =
+    "grid grid-cols-1 md:grid-cols-3 gap-4 place-items-center";
+
+  // 공용 버튼 생성 (아래 카드 톤과 맞춘 파스텔 카드 스타일)
+  const mkBtn = (label, color) => {
+    const btn = document.createElement('button');
+    btn.textContent = label;
+    btn.className = [
+      "w-full md:w-auto",           // 모바일 꽉 차게, 데스크톱은 내용 너비
+      "min-w-[310px]",
+      "px-6 py-3 rounded-xl font-semibold shadow",
+      "transition hover:brightness-105",
+      color
+    ].join(" ");
+    return btn;
+  };
+
+  const bCsv   = mkBtn("주간 기록 내보내기 (CSV)", "bg-blue-100 text-blue-700");
+  const bShare = mkBtn("주간 요약 공유",           "bg-green-100 text-green-700");
+  const bPng   = mkBtn("인스타 카드 만들기 (PNG)",  "bg-pink-100 text-pink-700");
+
+  // 이벤트 바인딩
+  bCsv.addEventListener('click', exportCurrentWeekToCSV);
+  bShare.addEventListener('click', shareWeeklySummary);
+  bPng.addEventListener('click', downloadInstagramCardPNG);
+
+  grid.append(bCsv, bShare, bPng);
+  bar.appendChild(grid);
+  wrapper.appendChild(bar);
+  return wrapper;
+}
+
+
+  // ====== 앵커에 장착 ======
+  function mountShareBar() {
+    const anchor = document.getElementById('share-export-mount');
+    if (!anchor) {
+      console.warn('[share/export] #share-export-mount 를 찾지 못했습니다. 1단계가 추가됐는지 확인하세요.');
+      return;
+    }
+    if (!document.getElementById('weekly-share-bar')) {
+      anchor.insertAdjacentElement('afterend', buildBar());
+    }
+  }
+
+  // ====== 기능: CSV ======
+  function exportCurrentWeekToCSV() {
+    const week = appState?.currentWeek ?? 1;
+    const cycle = appState?.currentCycleId ?? 1;
+    const rows = [["운동명","세트(중량x횟수)","날짜","사이클","주차","요일","단계"]];
+    for (const [name, recs] of Object.entries(appState?.allRecords || {})) {
+      (recs || []).filter(r => r.week === week && r.cycleId === cycle).forEach(r => {
+        const sets = (r.sets || []).map(s => `${s.weight}kg x ${s.reps}회`).join("; ");
+        rows.push([r.exerciseName || r.dayName || name, sets, r.date || "", r.cycleId, r.week, r.day || "", r.phase || ""]);
+      });
+    }
+    const csv = rows.map(r => r.map(x => `"${String(x).replace(/"/g,'""')}"`).join(",")).join("\n");
+    const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = `week-${week}-cycle-${cycle}.csv`;
+    document.body.appendChild(a); a.click();
+    setTimeout(() => { URL.revokeObjectURL(a.href); a.remove(); }, 0);
+  }
+
+  // ====== 기능: 요약 공유 ======
+function shareWeeklySummary() {
+  const week  = appState?.currentWeek ?? 1;
+  const cycle = appState?.currentCycleId ?? 1;
+
+  // --- 수집: 이번주 / 과거 ---
+  const now = [];
+  const past = [];
+
+  for (const [sanitized, recs] of Object.entries(appState?.allRecords || {})) {
+    (recs || []).forEach(r => {
+      const name = r.exerciseName || r.dayName || sanitized;
+      const sets = (r.sets || []).map(s => ({
+        w: +s.weight || 0, r: +s.reps || 0
+      }));
+      const record = {
+        name,
+        cycleId: +r.cycleId || 0,
+        week: +r.week || 0,
+        date: r.date || "",
+        sets
+      };
+      if (record.cycleId === cycle && record.week === week) now.push(record);
+      else past.push(record);
+    });
+  }
+
+  // --- 헬퍼 ---
+  const epley = (w, r) => (r > 1 ? w * (1 + r/30) : w); // 추정 1RM
+  const bestE1RMOf = (recs) => {
+    let best = 0;
+    for (const rec of recs) {
+      for (const s of rec.sets) best = Math.max(best, epley(s.w, s.r));
+    }
+    return best;
+  };
+
+  // --- 이번주 집계 ---
+  let totalSets = 0, totalVolume = 0;
+  const volByEx = new Map();         // { name -> volume(Σw*r) }
+  const bestSetThisWeek = new Map(); // { name -> {w,r,e1rm} }
+
+  for (const rec of now) {
+    let v = 0;
+    for (const s of rec.sets) {
+      totalSets += 1;
+      v += s.w * s.r;
+      const e1 = epley(s.w, s.r);
+      const prev = bestSetThisWeek.get(rec.name);
+      if (!prev || e1 > prev.e1rm) bestSetThisWeek.set(rec.name, { w:s.w, r:s.r, e1rm:e1 });
+    }
+    totalVolume += v;
+    volByEx.set(rec.name, (volByEx.get(rec.name) || 0) + v);
+  }
+
+  // --- Top5 (볼륨 기준) ---
+  const top5 = [...volByEx.entries()]
+    .sort((a,b)=>b[1]-a[1])
+    .slice(0,5)
+    .map(([name, vol], i) => `${i+1}. ${name} · 볼륨 ${Math.round(vol).toLocaleString()} kg·rep`);
+
+  // --- PR 감지 (이번주 e1RM > 과거 최고 e1RM) ---
+  const pastByName = past.reduce((m, rec) => {
+    (m[rec.name] ||= []).push(rec);
+    return m;
+  }, {});
+  const prs = [];
+  for (const [name, bestSet] of bestSetThisWeek.entries()) {
+    const pastBest = bestE1RMOf(pastByName[name] || []);
+    if (bestSet.e1rm > (pastBest + 0.5)) { // 0.5kg 여유치로 오탐 방지
+      prs.push({
+        name,
+        w: bestSet.w,
+        r: bestSet.r,
+        e1: bestSet.e1rm,
+        prev: pastBest
+      });
+    }
+  }
+  const prLines = prs
+    .sort((a,b)=>b.e1-a.e1)
+    .slice(0,5)
+    .map(p => `• ${p.name}: ${p.w}kg×${p.r} (추정1RM ${Math.round(p.e1)}kg, 이전 ${Math.round(p.prev)}kg)`);
+
+  // --- 텍스트 구성 ---
+  const header =
+    `[26주 프로그램] C${cycle} · ${week}주차 요약\n` +
+    `총 세트수: ${totalSets} | 총 볼륨: ${Math.round(totalVolume).toLocaleString()} kg·rep`;
+
+  const sections = [
+    top5.length ? `\n🏆 Top 5 볼륨\n${top5.join("\n")}` : "",
+    prLines.length ? `\n🚀 PR 갱신\n${prLines.join("\n")}` : ""
+  ].filter(Boolean).join("\n");
+
+  const hashtags = `\n#주간요약 #PR업데이트 #운동기록`;
+  const text = `${header}\n${sections}${hashtags}`.trim();
+
+  // --- 공유 / 복사 ---
+  if (navigator.share) {
+    navigator.share({ title: "주간 요약", text }).catch(()=>copy(text));
+  } else {
+    copy(text);
+  }
+  function copy(t){
+    navigator.clipboard?.writeText(t).then(()=>alert("요약을 클립보드에 복사했습니다!"));
+  }
+}
+
+  // ====== 기능: 인스타 PNG ======
+  function downloadInstagramCardPNG() {
+    const week = appState?.currentWeek ?? 1;
+    const cycle = appState?.currentCycleId ?? 1;
+    let totalVolume = 0, totalSets = 0;
+    for (const recs of Object.values(appState?.allRecords || {})) {
+      (recs || []).filter(r => r.week === week && r.cycleId === cycle).forEach(r => {
+        totalSets += (r.sets || []).length;
+        totalVolume += (r.sets || []).reduce((s,x)=>s+(+x.weight||0)*(+x.reps||0),0);
+      });
+    }
+    const W=1080,H=1350, pad=64;
+    const c=document.createElement('canvas'); c.width=W; c.height=H;
+    const ctx=c.getContext('2d');
+    ctx.fillStyle='#0f172a'; ctx.fillRect(0,0,W,H);
+    roundRect(ctx, pad, pad, W-pad*2, H-pad*2, 32, '#111827');
+
+    ctx.fillStyle='#e5e7eb'; ctx.font='bold 64px system-ui, sans-serif';
+    ctx.fillText('26주 장기 성장 프로그램', pad+64, pad+140);
+    ctx.fillStyle='#93c5fd'; ctx.font='bold 56px system-ui, sans-serif';
+    ctx.fillText(`C${cycle} · ${week}주차`, pad+64, pad+220);
+
+    drawStatBox(pad+64, pad+280, W-pad*2-128, 220, '총 볼륨(kg·rep)', Math.round(totalVolume).toLocaleString());
+    drawStatBox(pad+64, pad+540, W-pad*2-128, 220, '총 세트 수', String(totalSets));
+
+    ctx.fillStyle='#9ca3af'; ctx.font='bold 40px system-ui, sans-serif';
+    ctx.fillText('#오늘의운동 #주간기록', pad+64, H-pad-64);
+
+    const a=document.createElement('a');
+    a.href=c.toDataURL('image/png'); a.download=`C${cycle}_week${week}.png`;
+    document.body.appendChild(a); a.click();
+    setTimeout(()=>a.remove(),0);
+
+    function roundRect(ctx,x,y,w,h,r,fill){ctx.beginPath();ctx.moveTo(x+r,y);
+      ctx.arcTo(x+w,y,x+w,y+h,r);ctx.arcTo(x+w,y+h,x,y+h,r);
+      ctx.arcTo(x,y+h,x,y,r);ctx.arcTo(x,y,x+w,y,r);ctx.closePath();
+      ctx.fillStyle=fill;ctx.fill();}
+    function drawStatBox(x,y,w,h,label,value){
+      roundRect(ctx,x,y,w,h,24,'#1f2937');
+      ctx.fillStyle='#bfdbfe'; ctx.font='bold 40px system-ui, sans-serif'; ctx.fillText(label,x+32,y+80);
+      ctx.fillStyle='#ffffff'; ctx.font='bold 92px system-ui, sans-serif';  ctx.fillText(value,x+32,y+170);
+    }
+  }
+
+  // ====== 실행: DOM 준비되면 장착, appState가 늦어도 재시도 ======
+  onReady(()=> whenAppStateReady(mountShareBar));
+})();
+</script>
 </body>
 </html>
+
 
 
 
