@@ -523,28 +523,51 @@
         }, { weight: 0, reps: 0, e1rm: 0 });
     };
 
-// === PPL TOP3 (내부 PPL 사용: record.day = 'push'|'pull'|'leg') ===
+// === PPL TOP3 (내부 PPL 사용) — 운동명은 allRecords의 키(k) 우선 ===
 function getWeeklyPPLTop3(cycle = appState?.currentCycleId ?? 1,
                           week  = appState?.currentWeek ?? 1) {
-  const mapLabel = { push: "Push", pull: "Pull", leg: "Legs" };
   const buckets = { Push: new Map(), Pull: new Map(), Legs: new Map() };
 
-  for (const recs of Object.values(appState?.allRecords || {})) {
+  // 내부 PPL 라벨 판별 (레코드의 ppl/카테고리/세션명 등에서 추출)
+  const toPPL = (v) => {
+    if (!v && v !== 0) return null;
+    const s = String(v).toLowerCase();
+    if (s.includes('push') || s.includes('푸쉬') || s.includes('푸시')) return 'Push';
+    if (s.includes('pull') || s.includes('풀')) return 'Pull';
+    if (s.includes('leg')  || s.includes('하체')) return 'Legs';
+    if (s === 'push' || s === 'pull' || s === 'leg' || s === 'legs') {
+      return s === 'leg' ? 'Legs' : s[0].toUpperCase() + s.slice(1);
+    }
+    return null;
+  };
+
+  // (핵심) allRecords의 키(k)가 곧 운동명. 이걸 최우선으로 사용.
+  for (const [k, recs] of Object.entries(appState?.allRecords || {})) {
     (recs || []).forEach(r => {
       if (+r.cycleId !== +cycle || +r.week !== +week) return;
-      const cat = mapLabel[r.day];
-      if (!cat) return;
 
-      const name = (r.exerciseName || r.name || r.dayName || r.sanitizedName || "").trim() || "미지정 운동";
+      // PPL: 내부 필드 우선 → 세션 텍스트 보조
+      const cat =
+        toPPL(r?.ppl) || toPPL(r?.PPL) || toPPL(r?.category) || toPPL(r?.split) ||
+        toPPL(r?.dayType) || toPPL(r?.dayTag) || toPPL(r?.workoutType) ||
+        toPPL(r?.tags?.ppl) || toPPL(r?.meta?.ppl) ||
+        toPPL(r?.dayName) || toPPL(r?.phase) || toPPL(r?.day);
+
+      if (!cat || !buckets[cat]) return;
+
+      // 운동명: k(키) 최우선 → exerciseName → name → (최후) '미지정 운동'
+      const name = (k || r?.exerciseName || r?.name || '').trim() || '미지정 운동';
+
+      // 해당 레코드에서의 Max Kg / Reps / Sets
       let kgMax = 0, reps = 0, sets = 0;
-      (r.sets || []).forEach(s => {
-        const w = +s.weight || 0, rr = +s.reps || 0;
+      (r?.sets || []).forEach(s => {
+        const w = +s?.weight || 0, rr = +s?.reps || 0;
         kgMax = Math.max(kgMax, w);
-        reps += rr; sets += 1;
+        reps  += rr; sets += 1;
       });
 
       const m = buckets[cat];
-      const prev = m.get(name) || { name, kgMax:0, reps:0, sets:0 };
+      const prev = m.get(name) || { name, kgMax: 0, reps: 0, sets: 0 };
       prev.kgMax = Math.max(prev.kgMax, kgMax);
       prev.reps += reps;
       prev.sets += sets;
@@ -552,9 +575,15 @@ function getWeeklyPPLTop3(cycle = appState?.currentCycleId ?? 1,
     });
   }
 
+  // 정렬: Max Kg 우선 → Sets → Reps
   const sortByMaxKg = (a,b) => (b.kgMax - a.kgMax) || (b.sets - a.sets) || (b.reps - a.reps);
-  const toTop3 = (m) => [...m.values()].sort(sortByMaxKg).slice(0,3);
-  return { Push: toTop3(buckets.Push), Pull: toTop3(buckets.Pull), Legs: toTop3(buckets.Legs) };
+  const top3 = m => [...m.values()].sort(sortByMaxKg).slice(0, 3);
+
+  return {
+    Push: top3(buckets.Push),
+    Pull: top3(buckets.Pull),
+    Legs: top3(buckets.Legs)
+  };
 }
     
     // --- CORE LOGIC FUNCTIONS ---
@@ -1776,6 +1805,7 @@ function downloadInstagramCardPNG() {
 </script>
 </body>
 </html>
+
 
 
 
