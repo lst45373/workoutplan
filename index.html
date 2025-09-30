@@ -523,6 +523,40 @@
         }, { weight: 0, reps: 0, e1rm: 0 });
     };
 
+// === PPL TOP3 (내부 PPL 사용: record.day = 'push'|'pull'|'leg') ===
+function getWeeklyPPLTop3(cycle = appState?.currentCycleId ?? 1,
+                          week  = appState?.currentWeek ?? 1) {
+  const mapLabel = { push: "Push", pull: "Pull", leg: "Legs" };
+  const buckets = { Push: new Map(), Pull: new Map(), Legs: new Map() };
+
+  for (const recs of Object.values(appState?.allRecords || {})) {
+    (recs || []).forEach(r => {
+      if (+r.cycleId !== +cycle || +r.week !== +week) return;
+      const cat = mapLabel[r.day];
+      if (!cat) return;
+
+      const name = (r.exerciseName || r.name || r.dayName || r.sanitizedName || "").trim() || "미지정 운동";
+      let kgMax = 0, reps = 0, sets = 0;
+      (r.sets || []).forEach(s => {
+        const w = +s.weight || 0, rr = +s.reps || 0;
+        kgMax = Math.max(kgMax, w);
+        reps += rr; sets += 1;
+      });
+
+      const m = buckets[cat];
+      const prev = m.get(name) || { name, kgMax:0, reps:0, sets:0 };
+      prev.kgMax = Math.max(prev.kgMax, kgMax);
+      prev.reps += reps;
+      prev.sets += sets;
+      m.set(name, prev);
+    });
+  }
+
+  const sortByMaxKg = (a,b) => (b.kgMax - a.kgMax) || (b.sets - a.sets) || (b.reps - a.reps);
+  const toTop3 = (m) => [...m.values()].sort(sortByMaxKg).slice(0,3);
+  return { Push: toTop3(buckets.Push), Pull: toTop3(buckets.Pull), Legs: toTop3(buckets.Legs) };
+}
+    
     // --- CORE LOGIC FUNCTIONS ---
     function playBeepSound() {
         if (!audioCtx) return;
@@ -1555,183 +1589,185 @@ function getWeeklyExerciseStats(cycle = appState?.currentCycleId ?? 1,
 /* ===================== 주간 요약 공유(텍스트) ===================== */
 /* Top5는 '운동 단위'로 표기: Max Kg / Reps / Sets */
 function shareWeeklySummary() {
-  const { cycle, week, totalSets, list } = getWeeklyExerciseStats();
+  const cycle = appState?.currentCycleId ?? 1;
+  const week  = appState?.currentWeek ?? 1;
 
-  // PR 탐지용: 이번주 최고 Epley와 과거 최고 비교
-  const now = [], past = [];
-  for (const [sanitized, recs] of Object.entries(appState?.allRecords || {})) {
+  // 총 세트수
+  let totalSets = 0;
+  for (const recs of Object.values(appState?.allRecords || {})) {
     (recs || []).forEach(r => {
-      const name = (r.exerciseName || r.name || sanitized || "").trim();
-      const sets = (r.sets || []).map(s => ({ w:+s.weight||0, r:+s.reps||0 }));
-      const item = { name, cycleId:+r.cycleId||0, week:+r.week||0, sets };
-      (item.cycleId === cycle && item.week === week ? now : past).push(item);
+      if (+r.cycleId === +cycle && +r.week === +week) totalSets += (r.sets || []).length;
     });
   }
-  const epley = (w,r)=> (r>1 ? w*(1+r/30) : w);
-  const bestE1RMOf = (recs)=> {
-    let best = 0; for (const rec of recs) for (const s of rec.sets) best = Math.max(best, epley(s.w, s.r)); return best;
-  };
-  const bestSetThisWeek = new Map();
+
+  // PPL Top3
+  const { Push, Pull, Legs } = getWeeklyPPLTop3(cycle, week);
+  const fmt = (it,i) => `${i+1}. ${it.name} — ${it.kgMax} kg (max) / ${it.reps} reps / ${it.sets} sets`;
+
+  // (선택) PR 하이라이트
+  const now = [], past = [];
+  for (const [k, recs] of Object.entries(appState?.allRecords || {})) {
+    (recs || []).forEach(r => {
+      const sets = (r.sets || []).map(s => ({ w:+s.weight||0, r:+s.reps||0 }));
+      const obj = { name: (r.exerciseName || r.name || r.dayName || k).trim(), cycleId:+r.cycleId||0, week:+r.week||0, sets };
+      ((obj.cycleId === cycle && obj.week === week) ? now : past).push(obj);
+    });
+  }
+  const e1 = (w,r)=> (r>1 ? w*(1+r/30) : w);
+  const bestE1RM = (arr)=> arr.reduce((mx,rec)=>Math.max(mx, ...rec.sets.map(s=>e1(s.w,s.r))), 0);
+  const pastByName = past.reduce((m,rec)=>( (m[rec.name]??=[]).push(rec), m), {});
+  const bestThisWeek = new Map();
   for (const rec of now) for (const s of rec.sets) {
-    const e1 = epley(s.w, s.r);
-    const prev = bestSetThisWeek.get(rec.name);
-    if (!prev || e1 > prev.e1) bestSetThisWeek.set(rec.name, { w:s.w, r:s.r, e1 });
+    const curr = bestThisWeek.get(rec.name);
+    const val  = e1(s.w,s.r);
+    if (!curr || val > curr.e1) bestThisWeek.set(rec.name, { w:s.w, r:s.r, e1:val });
   }
-  const pastByName = past.reduce((m, rec)=>((m[rec.name] ||= []).push(rec), m), {});
   const prs = [];
-  for (const [name, cur] of bestSetThisWeek.entries()) {
-    const pastBest = bestE1RMOf(pastByName[name] || []);
-    if (cur.e1 > pastBest + 0.5) prs.push({ name, ...cur, prev: pastBest });
+  for (const [name,cur] of bestThisWeek.entries()) {
+    const prev = bestE1RM(pastByName[name] || []);
+    if (cur.e1 > prev + 0.5) prs.push({ name, ...cur, prev });
   }
+  const prLines = prs.sort((a,b)=>b.e1-a.e1).slice(0,5)
+    .map(p => `• ${p.name}: ${p.w}kg×${p.r} (추정1RM ${Math.round(p.e1)}kg, 이전 ${Math.round(p.prev)}kg)`);
 
-  const top5 = list.slice(0,5).map((it,i)=>`${i+1}. ${it.name} · ${it.kgMax} kg (max) / ${it.reps} reps / ${it.sets} sets`);
-  const prLines = prs
-    .sort((a,b)=>b.e1 - a.e1).slice(0,5)
-    .map(p=>`• ${p.name}: ${p.w}kg×${p.r} (추정1RM ${Math.round(p.e1)}kg, 이전 ${Math.round(p.prev)}kg)`);
-
+  // 텍스트 구성
   const header = `[26주 프로그램] C${cycle} · ${week}주차 요약\n총 세트수: ${totalSets}`;
-  const body = [
-    top5.length ? `\n🏆 Top 5 (운동)\n${top5.join("\n")}` : "",
-    prLines.length ? `\n🚀 PR 갱신\n${prLines.join("\n")}` : "",
-  ].filter(Boolean).join("\n");
-  const hashtags = `\n#주간요약 #PR업데이트 #운동기록`;
+  const secPush = Push.length ? `\n💪 Push — Top 3 (Max Kg)\n${Push.map(fmt).join("\n")}` : "";
+  const secPull = Pull.length ? `\n🧲 Pull — Top 3 (Max Kg)\n${Pull.map(fmt).join("\n")}` : "";
+  const secLegs = Legs.length ? `\n🦵 Legs — Top 3 (Max Kg)\n${Legs.map(fmt).join("\n")}` : "";
+  const secPR   = prLines.length ? `\n🚀 PR 갱신\n${prLines.join("\n")}` : "";
 
-  const text = `${header}\n${body}${hashtags}`.trim();
+  const text = `${header}${secPush}${secPull}${secLegs}${secPR}\n#주간요약 #PPL #운동기록`.trim();
 
   if (navigator.share) navigator.share({ title:"주간 요약", text }).catch(()=>copy(text));
   else copy(text);
 
-  function copy(t){
-    navigator.clipboard?.writeText(t).then(()=>alert("주간 요약을 클립보드에 복사했습니다!"));
-  }
+  function copy(t){ navigator.clipboard?.writeText(t).then(()=>alert("주간 요약을 클립보드에 복사했습니다!")); }
 }
 
 /* ===================== CSV 내보내기 ===================== */
 /* 컬럼: 운동명, Max Kg, Reps, Sets (+ 상단 요약) */
 function exportCurrentWeekToCSV() {
-  const { cycle, week, totalSets, totalKg, totalReps, list } = getWeeklyExerciseStats();
+  const cycle = appState?.currentCycleId ?? 1;
+  const week  = appState?.currentWeek ?? 1;
+  const rows = [["Category","Exercise","MaxKg","TotalReps","Sets"]];
 
-  const rows = [];
-  rows.push(["[요약]", `C${cycle}`, `${week}주차`]);
-  rows.push(["총 Sets", totalSets, "총 Reps", totalReps, "총 Kg(합계)", totalKg]);
-  rows.push([]);
-  rows.push(["운동명", "Max Kg", "Reps", "Sets"]);
-  list.forEach(it => rows.push([it.name, String(it.kgMax), String(it.reps), String(it.sets)]));
+  // PPL TOP3 기준이긴 하지만, CSV는 주차 내 모든 운동을 포함(정렬은 MaxKg 내림차순)
+  const byKey = new Map(); // key: `${cat}||${name}`
+  const catMap = { push:"Push", pull:"Pull", leg:"Legs" };
 
-  const csv = rows.map(r => r.map(x => `"${String(x ?? "").replace(/"/g,'""')}"`).join(",")).join("\n");
+  for (const recs of Object.values(appState?.allRecords || {})) {
+    (recs || []).forEach(r => {
+      if (+r.cycleId !== +cycle || +r.week !== +week) return;
+      const cat  = catMap[r.day] || "Etc";
+      const name = (r.exerciseName || r.name || r.dayName || "").trim() || "미지정 운동";
+
+      let kgMax = 0, reps = 0, sets = 0;
+      (r.sets || []).forEach(s => {
+        const w = +s.weight || 0, rr = +s.reps || 0;
+        kgMax = Math.max(kgMax, w);
+        reps += rr; sets += 1;
+      });
+
+      const key = `${cat}||${name}`;
+      const prev = byKey.get(key) || { cat, name, kgMax:0, reps:0, sets:0 };
+      prev.kgMax = Math.max(prev.kgMax, kgMax);
+      prev.reps += reps;
+      prev.sets += sets;
+      byKey.set(key, prev);
+    });
+  }
+
+  const list = [...byKey.values()].sort((a,b)=>(b.kgMax-a.kgMax)||(b.sets-a.sets)||(b.reps-a.reps));
+  list.forEach(it => rows.push([it.cat, it.name, it.kgMax, it.reps, it.sets]));
+
+  // CSV 생성/다운
+  const csv = rows.map(r => r.map(x => `"${String(x).replace(/"/g,'""')}"`).join(",")).join("\n");
   const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
-  const a = document.createElement('a');
-  a.href = URL.createObjectURL(blob);
-  a.download = `C${cycle}_week${week}_summary.csv`;
-  document.body.appendChild(a); a.click();
-  setTimeout(() => { URL.revokeObjectURL(a.href); a.remove(); }, 0);
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url; a.download = `C${cycle}_W${week}_weekly.csv`;
+  document.body.appendChild(a); a.click(); setTimeout(()=>{ a.remove(); URL.revokeObjectURL(url); },0);
 }
 
 // ===== 인스타 카드: 라이트 테마(밝은 배경) + Top5(운동): Max Kg / Reps / Sets =====
 function downloadInstagramCardPNG() {
-  const { cycle, week, totalSets, totalKg, totalReps, list } = getWeeklyExerciseStats();
-  const top5 = list.slice(0, 5);
+  const { currentCycleId: cycle = 1, currentWeek: week = 1 } = appState || {};
 
-  // 🎨 앱 톤에 맞춘 라이트 팔레트 (필요시 값만 바꾸면 전반 톤 변경됨)
-  const COLORS = {
-    pageBg:    '#f8fafc', // slate-50
-    cardBg:    '#ffffff',
-    cardBorder:'#e5e7eb', // gray-200
-    title:     '#0f172a', // slate-900
-    subTitle:  '#2563eb', // blue-600 (앱 포인트 컬러로 교체 가능)
-    label:     '#475569', // slate-600
-    value:     '#0f172a', // slate-900
-    statBoxBg: '#f3f4f6', // gray-100
-    statBoxBd: '#e5e7eb',
-    top5Head:  '#2563eb',
-    top5Text:  '#111827', // gray-900
-    tag:       '#64748b'  // slate-500
+  // 총 세트수
+  let totalSets = 0;
+  for (const recs of Object.values(appState?.allRecords || {})) {
+    (recs || []).forEach(r => {
+      if (+r.cycleId === +cycle && +r.week === +week) totalSets += (r.sets || []).length;
+    });
+  }
+
+  // PPL Top3
+  const { Push, Pull, Legs } = getWeeklyPPLTop3(cycle, week);
+
+  // Canvas (라이트 테마 / 앱 톤)
+  const W = 1080, H = 1350, pad = 64;
+  const C = {
+    pageBg:'#f8fafc', cardBg:'#ffffff', cardBorder:'#e5e7eb',
+    title:'#0f172a', sub:'#2563eb', label:'#475569', value:'#0f172a',
+    secPush:'#ef4444', secPull:'#0ea5e9', secLegs:'#10b981', line:'#111827', tag:'#64748b'
   };
 
-  const W = 1080, H = 1350, pad = 64;
-  const c = document.createElement('canvas'); c.width = W; c.height = H;
+  const c = document.createElement('canvas'); c.width=W; c.height=H;
   const ctx = c.getContext('2d');
 
-  // 배경 (밝은 페이지 배경)
-  ctx.fillStyle = COLORS.pageBg; ctx.fillRect(0,0,W,H);
-
-  // 메인 카드(화이트) + 약한 그림자
-  ctx.save();
-  ctx.shadowColor = 'rgba(0,0,0,0.08)';
-  ctx.shadowBlur = 24;
-  ctx.shadowOffsetY = 8;
-  roundRect(ctx, pad, pad, W-pad*2, H-pad*2, 32, COLORS.cardBg);
-  ctx.restore();
-
-  // 카드 보더
-  ctx.lineWidth = 2;
-  ctx.strokeStyle = COLORS.cardBorder;
-  strokeRoundRect(ctx, pad, pad, W-pad*2, H-pad*2, 32);
+  // 배경 / 카드
+  ctx.fillStyle = C.pageBg; ctx.fillRect(0,0,W,H);
+  ctx.save(); ctx.shadowColor='rgba(0,0,0,0.08)'; ctx.shadowBlur=24; ctx.shadowOffsetY=8;
+  roundRect(ctx, pad, pad, W-pad*2, H-pad*2, 32, C.cardBg); ctx.restore();
+  ctx.lineWidth=2; ctx.strokeStyle=C.cardBorder; strokeRoundRect(ctx, pad, pad, W-pad*2, H-pad*2, 32);
 
   // 헤더
-  ctx.fillStyle = COLORS.title; ctx.font = 'bold 64px system-ui, sans-serif';
+  ctx.fillStyle = C.title; ctx.font = 'bold 64px system-ui, sans-serif';
   ctx.fillText('26주 장기 성장 프로그램', pad+64, pad+140);
-  ctx.fillStyle = COLORS.subTitle; ctx.font = 'bold 56px system-ui, sans-serif';
+  ctx.fillStyle = C.sub; ctx.font = 'bold 56px system-ui, sans-serif';
   ctx.fillText(`C${cycle} · ${week}주차`, pad+64, pad+220);
 
-  // 통계 박스(라이트 박스) 3개
-  drawStatBoxLight(pad+64, pad+280, W-pad*2-128, 110, '총 Sets', String(totalSets));
-  drawStatBoxLight(pad+64, pad+400, W-pad*2-128, 110, '총 Reps', String(totalReps));
-  drawStatBoxLight(pad+64, pad+520, W-pad*2-128, 110, '총 Kg(합계)', String(totalKg));
+  // 총 세트수
+  drawStatBox(pad+64, pad+280, W-pad*2-128, 110, '총 Sets', String(totalSets));
 
-  // Top5 제목
-  let x = pad+64, y = pad+680;
-  ctx.fillStyle = COLORS.top5Head; ctx.font = 'bold 44px system-ui, sans-serif';
-  ctx.fillText('🏆 Top 5 (운동)', x, y); y += 54;
+  // 섹션 출력
+  function renderSection(yStart, title, color, items){
+    let x = pad+64, y = yStart;
+    ctx.fillStyle = color; ctx.font = 'bold 44px system-ui, sans-serif';
+    ctx.fillText(title, x, y); y += 54;
+    ctx.fillStyle = C.line; ctx.font = '600 40px system-ui, sans-serif';
+    items.forEach((it, i) => {
+      const line = `${i+1}. ${it.name} — ${it.kgMax} kg (max) / ${it.reps} reps / ${it.sets} sets`;
+      ctx.fillText(line, x, y); y += 48;
+    });
+    return y;
+  }
 
-  // Top5 리스트 (Max Kg / Reps / Sets)
-  ctx.fillStyle = COLORS.top5Text; ctx.font = '600 40px system-ui, sans-serif';
-  top5.forEach((it, i) => {
-    const line = `${i+1}. ${it.name} — ${it.kgMax} kg (max) / ${it.reps} reps / ${it.sets} sets`;
-    ctx.fillText(line, x, y);
-    y += 48;
-  });
+  let y = pad+420;
+  if (Push.length) y = renderSection(y, '💪 Push — Top 3 (Max Kg)', C.secPush, Push);
+  if (Pull.length) y = renderSection(y+16, '🧲 Pull — Top 3 (Max Kg)', C.secPull, Pull);
+  if (Legs.length) y = renderSection(y+16, '🦵 Legs — Top 3 (Max Kg)', C.secLegs, Legs);
 
-  // 해시태그
-  ctx.fillStyle = COLORS.tag; ctx.font = 'bold 38px system-ui, sans-serif';
-  ctx.fillText('#주간요약 #운동기록', pad+64, H-pad-64);
+  // 태그
+  ctx.fillStyle = C.tag; ctx.font = 'bold 38px system-ui, sans-serif';
+  ctx.fillText('#주간요약 #PPL #운동기록', pad+64, H-pad-64);
 
   // 저장
-  const a = document.createElement('a');
-  a.href = c.toDataURL('image/png');
-  a.download = `C${cycle}_week${week}_summary_light.png`;
-  document.body.appendChild(a); a.click();
-  setTimeout(()=>a.remove(),0);
+  const a = document.createElement('a'); a.href = c.toDataURL('image/png'); a.download = `C${cycle}_W${week}_PPL_top3.png`;
+  document.body.appendChild(a); a.click(); setTimeout(()=>a.remove(),0);
 
-  // helpers
-  function roundRect(ctx, x,y,w,h,r, fill){
-    ctx.beginPath(); ctx.moveTo(x+r,y);
-    ctx.arcTo(x+w,y, x+w,y+h, r);
-    ctx.arcTo(x+w,y+h, x,y+h, r);
-    ctx.arcTo(x,y+h, x,y, r);
-    ctx.arcTo(x,y,   x+w,y, r);
-    ctx.closePath(); ctx.fillStyle = fill; ctx.fill();
-  }
-  function strokeRoundRect(ctx, x,y,w,h,r){
-    ctx.beginPath(); ctx.moveTo(x+r,y);
-    ctx.arcTo(x+w,y, x+w,y+h, r);
-    ctx.arcTo(x+w,y+h, x,y+h, r);
-    ctx.arcTo(x,y+h, x,y, r);
-    ctx.arcTo(x,y,   x+w,y, r);
-    ctx.closePath(); ctx.stroke();
-  }
-  function drawStatBoxLight(x,y,w,h,label,value){
-    // 박스 배경 + 테두리
-    ctx.fillStyle = COLORS.statBoxBg;
-    roundRect(ctx, x,y,w,h,24, COLORS.statBoxBg);
-    ctx.lineWidth = 2; ctx.strokeStyle = COLORS.statBoxBd;
-    strokeRoundRect(ctx, x,y,w,h,24);
-
-    // 라벨/값
-    ctx.fillStyle = COLORS.label; ctx.font = '700 36px system-ui, sans-serif';
-    ctx.fillText(label, x+24, y+68);
-
-    ctx.fillStyle = COLORS.value; ctx.font = 'bold 64px system-ui, sans-serif';
+  // helpers (card)
+  function roundRect(ctx, x,y,w,h,r, fill){ ctx.beginPath(); ctx.moveTo(x+r,y);
+    ctx.arcTo(x+w,y,x+w,y+h,r); ctx.arcTo(x+w,y+h,x,y+h,r);
+    ctx.arcTo(x,y+h,x,y,r); ctx.arcTo(x,y,x+w,y,r); ctx.closePath(); ctx.fillStyle=fill; ctx.fill(); }
+  function strokeRoundRect(ctx, x,y,w,h,r){ ctx.beginPath(); ctx.moveTo(x+r,y);
+    ctx.arcTo(x+w,y,x+w,y+h,r); ctx.arcTo(x+w,y+h,x,y+h,r);
+    ctx.arcTo(x,y+h,x,y,r); ctx.arcTo(x,y,x+w,y,r); ctx.closePath(); ctx.stroke(); }
+  function drawStatBox(x,y,w,h,label,value){
+    roundRect(ctx,x,y,w,h,24,'#f3f4f6'); ctx.lineWidth=2; ctx.strokeStyle=C.cardBorder; strokeRoundRect(ctx,x,y,w,h,24);
+    ctx.fillStyle=C.label; ctx.font='700 36px system-ui, sans-serif'; ctx.fillText(label,x+24,y+68);
+    ctx.fillStyle=C.value; ctx.font='bold 64px system-ui, sans-serif';
     ctx.fillText(value, x + w - 24 - ctx.measureText(value).width, y+68);
   }
 }
@@ -1740,6 +1776,7 @@ function downloadInstagramCardPNG() {
 </script>
 </body>
 </html>
+
 
 
 
