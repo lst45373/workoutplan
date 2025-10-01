@@ -24,6 +24,11 @@
         .chart-container { position: relative; width: 100%; max-width: 800px; margin-left: auto; margin-right: auto; height: 300px; max-height: 400px; }
         @media (min-width: 640px) { .chart-container { height: 40vh; } }
         .prose { max-width: none; }
+/* ▼▼▼ 타이머 배너 스타일 추가 ▼▼▼ */
+        #timer-banner.show {
+            transform: translateY(0);
+        }
+        /* ▲▲▲ /타이머 배너 스타일 추가 ▲▲▲ */
     </style>
     <link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css" />
 </head>
@@ -323,14 +328,16 @@
             </div>
 
             <!-- Timer Modal -->
-            <div id="timer-modal" class="fixed inset-0 bg-black bg-opacity-80 flex flex-col items-center justify-center hidden z-50 p-4 modal-enter">
-                <div class="bg-white rounded-2xl p-6 md:p-8 shadow-2xl max-w-sm w-full text-center">
-                    <h3 id="timer-exercise-name" class="text-xl sm:text-2xl font-bold mb-2 text-slate-800"></h3>
-                    <p class="text-slate-500 mb-6">휴식 시간</p>
-                    <div id="timer-display" class="text-7xl sm:text-8xl font-bold font-mono text-slate-900 mb-8 tracking-tighter" style="font-variant-numeric: tabular-nums;">00:00</div>
-                    <button id="skip-timer-btn" class="w-full px-4 py-3 sm:px-5 sm:py-3.5 rounded-lg bg-slate-200 text-slate-800 font-bold hover:bg-slate-300 transition shadow-md">휴식 건너뛰기</button>
-                </div>
-            </div>
+            <div id="timer-banner" class="fixed bottom-0 left-0 right-0 bg-slate-800 text-white p-4 shadow-lg transform translate-y-full transition-transform duration-500 ease-in-out z-40 hidden">
+    <div class="container mx-auto max-w-7xl flex items-center justify-between gap-4">
+        <div class="flex-grow">
+            <p id="banner-timer-exercise-name" class="font-bold text-base sm:text-lg truncate"></p>
+            <p class="text-sm text-slate-300">휴식 시간</p>
+        </div>
+        <div id="banner-timer-display" class="font-mono font-bold text-4xl sm:text-5xl" style="font-variant-numeric: tabular-nums;">00:00</div>
+        <button id="banner-skip-timer-btn" class="bg-slate-600 hover:bg-slate-500 font-bold py-2 px-4 rounded-lg transition text-sm sm:text-base">건너뛰기</button>
+    </div>
+</div>
 
             <!-- History Modal -->
             <div id="history-modal" class="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center hidden z-50 p-4 modal-enter">
@@ -1299,34 +1306,42 @@ function getSmartAssistanceGoal_Aegis_v16(exercise, targetWeek, targetCycleId) {
         form.querySelector('#inbody-date').valueAsDate = new Date();
     }
     
-    function startTimer(exercise, phase) {
-        if (appState.timerInterval) {
-            clearInterval(appState.timerInterval);
-        }
-        const duration = getRestTime(exercise, phase);
-        let remaining = duration;
-        const modal = document.getElementById('timer-modal');
-        document.getElementById('timer-exercise-name').textContent = exercise.name;
-        const displayEl = document.getElementById('timer-display');
-        displayEl.textContent = formatTime(remaining);
-        toggleModal('timer-modal', true);
-
-        appState.timerInterval = setInterval(() => {
-            remaining--;
-            displayEl.textContent = formatTime(remaining);
-            if (remaining <= 0) {
-                clearInterval(appState.timerInterval);
-                appState.timerInterval = null;
-                if (navigator.vibrate) navigator.vibrate([150, 100, 150]);
-                playBeepSound();
-                document.body.style.animation = 'flash 0.5s 2';
-                setTimeout(() => {
-                    toggleModal('timer-modal', false);
-                    document.body.style.animation = '';
-                }, 1000);
-            }
-        }, 1000);
+function startTimer(exercise, phase) {
+    if (appState.timerInterval) {
+        clearInterval(appState.timerInterval);
     }
+    const duration = getRestTime(exercise, phase);
+    let remaining = duration;
+
+    // ▼▼▼ 이 부분이 변경됩니다 ▼▼▼
+    const banner = document.getElementById('timer-banner');
+    document.getElementById('banner-timer-exercise-name').textContent = exercise.name;
+    const displayEl = document.getElementById('banner-timer-display');
+
+    displayEl.textContent = formatTime(remaining);
+    banner.classList.remove('hidden');
+    setTimeout(() => banner.classList.add('show'), 10); // 애니메이션을 위해 약간의 딜레이 추가
+    // ▲▲▲ 여기까지 변경 ▲▲▲
+
+    appState.timerInterval = setInterval(() => {
+        remaining--;
+        displayEl.textContent = formatTime(remaining);
+        if (remaining <= 0) {
+            clearInterval(appState.timerInterval);
+            appState.timerInterval = null;
+            if (navigator.vibrate) navigator.vibrate([150, 100, 150]);
+            playBeepSound();
+            document.body.style.animation = 'flash 0.5s 2';
+            setTimeout(() => {
+                // ▼▼▼ 이 부분도 변경됩니다 ▼▼▼
+                banner.classList.remove('show'); // 배너를 아래로 내리는 애니메이션
+                setTimeout(() => banner.classList.add('hidden'), 500); // 애니메이션 후 숨김 처리
+                // ▲▲▲ 여기까지 변경 ▲▲▲
+                document.body.style.animation = '';
+            }, 1000);
+        }
+    }, 1000);
+}
 
     function initApp() {
         appState.dom = {
@@ -1507,13 +1522,15 @@ document.getElementById('weekly-instagram-png')?.addEventListener('click', downl
                   break;
                 }
                 case 'confirm-import-button': handleImport(); break;
-                 case 'skip-timer-btn':
-                    if (appState.timerInterval) {
-                        clearInterval(appState.timerInterval);
-                        appState.timerInterval = null;
-                        toggleModal('timer-modal', false);
-                    }
-                    break;
+             case 'banner-skip-timer-btn':
+                if (appState.timerInterval) {
+                    clearInterval(appState.timerInterval);
+                    appState.timerInterval = null;
+                    const banner = document.getElementById('timer-banner');
+                    banner.classList.remove('show');
+                    setTimeout(() => banner.classList.add('hidden'), 500);
+                }
+                break;
             }
         });
         
