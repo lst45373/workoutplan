@@ -482,6 +482,38 @@
     };
     
     // --- APP STATE & DOM ELEMENTS ---
+// ▼▼▼ 화면 꺼짐 방지(Wake Lock) 기능 코드 ▼▼▼
+let wakeLock = null;
+
+// Function to acquire the wake lock
+const acquireWakeLock = async () => {
+    if ('wakeLock' in navigator) {
+        try {
+            wakeLock = await navigator.wakeLock.request('screen');
+            console.log('화면 꺼짐 방지 기능이 활성화되었습니다.');
+
+            // The lock can be released by the system, so listen for release events
+            wakeLock.addEventListener('release', () => {
+                console.log('화면 꺼짐 방지 기능이 시스템에 의해 해제되었습니다.');
+                wakeLock = null;
+            });
+        } catch (err) {
+            console.error(`${err.name}, ${err.message}`);
+        }
+    } else {
+        console.log('이 브라우저에서는 화면 꺼짐 방지 기능이 지원되지 않습니다.');
+    }
+};
+
+// Function to release the wake lock
+const releaseWakeLock = async () => {
+    if (wakeLock !== null) {
+        await wakeLock.release();
+        wakeLock = null;
+        console.log('화면 꺼짐 방지 기능이 비활성화되었습니다.');
+    }
+};
+// ▲▲▲ /화면 꺼짐 방지(Wake Lock) 기능 코드 ▲▲▲
     let appState = {
         currentWeek: 1, currentDay: 'pull', currentCycleId: 1,
         allRecords: {}, inbodyRecords: [], charts: {}, dom: {},
@@ -1545,7 +1577,23 @@ document.getElementById('weekly-instagram-png')?.addEventListener('click', downl
         updateActiveButtons();
         renderWorkout();
         showView('today');
+        // ▼▼▼ Wake Lock 자동 실행/해제 코드 ▼▼▼
+        // 사용자가 화면을 처음 터치하면 화면 꺼짐 방지 기능 활성화
+        document.body.addEventListener('click', acquireWakeLock, { once: true });
+        document.body.addEventListener('touchstart', acquireWakeLock, { once: true });
+
+        // 페이지가 보이지 않게 되면(다른 앱 전환, 홈 화면 등) 자동으로 기능 해제
+        document.addEventListener('visibilitychange', () => {
+            if (wakeLock !== null && document.visibilityState === 'hidden') {
+                releaseWakeLock();
+            } else if (document.visibilityState === 'visible') {
+                // 다시 앱으로 돌아왔을 때 기능 재활성화
+                acquireWakeLock();
+            }
+        });
+        // ▲▲▲ /Wake Lock 자동 실행/해제 코드 ▲▲▲
     }
+ 
 
     function toggleModal(modalId, show) {
         const modal = document.getElementById(modalId);
