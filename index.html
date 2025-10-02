@@ -1119,7 +1119,9 @@ function getSmartAssistanceGoal_Aegis_v16(exercise, targetWeek, targetCycleId) {
         const selector = document.getElementById('exercise-selector');
         const exerciseSet = new Set();
         Object.values(workoutPlan).forEach(w => Object.values(w).forEach(d => d.routine.forEach(ex => exerciseSet.add(ex.name))));
-        selector.innerHTML = '<option value="">-- 운동 선택 --</option>' + [...exerciseSet].sort().map(name => `<option value="${name}">${name}</option>`).join('');
+        const list = Array.from(exerciseSet).sort();
+        selector.innerHTML = '<option value="">-- 운동 선택 --</option>' + list.map(name => `<option value="${name}">${name}</option>`).join('');
+        
     }
 
     function handleExerciseSelection() {
@@ -1152,7 +1154,7 @@ function getSmartAssistanceGoal_Aegis_v16(exercise, targetWeek, targetCycleId) {
         noRecords.classList.add('hidden');
         document.getElementById('chart-title').textContent = `${exerciseName} 중량 변화 추이 (Top Set 기준)`;
         
-        const chartRecords = [...allMatchingRecords].reverse(); // For chart, reverse to show chronological order
+        const chartRecords = allMatchingRecords.slice().reverse(); // For chart, reverse to show chronological order
         const labels = chartRecords.map(d => `C${d.cycleId || 1}-${d.week}주`);
         const topSetData = chartRecords.map(d => pickStrongestSet(d.sets)?.weight || null);
         const e1RMData = chartRecords.map(d => pickStrongestSet(d.sets)?.e1rm || null);
@@ -1337,7 +1339,7 @@ function getSmartAssistanceGoal_Aegis_v16(exercise, targetWeek, targetCycleId) {
         if (appState.charts[canvasId]) appState.charts[canvasId].destroy();
         const ctx = document.getElementById(canvasId)?.getContext('2d');
         if (ctx) {
-            config.options = { ...config.options, responsive: true, maintainAspectRatio: false };
+            config.options = { ...(config.options || {}), responsive: true, maintainAspectRatio: false };
             appState.charts[canvasId] = new Chart(ctx, config);
         }
     }
@@ -1880,7 +1882,7 @@ function exportCurrentWeekToCSV() {
     });
   }
 
-  const list = [...byKey.values()].sort((a,b)=>(b.kgMax-a.kgMax)||(b.sets-a.sets)||(b.reps-a.reps));
+  const list = Array.from(byKey.values()).sort((a,b)=>(b.kgMax-a.kgMax)||(b.sets-a.sets)||(b.reps-a.reps));
   list.forEach(it => rows.push([it.cat, it.name, it.kgMax, it.reps, it.sets]));
 
   const csv = rows.map(r => r.map(x => `"${String(x).replace(/"/g,'""')}"`).join(",")).join("\n");
@@ -2011,4 +2013,5 @@ async function downloadInstagramCardPNG() {
 </script>
 </body>
 </html>
+
 
