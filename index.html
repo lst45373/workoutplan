@@ -932,7 +932,6 @@ function getSmartAssistanceGoal_Aegis_v16(exercise, targetWeek, targetCycleId) {
     return newGoal;
 }
 
-    // --- RENDER & UI FUNCTIONS ---
 // --- RENDER & UI FUNCTIONS ---
     function renderWorkout() {
         const { currentWeek, currentDay, displayCycleId } = appState;
@@ -941,7 +940,7 @@ function getSmartAssistanceGoal_Aegis_v16(exercise, targetWeek, targetCycleId) {
         const dom = appState.dom;
         dom.workoutTitle.textContent = `${currentWeek}주차: ${originalWeekData[currentDay]?.name || '휴식일'}`;
         
-        // 이전에 문제가 되었던 부분을 포함하여 전체 함수를 수정했습니다.
+        // [버그 수정] 잘못된 문법을 올바르게 수정했습니다.
         dom.cycleInfoBadge.textContent = `(사이클 ${displayCycleId}: ${(displayCycleId % 2 === 1) ? '블록 주기화' : '주간 파동형 주기화'})`;
         
         dom.workoutPhaseBadge.className = `px-4 py-1.5 text-base font-semibold rounded-full self-start ${phaseInfo.colors[phase]}`;
@@ -1411,7 +1410,7 @@ function startTimer(exercise, phase) {
 }
 // ▲▲▲ /사이클 네비게이션 업데이트 함수 ▲▲▲
 
-    function initApp() {
+function initApp() {
         appState.dom = {
             mainTabs: document.getElementById('main-tabs'),
             weekSelector: document.getElementById('week-selector'),
@@ -1442,14 +1441,14 @@ function startTimer(exercise, phase) {
         appState.dom.weekSelector.innerHTML = Array.from({length: 13}, (_, i) => `<button data-week="${i + 1}" class="p-2 px-4 rounded-lg font-semibold text-sm sm:text-base transition duration-200 hover:bg-slate-200 flex-grow text-center shadow-md">${i + 1}주</button>`).join('');
         
         appState.dom.mainTabs.addEventListener('click', e => e.target.dataset.view && showView(e.target.dataset.view));
-        // ▼▼▼ 사이클 버튼 이벤트 리스너 추가 ▼▼▼
+        
         document.getElementById('prev-cycle-btn').addEventListener('click', () => {
             if (appState.displayCycleId > 1) {
                 appState.displayCycleId--;
                 renderWorkout();
                 updateCycleNav();
             }
-});
+        });
 
         document.getElementById('next-cycle-btn').addEventListener('click', () => {
             if (appState.displayCycleId < appState.currentCycleId) {
@@ -1457,8 +1456,7 @@ function startTimer(exercise, phase) {
                 renderWorkout();
                 updateCycleNav();
             }
-});
-// ▲▲▲ /사이클 버튼 이벤트 리스너 추가 ▲▲▲
+        });
 
         appState.dom.weekSelector.addEventListener('click', e => {
             if(e.target.dataset.week) {
@@ -1556,6 +1554,8 @@ function startTimer(exercise, phase) {
                 }
             );
         });
+        
+        // [버그 수정] '새로운 사이클 시작' 버튼의 로직을 올바르게 수정했습니다.
         appState.dom.newCycleButton.addEventListener('click', () => {
              showConfirmModal(
                 '새로운 사이클 시작', 
@@ -1563,10 +1563,10 @@ function startTimer(exercise, phase) {
                 'bg-blue-600 hover:bg-blue-700',
                 () => {
                     appState.currentCycleId++;
-                    appState.displayCycleId = appState.currentCycleId; 
+                    appState.displayCycleId = appState.currentCycleId; // displayCycleId도 현재 사이클로 동기화
                     appState.currentWeek = 1; 
                     appState.currentDay = 'pull';
-                    localStorage.setItem('workoutCycleInfo', JSON.stringify({ cycleId: appState.displayCycleId }));
+                    localStorage.setItem('workoutCycleInfo', JSON.stringify({ cycleId: appState.currentCycleId }));
                     localStorage.setItem('workoutState', JSON.stringify({ currentWeek: appState.currentWeek, currentDay: appState.currentDay }));
                     loadState(); 
                     renderWorkout(); 
@@ -1576,10 +1576,11 @@ function startTimer(exercise, phase) {
                 }
             );
         });
+
         appState.dom.exportDataButton.addEventListener('click', handleExport);
-document.getElementById('weekly-export-csv')?.addEventListener('click', exportCurrentWeekToCSV);
-document.getElementById('weekly-share-summary')?.addEventListener('click', shareWeeklySummary);
-document.getElementById('weekly-instagram-png')?.addEventListener('click', downloadInstagramCardPNG);
+        document.getElementById('weekly-export-csv')?.addEventListener('click', exportCurrentWeekToCSV);
+        document.getElementById('weekly-share-summary')?.addEventListener('click', shareWeeklySummary);
+        document.getElementById('weekly-instagram-png')?.addEventListener('click', downloadInstagramCardPNG);
         appState.dom.importDataButton.addEventListener('click', () => toggleModal('import-modal', true));
 
         appState.dom.modalContainer.addEventListener('click', (e) => {
@@ -1609,15 +1610,15 @@ document.getElementById('weekly-instagram-png')?.addEventListener('click', downl
                   break;
                 }
                 case 'confirm-import-button': handleImport(); break;
-             case 'banner-skip-timer-btn':
-                if (appState.timerInterval) {
-                    clearInterval(appState.timerInterval);
-                    appState.timerInterval = null;
-                    const banner = document.getElementById('timer-banner');
-                    banner.classList.remove('show');
-                    setTimeout(() => banner.classList.add('hidden'), 500);
-                }
-                break;
+                 case 'banner-skip-timer-btn':
+                    if (appState.timerInterval) {
+                        clearInterval(appState.timerInterval);
+                        appState.timerInterval = null;
+                        const banner = document.getElementById('timer-banner');
+                        banner.classList.remove('show');
+                        setTimeout(() => banner.classList.add('hidden'), 500);
+                    }
+                    break;
             }
         });
         
@@ -1633,21 +1634,17 @@ document.getElementById('weekly-instagram-png')?.addEventListener('click', downl
         renderWorkout();
         showView('today');
         updateCycleNav();
-        // ▼▼▼ Wake Lock 자동 실행/해제 코드 ▼▼▼
-        // 사용자가 화면을 처음 터치하면 화면 꺼짐 방지 기능 활성화
+        
         document.body.addEventListener('click', acquireWakeLock, { once: true });
         document.body.addEventListener('touchstart', acquireWakeLock, { once: true });
 
-        // 페이지가 보이지 않게 되면(다른 앱 전환, 홈 화면 등) 자동으로 기능 해제
         document.addEventListener('visibilitychange', () => {
             if (wakeLock !== null && document.visibilityState === 'hidden') {
                 releaseWakeLock();
             } else if (document.visibilityState === 'visible') {
-                // 다시 앱으로 돌아왔을 때 기능 재활성화
                 acquireWakeLock();
             }
         });
-        // ▲▲▲ /Wake Lock 자동 실행/해제 코드 ▲▲▲
     }
  
 
@@ -2014,3 +2011,4 @@ async function downloadInstagramCardPNG() {
 </script>
 </body>
 </html>
+
