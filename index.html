@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>26주 장기 성장 프로그램 | 인터랙티브 플래너 (v2.1.1)</title>
+    <title>26주 장기 성장 프로그램 | 인터랙티브 플래너 (v2.2.1)</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
@@ -66,8 +66,20 @@
                     </section>
                     <section id="workout-display">
                         <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center mb-4 gap-3">
-                             <h2 id="workout-title" class="text-2xl sm:text-3xl font-bold text-slate-900"></h2>
-                             <span id="cycle-info-badge" class="text-base font-medium text-slate-500 self-start sm:self-center whitespace-nowrap"></span>
+                            <h2 id="workout-title" class="text-2xl sm:text-3xl font-bold text-slate-900"></h2>
+                            <div class="flex items-center gap-3 bg-slate-200 rounded-full p-1 self-start sm:self-center">
+                                <button id="prev-cycle-btn" class="p-2 rounded-full hover:bg-slate-300 transition disabled:opacity-50 disabled:cursor-not-allowed">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" class="bi bi-chevron-left" viewBox="0 0 16 16">
+                                        <path fill-rule="evenodd" d="M11.354 1.646a.5.5 0 0 1 0 .708L5.707 8l5.647 5.646a.5.5 0 0 1-.708.708l-6-6a.5.5 0 0 1 0-.708l6-6a.5.5 0 0 1 .708 0z"/>
+                                    </svg>
+                                </button>
+                                <span id="cycle-info-badge" class="text-base font-bold text-slate-700 self-center whitespace-nowrap px-2"></span>
+                                <button id="next-cycle-btn" class="p-2 rounded-full hover:bg-slate-300 transition disabled:opacity-50 disabled:cursor-not-allowed">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" class="bi bi-chevron-right" viewBox="0 0 16 16">
+                                        <path fill-rule="evenodd" d="M4.646 1.646a.5.5 0 0 1 .708 0l6 6a.5.5 0 0 1 0 .708l-6 6a.5.5 0 0 1-.708-.708L10.293 8 4.646 2.354a.5.5 0 0 1 0-.708z"/>
+                                    </svg>
+                                </button>
+                            </div>
                         </div>
                         <div class="flex items-center mb-4 gap-3">
                             <span id="workout-phase-badge" class="px-3 py-1 sm:px-4 sm:py-1.5 text-sm sm:text-base font-semibold rounded-full self-start"></span>
@@ -516,6 +528,7 @@ const releaseWakeLock = async () => {
 // ▲▲▲ /화면 꺼짐 방지(Wake Lock) 기능 코드 ▲▲▲
     let appState = {
         currentWeek: 1, currentDay: 'pull', currentCycleId: 1,
+        displayCycleId: 1,
         allRecords: {}, inbodyRecords: [], charts: {}, dom: {},
         currentRoutine: [],
         timerInterval: null
@@ -581,7 +594,7 @@ function getMainExerciseKeySet() {
 }    
     
 // === PPL TOP3 (내부 PPL 사용) — "메인" 운동만 집계 ===
-function getWeeklyPPLTop3(cycle = appState?.currentCycleId ?? 1,
+function getWeeklyPPLTop3(cycle = appState?.displayCycleId ?? 1,
                           week  = appState?.currentWeek ?? 1) {
   const buckets = { Push: new Map(), Pull: new Map(), Legs: new Map() };
   const MAIN = getMainExerciseKeySet(); // 메인 운동 키 집합
@@ -782,18 +795,22 @@ function drawTextWrap(ctx, text, x, y, maxWidth, lineHeight) {
 
         const sanitizedName = getSanitizedName(exercise);
         
-        const allPastRecords = (appState.allRecords[sanitizedName] || [])
-            .filter(r => (r.cycleId < cycleId || (r.cycleId === cycleId && r.week < week)));
+    const allPastRecords = (appState.allRecords[sanitizedName] || [])
+        .filter(r => (r.cycleId < cycleId || (r.cycleId === cycleId && r.week < week)));
 
-        let peakE1RM = 0;
-        if (allPastRecords.length > 0) {
-             allPastRecords.forEach(record => {
-                const strongestSet = pickStrongestSet(record.sets);
-                if (strongestSet.e1rm > peakE1RM) {
-                    peakE1RM = strongestSet.e1rm;
-                }
-            });
-        } else {
+    // BUG FIX: 항상 현재 사이클까지의 기록 중에서 최고 기록을 찾아야 함
+    const allRecordsThroughCurrent = (appState.allRecords[sanitizedName] || [])
+        .filter(r => (r.cycleId < appState.currentCycleId) || (r.cycleId === appState.currentCycleId && r.week <= appState.currentWeek));
+
+    let peakE1RM = 0;
+    if (allRecordsThroughCurrent.length > 0) { // <-- 이 부분을 수정하세요
+         allRecordsThroughCurrent.forEach(record => { // <-- 이 부분을 수정하세요
+            const strongestSet = pickStrongestSet(record.sets);
+            if (strongestSet.e1rm > peakE1RM) {
+                peakE1RM = strongestSet.e1rm;
+            }
+        });
+    } else {
             peakE1RM = calculateEpley1RM(exercise.baseTopSet, 6); // 기록 없을 시 초기값
         }
 
@@ -841,7 +858,7 @@ function getSmartAssistanceGoal_Aegis_v16(exercise, targetWeek, targetCycleId) {
 
     // 현재 계산 중인 목표 주차 및 사이클 ID (재귀 호출 시 사용)
     const week = targetWeek !== undefined ? targetWeek : appState.currentWeek;
-    const cycleId = targetCycleId !== undefined ? targetCycleId : appState.currentCycleId;
+    const cycleId = targetCycleId !== undefined ? targetCycleId : appState.displayCycleId;
 
     // 캐시 키 생성 및 확인
     const cacheKey = `${sanitizedName}-${cycleId}-${week}`;
@@ -916,13 +933,17 @@ function getSmartAssistanceGoal_Aegis_v16(exercise, targetWeek, targetCycleId) {
 }
 
     // --- RENDER & UI FUNCTIONS ---
+// --- RENDER & UI FUNCTIONS ---
     function renderWorkout() {
-        const { currentWeek, currentDay, currentCycleId } = appState;
-        const { phase, method, originalWeekData } = getWeekInfo(currentWeek, currentCycleId);
+        const { currentWeek, currentDay, displayCycleId } = appState;
+        const { phase, method, originalWeekData } = getWeekInfo(currentWeek, displayCycleId);
         
         const dom = appState.dom;
         dom.workoutTitle.textContent = `${currentWeek}주차: ${originalWeekData[currentDay]?.name || '휴식일'}`;
-        dom.cycleInfoBadge.textContent = `(사이클 ${currentCycleId}: ${(currentCycleId % 2 === 1) ? '블록 주기화' : '주간 파동형 주기화'})`;
+        
+        // 이전에 문제가 되었던 부분을 포함하여 전체 함수를 수정했습니다.
+        dom.cycleInfoBadge.textContent = `(사이클 ${displayCycleId}: ${(displayCycleId % 2 === 1) ? '블록 주기화' : '주간 파동형 주기화'})`;
+        
         dom.workoutPhaseBadge.className = `px-4 py-1.5 text-base font-semibold rounded-full self-start ${phaseInfo.colors[phase]}`;
         dom.workoutPhaseBadge.textContent = phase;
         dom.workoutPhaseDescription.textContent = phaseInfo.descriptions[phase];
@@ -930,7 +951,7 @@ function getSmartAssistanceGoal_Aegis_v16(exercise, targetWeek, targetCycleId) {
         dom.workoutList.innerHTML = '';
         const routine = JSON.parse(JSON.stringify(originalWeekData[currentDay]?.routine || []));
         
-        if (getWeekInfo(currentWeek, currentCycleId).type === 'C' && currentDay === 'push') {
+        if (getWeekInfo(currentWeek, displayCycleId).type === 'C' && currentDay === 'push') {
             const isStrengthPhase = (phase === '강화 주기');
             const strengthExercise = { type: '메인', name: '뉴텍 스탠딩 사이드 레터럴 레이즈', sets: '3~4세트', tip: '어깨 관절을 머신의 회전축에 맞추고, 한 손씩 수행하여 측면 삼각근을 완벽하게 고립합니다. 반대 손으로 몸을 지지하여 반동을 통제하세요.', staticGoal: '🔥 목표: 30kg x 10-15회.', movement_pattern: 'isolation_shoulder', increment: 10, alternatives: ['덤벨 사이드 레터럴 레이즈', '케이블 사이드 레터럴 레이즈']};
             const accumulationExercise = { type: '메인', name: '케이블 X-레이즈', sets: '3~4세트', tip: '측면 삼각근을 최대로 이완(Stretch)시켜 자극하는 것이 목표입니다. 케이블 풀리를 중간 높이에 맞추고, 발목 스트랩을 양 손목에 착용합니다. 벤치에 누워 반대편 케이블을 손목 스트랩에 교차하여 연결한 뒤, 팔꿈치를 살짝 구부린 상태를 유지하며 큰 원을 그리듯 팔을 벌려 측면 어깨가 최대로 늘어나는 것을 느끼세요.', staticGoal: '🔥 목표: 0kg x 12-15회.', movement_pattern: 'isolation_shoulder', increment: 2.5, alternatives: ['덤벨 사이드 레터럴 레이즈 (인클라인)', '케이블 Y-레이즈']};
@@ -943,6 +964,7 @@ function getSmartAssistanceGoal_Aegis_v16(exercise, targetWeek, targetCycleId) {
         
         appState.currentRoutine = routine; // Store current routine for timer logic
         if (!routine.length) { 
+            updateCycleNav(); // 루틴이 없어도 네비게이션은 업데이트
             return;
         }
 
@@ -966,7 +988,7 @@ function getSmartAssistanceGoal_Aegis_v16(exercise, targetWeek, targetCycleId) {
                 tipContent = originalExercise?.tip || "전략적 회복에 집중하세요.";
             } else {
                 if (exercise.type === '메인' && exercise.baseTopSet) {
-                    goalText = getMainGoalText(exercise, currentWeek, currentCycleId) || exercise.staticGoal || '';
+                    goalText = getMainGoalText(exercise, currentWeek, displayCycleId) || exercise.staticGoal || '';
                 } else if (exercise.type !== '웜업') {
                     goalText = getSmartAssistanceGoal_Aegis_v16(exercise);
                 } else {
@@ -996,7 +1018,7 @@ function getSmartAssistanceGoal_Aegis_v16(exercise, targetWeek, targetCycleId) {
                     <div class="flex justify-between items-center mt-3 gap-2">
                          <p class="text-sm font-semibold text-slate-500 flex-1 min-w-0">${methodText} &nbsp;&nbsp; | &nbsp;&nbsp; <span class="font-bold text-sky-700">${restText}</span></p>
                          <button data-action="view-history" data-exercise-name="${exercise.name}" class="p-2 text-slate-400 hover:text-blue-500 transition flex-shrink-0" title="과거 기록 보기">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" class="bi bi-table" viewBox="0 0 16 16">
+                            <svg xmlns="[http://www.w3.org/2000/svg](http://www.w3.org/2000/svg)" width="20" height="20" fill="currentColor" class="bi bi-table" viewBox="0 0 16 16">
                                 <path d="M0 2a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2V2zm15 2h-4v3h4V4zm0 4h-4v3h4V8zm0 4h-4v3h3a1 1 0 0 0 1-1v-2zm-5 3v-3H6v3h4zm-5 0v-3H1v2a1 1 0 0 0 1 1h3zm-4-4h4V8H1v3zm0-4h4V4H1v3zm5-3v3h4V4H6zm5 0v3h4V4h-4z"/>
                             </svg>
                          </button>
@@ -1008,10 +1030,12 @@ function getSmartAssistanceGoal_Aegis_v16(exercise, targetWeek, targetCycleId) {
             dom.workoutList.appendChild(card);
             
             const setsContainer = card.querySelector(`[data-container-for="${sanitizedName}"]`);
-            const lastRecord = (appState.allRecords[sanitizedName] || []).find(r => r.week === currentWeek && r.day === currentDay && r.cycleId === currentCycleId);
+            const lastRecord = (appState.allRecords[sanitizedName] || []).find(r => r.week === currentWeek && r.day === currentDay && r.cycleId === displayCycleId);
             const setsToRender = lastRecord?.sets || [{ weight: '', reps: '' }];
             setsToRender.forEach((set, i) => addSetRow(setsContainer, i + 1, set));
         });
+        
+        updateCycleNav();
     }
 
     function addSetRow(container, setNumber, setData = {weight: '', reps: ''}) {
@@ -1074,7 +1098,7 @@ function getSmartAssistanceGoal_Aegis_v16(exercise, targetWeek, targetCycleId) {
         const headers = ['주차', '월요일 (PULL)', '수요일 (PUSH)', '금요일 (LEG)', '주요 훈련 방식'];
         const dataRows = Array.from({length: 13}, (_, i) => {
             const week = i + 1;
-            const { phase, method, originalWeekData, type } = getWeekInfo(week, appState.currentCycleId);
+            const { phase, method, originalWeekData, type } = getWeekInfo(week, appState.displayCycleId);
             return [
                 `<span class="font-bold">${week}</span>`,
                 originalWeekData.pull?.name || `${type} 디로딩`,
@@ -1168,7 +1192,7 @@ function getSmartAssistanceGoal_Aegis_v16(exercise, targetWeek, targetCycleId) {
     
     function renderMovementPatternAnalysis() {
         const allRecords = appState.allRecords;
-        const cycleInfo = { cycleId: appState.currentCycleId };
+        const cycleInfo = { cycleId: appState.displayCycleId };
         
         const isBlock = (cycleInfo.cycleId % 2 === 1);
         const feedbackPeriodText = isBlock ? "최근 3주" : "최근 6주";
@@ -1303,6 +1327,9 @@ function getSmartAssistanceGoal_Aegis_v16(exercise, targetWeek, targetCycleId) {
         appState.currentWeek = savedState.currentWeek || 1;
         appState.currentDay = savedState.currentDay || 'pull';
         appState.currentCycleId = (JSON.parse(localStorage.getItem('workoutCycleInfo')) || { cycleId: 1 }).cycleId;
+
+        appState.displayCycleId = appState.currentCycleId; // <--- 이 줄을 추가하세요!
+
         appState.allRecords = JSON.parse(localStorage.getItem('workoutRecords')) || {};
         appState.inbodyRecords = JSON.parse(localStorage.getItem('inbodyRecords')) || [];
     }
@@ -1375,6 +1402,15 @@ function startTimer(exercise, phase) {
     }, 1000);
 }
 
+// ▼▼▼ 사이클 네비게이션 업데이트 함수 ▼▼▼
+    function updateCycleNav() {
+        const { displayCycleId, currentCycleId } = appState;
+            appState.dom.cycleInfoBadge.textContent = `사이클 ${displayCycleId}`;
+            document.getElementById('prev-cycle-btn').disabled = (displayCycleId <= 1);
+            document.getElementById('next-cycle-btn').disabled = (displayCycleId >= currentCycleId);
+}
+// ▲▲▲ /사이클 네비게이션 업데이트 함수 ▲▲▲
+
     function initApp() {
         appState.dom = {
             mainTabs: document.getElementById('main-tabs'),
@@ -1406,6 +1442,24 @@ function startTimer(exercise, phase) {
         appState.dom.weekSelector.innerHTML = Array.from({length: 13}, (_, i) => `<button data-week="${i + 1}" class="p-2 px-4 rounded-lg font-semibold text-sm sm:text-base transition duration-200 hover:bg-slate-200 flex-grow text-center shadow-md">${i + 1}주</button>`).join('');
         
         appState.dom.mainTabs.addEventListener('click', e => e.target.dataset.view && showView(e.target.dataset.view));
+        // ▼▼▼ 사이클 버튼 이벤트 리스너 추가 ▼▼▼
+        document.getElementById('prev-cycle-btn').addEventListener('click', () => {
+            if (appState.displayCycleId > 1) {
+                appState.displayCycleId--;
+                renderWorkout();
+                updateCycleNav();
+            }
+});
+
+        document.getElementById('next-cycle-btn').addEventListener('click', () => {
+            if (appState.displayCycleId < appState.currentCycleId) {
+                appState.displayCycleId++;
+                renderWorkout();
+                updateCycleNav();
+            }
+});
+// ▲▲▲ /사이클 버튼 이벤트 리스너 추가 ▲▲▲
+
         appState.dom.weekSelector.addEventListener('click', e => {
             if(e.target.dataset.week) {
                 appState.currentWeek = parseInt(e.target.dataset.week);
@@ -1457,7 +1511,7 @@ function startTimer(exercise, phase) {
                 if(startTimerFlag) {
                     const exercise = appState.currentRoutine.find(ex => getSanitizedName(ex) === sanitizedName);
                     if (exercise) {
-                        const { phase } = getWeekInfo(appState.currentWeek, appState.currentCycleId);
+                        const { phase } = getWeekInfo(appState.currentWeek, appState.displayCycleId);
                         startTimer(exercise, phase);
                     }
                 }
@@ -1508,10 +1562,11 @@ function startTimer(exercise, phase) {
                 '1주차부터 새로운 13주 훈련 계획이 시작됩니다. 기존 기록은 보존됩니다.',
                 'bg-blue-600 hover:bg-blue-700',
                 () => {
-                    appState.currentCycleId++; 
+                    appState.currentCycleId++;
+                    appState.displayCycleId = appState.currentCycleId; 
                     appState.currentWeek = 1; 
                     appState.currentDay = 'pull';
-                    localStorage.setItem('workoutCycleInfo', JSON.stringify({ cycleId: appState.currentCycleId }));
+                    localStorage.setItem('workoutCycleInfo', JSON.stringify({ cycleId: appState.displayCycleId }));
                     localStorage.setItem('workoutState', JSON.stringify({ currentWeek: appState.currentWeek, currentDay: appState.currentDay }));
                     loadState(); 
                     renderWorkout(); 
@@ -1577,6 +1632,7 @@ document.getElementById('weekly-instagram-png')?.addEventListener('click', downl
         updateActiveButtons();
         renderWorkout();
         showView('today');
+        updateCycleNav();
         // ▼▼▼ Wake Lock 자동 실행/해제 코드 ▼▼▼
         // 사용자가 화면을 처음 터치하면 화면 꺼짐 방지 기능 활성화
         document.body.addEventListener('click', acquireWakeLock, { once: true });
@@ -1958,15 +2014,3 @@ async function downloadInstagramCardPNG() {
 </script>
 </body>
 </html>
-
-
-
-
-
-
-
-
-
-
-
-
