@@ -1406,7 +1406,8 @@ function startTimer(exercise, phase) {
 // ▼▼▼ 사이클 네비게이션 업데이트 함수 ▼▼▼
     function updateCycleNav() {
         const { displayCycleId, currentCycleId } = appState;
-            appState.dom.cycleInfoBadge.textContent = `사이클 ${displayCycleId}`;
+        const mode = (displayCycleId % 2 === 1) ? '블록 주기화' : '주간 파동형 주기화';
+            appState.dom.cycleInfoBadge.textContent = `(사이클 ${displayCycleId}: ${mode})`;
             document.getElementById('prev-cycle-btn').disabled = (displayCycleId <= 1);
             document.getElementById('next-cycle-btn').disabled = (displayCycleId >= currentCycleId);
 }
@@ -2013,5 +2014,6 @@ async function downloadInstagramCardPNG() {
 </script>
 </body>
 </html>
+
 
 
