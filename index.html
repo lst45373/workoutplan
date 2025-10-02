@@ -1321,7 +1321,7 @@ function getSmartAssistanceGoal_Aegis_v16(exercise, targetWeek, targetCycleId) {
             else appState.allRecords[sanitizedName].push(newRecord);
         }
         localStorage.setItem('workoutRecords', JSON.stringify(appState.allRecords));
-        aegisCache.clear();
+        if (typeof aegisCache?.clear === 'function') aegisCache.clear();
     }
 
     function loadState() {
@@ -2015,6 +2015,7 @@ async function downloadInstagramCardPNG() {
 </script>
 </body>
 </html>
+
 
 
 
