@@ -900,7 +900,7 @@ function getSmartAssistanceGoal_Aegis_v16(exercise, targetWeek, targetCycleId) {
 
     // --- 감량 및 증량 조건 판단 ---
     const qualityFail = performedSets.filter(s => s.weight < minWeightGoal).length > performedSets.length / 2;
-    const repsFail = performedSets.some(s => s.weight >= minWeightGoal && s.reps < minRepsGoal);
+    const repsFail = performedSets.slice(0, minSetsGoal).some(s => s.weight >= minWeightGoal && s.reps < minRepsGoal);
     const performedVolume = performedSets.reduce((sum, set) => sum + (set.weight * set.reps), 0);
     const minTargetVolume = minWeightGoal * minRepsGoal * minSetsGoal;
     const volumeFail = performedVolume < minTargetVolume;
@@ -2015,6 +2015,7 @@ async function downloadInstagramCardPNG() {
 </script>
 </body>
 </html>
+
 
 
 
