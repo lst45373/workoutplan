@@ -340,16 +340,16 @@
             </div>
 
             <!-- Timer Modal -->
-            <div id="timer-banner" class="fixed bottom-0 left-0 right-0 bg-slate-800 text-white p-4 shadow-lg transform translate-y-full transition-transform duration-500 ease-in-out z-40 hidden">
-    <div class="container mx-auto max-w-7xl flex items-center justify-between gap-4">
-        <div class="flex-grow">
-            <p id="banner-timer-exercise-name" class="font-bold text-base sm:text-lg truncate"></p>
-            <p class="text-sm text-slate-300">휴식 시간</p>
+    <div id="timer-banner" class="fixed bottom-0 left-0 right-0 bg-slate-800 text-white p-4 shadow-lg transform translate-y-full transition-transform duration-500 ease-in-out z-40 hidden">
+        <div class="container mx-auto max-w-7xl flex items-center justify-between gap-4">
+            <div class="flex-grow min-w-0"> <!-- 부모 요소에 min-w-0 추가하여 자식의 truncate가 잘 동작하도록 합니다 -->
+                <p id="banner-timer-exercise-name" class="font-bold text-base sm:text-lg truncate"></p> <!-- 여기에 'truncate' 클래스를 추가했습니다 -->
+                <p class="text-sm text-slate-300">휴식 시간</p>
+            </div>
+                <div id="banner-timer-display" class="font-mono font-bold text-4xl sm:text-5xl flex-shrink-0" style="font-variant-numeric: tabular-nums;">00:00</div>
+            <button id="banner-skip-timer-btn" class="bg-slate-600 hover:bg-slate-500 font-bold py-2 px-4 rounded-lg transition text-sm sm:text-base flex-shrink-0">건너뛰기</button>
+            </div>
         </div>
-        <div id="banner-timer-display" class="font-mono font-bold text-4xl sm:text-5xl" style="font-variant-numeric: tabular-nums;">00:00</div>
-        <button id="banner-skip-timer-btn" class="bg-slate-600 hover:bg-slate-500 font-bold py-2 px-4 rounded-lg transition text-sm sm:text-base">건너뛰기</button>
-    </div>
-</div>
 
             <!-- History Modal -->
             <div id="history-modal" class="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center hidden z-50 p-4 modal-enter">
@@ -2015,6 +2015,7 @@ async function downloadInstagramCardPNG() {
 </script>
 </body>
 </html>
+
 
 
 
