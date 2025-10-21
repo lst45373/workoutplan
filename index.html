@@ -953,7 +953,7 @@ function getSmartAssistanceGoal_Aegis_v16(exercise, targetWeek, targetCycleId) {
         if (getWeekInfo(currentWeek, displayCycleId).type === 'C' && currentDay === 'push') {
             const isStrengthPhase = (phase === '강화 주기');
             const strengthExercise = { type: '보조', name: '뉴텍 스탠딩 사이드 레터럴 레이즈', sets: '3~4세트', tip: '어깨 관절을 머신의 회전축에 맞추고, 한 손씩 수행하여 측면 삼각근을 완벽하게 고립합니다. 반대 손으로 몸을 지지하여 반동을 통제하세요.', staticGoal: '🔥 목표: 30kg x 10-15회.', movement_pattern: 'isolation_shoulder', increment: 10, alternatives: ['덤벨 사이드 레터럴 레이즈', '케이블 사이드 레터럴 레이즈']};
-            const accumulationExercise = { type: '보', name: '케이블 X-레이즈', sets: '3~4세트', tip: '측면 삼각근을 최대로 이완(Stretch)시켜 자극하는 것이 목표입니다. 케이블 풀리를 중간 높이에 맞추고, 발목 스트랩을 양 손목에 착용합니다. 벤치에 누워 반대편 케이블을 손목 스트랩에 교차하여 연결한 뒤, 팔꿈치를 살짝 구부린 상태를 유지하며 큰 원을 그리듯 팔을 벌려 측면 어깨가 최대로 늘어나는 것을 느끼세요.', staticGoal: '🔥 목표: 0kg x 12-15회.', movement_pattern: 'isolation_shoulder', increment: 2.5, alternatives: ['덤벨 사이드 레터럴 레이즈 (인클라인)', '케이블 Y-레이즈']};
+            const accumulationExercise = { type: '보조', name: '케이블 X-레이즈', sets: '3~4세트', tip: '측면 삼각근을 최대로 이완(Stretch)시켜 자극하는 것이 목표입니다. 케이블 풀리를 중간 높이에 맞추고, 발목 스트랩을 양 손목에 착용합니다. 벤치에 누워 반대편 케이블을 손목 스트랩에 교차하여 연결한 뒤, 팔꿈치를 살짝 구부린 상태를 유지하며 큰 원을 그리듯 팔을 벌려 측면 어깨가 최대로 늘어나는 것을 느끼세요.', staticGoal: '🔥 목표: 0kg x 12-15회.', movement_pattern: 'isolation_shoulder', increment: 2.5, alternatives: ['덤벨 사이드 레터럴 레이즈 (인클라인)', '케이블 Y-레이즈']};
             const dynamicExercise = isStrengthPhase ? strengthExercise : accumulationExercise;
             const targetIndex = routine.findIndex(ex => ex.name === '사이드 래터럴 레이즈 머신');
             if (targetIndex !== -1) {
@@ -2015,6 +2015,7 @@ async function downloadInstagramCardPNG() {
 </script>
 </body>
 </html>
+
 
 
 
