@@ -803,16 +803,16 @@ function drawTextWrap(ctx, text, x, y, maxWidth, lineHeight) {
         .filter(r => (r.cycleId < appState.currentCycleId) || (r.cycleId === appState.currentCycleId && r.week <= appState.currentWeek));
 
     let peakE1RM = 0;
-    if (allRecordsThroughCurrent.length > 0) { // <-- 이 부분을 수정하세요
-         allRecordsThroughCurrent.forEach(record => { // <-- 이 부분을 수정하세요
-            const strongestSet = pickStrongestSet(record.sets);
-            if (strongestSet.e1rm > peakE1RM) {
-                peakE1RM = strongestSet.e1rm;
-            }
-        });
-    } else {
-            peakE1RM = calculateEpley1RM(exercise.baseTopSet, 6); // 기록 없을 시 초기값
-        }
+    if (allPastRecords.length > 0) {
+         allPastRecords.forEach(record => {
+            const strongestSet = pickStrongestSet(record.sets);
+            if (strongestSet.e1rm > peakE1RM) {
+                peakE1RM = strongestSet.e1rm;
+            }
+        });
+    } else {
+            peakE1RM = calculateEpley1RM(exercise.baseTopSet, 6); // 기록 없을 시 초기값
+        }
 
         let lastTopSet = { weight: 0, reps: 0 };
         const lastStrengthRecord = allPastRecords
@@ -2015,6 +2015,7 @@ async function downloadInstagramCardPNG() {
 </script>
 </body>
 </html>
+
 
 
 
