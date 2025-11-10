@@ -493,7 +493,7 @@
         }
     };
     
-    // --- APP STATE & DOM ELEMENTS ---
+// --- APP STATE & DOM ELEMENTS ---
 // ▼▼▼ 화면 꺼짐 방지(Wake Lock) 기능 코드 ▼▼▼
 let wakeLock = null;
 
@@ -553,19 +553,49 @@ const releaseWakeLock = async () => {
         return weight * (1 + reps / 30);
     };
 
-    const parseWeightRange = (text) => {
-        if (!text) return null;
-        const kg = text.match(/([\d.]+)(?:-([\d.]+))?\s*kg/i);
-        const lbs = text.match(/([\d.]+)(?:-([\d.]+))?\s*(?:lbs|pounds)/i);
-        if (kg) return { unit: 'kg', min: parseFloat(kg[1]), max: parseFloat(kg[2] || kg[1]) };
-        if (lbs) {
-            const toKg = (x) => Math.round(x * 0.45359237 * 2) / 2; // 0.5kg 단위 반올림
-            const min = toKg(parseFloat(lbs[1]));
-            const max = toKg(parseFloat(lbs[2] || lbs[1]));
-            return { unit: 'kg', min, max };
+const parseWeightRange = (text) => {
+        if (!text) return null;
+        const kg = text.match(/([\d.]+)(?:-([\d.]+))?\s*kg/i);
+        const lbs = text.match(/([\d.]+)(?:-([\d.]+))?\s*(?:lbs|pounds)/i);
+        const isBodyweight = /맨몸|bodyweight/i.test(text);
+
+        if (kg) {
+            let minKg = parseFloat(kg[1]);
+            let maxKg = parseFloat(kg[2] || kg[1]);
+            // "맨몸 또는 10kg" 같은 경우
+            if (isBodyweight) {
+                // "10kg 또는 맨몸"일 수도 있으니, 둘 중 작은 값을 min으로.
+                minKg = Math.min(minKg, 0); 
+                // "맨몸"만 있고 kg가 0이면, max도 0으로 (e.g. 0kg)
+                if (maxKg === 0) minKg = 0; 
+                else if (minKg === 0) maxKg = Math.max(maxKg, parseFloat(kg[1])); // 0과 10 중 큰 값을 max로
+            }
+            // "10-0kg" 같은 잘못된 입력을 바로잡음
+            if (minKg > maxKg) maxKg = minKg; 
+
+            return { unit: 'kg', min: minKg, max: maxKg };
         }
-        return null;
-    };
+        if (lbs) {
+            const toKg = (x) => Math.round(x * 0.45359237 * 2) / 2;
+            let minLbs = parseFloat(lbs[1]);
+            let maxLbs = parseFloat(lbs[2] || lbs[1]);
+            if (isBodyweight) {
+                minLbs = Math.min(minLbs, 0);
+                if (maxLbs === 0) minLbs = 0;
+                else if (minLbs === 0) maxLbs = Math.max(maxLbs, parseFloat(lbs[1]));
+            }
+            if (minLbs > maxLbs) maxLbs = minLbs;
+            
+            const min = toKg(minLbs);
+            const max = toKg(maxLbs);
+            return { unit: 'kg', min, max };
+        }
+        // "맨몸 x 15-20회"처럼 무게가 아예 없는 경우
+        if (isBodyweight) {
+            return { unit: 'kg', min: 0, max: 0 };
+        }
+        return null;
+    };
 
     const pickStrongestSet = (sets) => {
         if (!sets || sets.length === 0) return { weight: 0, reps: 0, e1rm: 0 };
@@ -916,16 +946,26 @@ function getSmartAssistanceGoal_Aegis_v16(exercise, targetWeek, targetCycleId) {
         const weightText = newMin === newMax ? `${newMin}kg` : `${newMin}-${newMax}kg`;
         newGoal = historicGoal.replace(/([\d.]+)(?:-([\d.]+))?\s*(kg|lbs)/i, weightText);
     } else {
-        // 증량 조건 확인
-        const didMaxSets = performedSets.length >= maxSetsGoal;
-        const allSetsPerfect = performedSets.every(s => s.weight >= maxWeightGoal && s.reps >= maxRepsGoal);
-        if (didMaxSets && allSetsPerfect) {
-            let newMin = Math.max(0, roundToNearest2point5(minWeightGoal + increment));
-            let newMax = Math.max(0, roundToNearest2point5(maxWeightGoal + increment));
-            const weightText = newMin === newMax ? `${newMin}kg` : `${newMin}-${newMax}kg`;
-            newGoal = historicGoal.replace(/([\d.]+)(?:-([\d.]+))?\s*(kg|lbs)/i, weightText);
-        }
-    }
+        // 증량 조건 확인
+        const didMaxSets = performedSets.length >= maxSetsGoal;
+        const allSetsPerfect = performedSets.every(s => s.weight >= maxWeightGoal && s.reps >= maxRepsGoal); // 핵심 성공 조건 (유지)
+        if (didMaxSets && allSetsPerfect) {
+            let newMin = Math.max(0, roundToNearest2point5(minWeightGoal + increment));
+            let newMax = Math.max(0, roundToNearest2point5(maxWeightGoal + increment));
+
+            // ▼▼▼ [버그 수정] 증량 시 0kg 처리 로직 추가 ▼▼▼
+            if (minWeightGoal === 0) {
+                // min이 0이었던 경우 (0-0kg, 0-10kg), 증량 시 min/max를 (max + increment)로 통일
+                newMin = roundToNearest2point5(maxWeightGoal + increment);
+                newMax = newMin; // 범위를 없애고 단일 무게로 설정
+            }
+            // ▲▲▲ [버그 수정] 여기까지 ▲▲▲
+
+            const weightText = newMin === newMax ? `${newMin}kg` : `${newMin}-${newMax}kg`;
+            // "맨몸 또는 " 텍스트를 제거하여 깔끔한 kg 목표로 변경
+            newGoal = historicGoal.replace(/([\d.]+)(?:-([\d.]+))?\s*(kg|lbs)/i, weightText).replace(/맨몸 또는 /i, '');
+        }
+    }
 
     // 계산된 최종 목표를 캐시에 저장하고 반환
     aegisCache.set(cacheKey, newGoal);
@@ -2015,6 +2055,7 @@ async function downloadInstagramCardPNG() {
 </script>
 </body>
 </html>
+
 
 
 
