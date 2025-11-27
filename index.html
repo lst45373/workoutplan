@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>26주 장기 성장 프로그램 | 인터랙티브 플래너 (v2.5.5)</title>
+    <title>26주 장기 성장 프로그램 | 인터랙티브 플래너 (v2.2.1)</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
@@ -531,17 +531,12 @@ const releaseWakeLock = async () => {
         displayCycleId: 1,
         allRecords: {}, inbodyRecords: [], charts: {}, dom: {},
         currentRoutine: [],
-        timerInterval: null,
-        exerciseSettings: {}
+        timerInterval: null
     };
 
     // --- UTILITY FUNCTIONS ---
     const getSanitizedName = (ex) => (ex.name + (ex.type || '')).replace(/\s/g, '').replace(/[^a-zA-Z0-9가-힣]/g, '');
     const debounce = (func, wait) => { let t; return (...a) => { clearTimeout(t); t = setTimeout(() => func.apply(this, a), wait); }; };
-    const roundToNearestUserIncrement = (num, increment = 2.5) => {
-        if (!increment || increment <= 0) return num;
-        return Math.round(num / increment) * increment;
-    };    
     const roundToNearest2point5 = (num) => Math.round(num / 2.5) * 2.5;
     const formatTime = (seconds) => `${String(Math.floor(seconds / 60)).padStart(2, '0')}:${String(seconds % 60).padStart(2, '0')}`;
     let audioCtx;
@@ -823,34 +818,35 @@ function drawTextWrap(ctx, text, x, y, maxWidth, lineHeight) {
         return { phase, method, type, originalWeekData: workoutPlan[originalWeekKey] };
     }
 
-function getMainGoalText(exercise, week, cycleId) {
+    function getMainGoalText(exercise, week, cycleId) {
         if (!exercise.baseTopSet) return null;
         const { phase, type } = getWeekInfo(week, cycleId);
         if (phase === '디로딩 주간') return null;
 
         const sanitizedName = getSanitizedName(exercise);
+        
+    const allPastRecords = (appState.allRecords[sanitizedName] || [])
+        .filter(r => (r.cycleId < cycleId || (r.cycleId === cycleId && r.week < week)));
 
-        // [1] 사용자 설정값 가져오기
-        let userIncrement = 2.5;
-        if (appState.exerciseSettings[sanitizedName] && appState.exerciseSettings[sanitizedName].increment) {
-            userIncrement = parseFloat(appState.exerciseSettings[sanitizedName].increment);
-        }
+    // BUG FIX: 항상 현재 사이클까지의 기록 중에서 최고 기록을 찾아야 함
+    const allRecordsThroughCurrent = (appState.allRecords[sanitizedName] || [])
+        .filter(r => (r.cycleId < appState.currentCycleId) || (r.cycleId === appState.currentCycleId && r.week <= appState.currentWeek));
 
-        const allPastRecords = (appState.allRecords[sanitizedName] || [])
-            .filter(r => (r.cycleId < cycleId || (r.cycleId === cycleId && r.week < week)));
-
-        let peakE1RM = 0;
-        if (allPastRecords.length > 0) {
-             allPastRecords.forEach(record => {
-                const strongestSet = pickStrongestSet(record.sets);
-                if (strongestSet.e1rm > peakE1RM) peakE1RM = strongestSet.e1rm;
-            });
-        } else {
-            peakE1RM = calculateEpley1RM(exercise.baseTopSet, 6); 
-        }
+    let peakE1RM = 0;
+    if (allPastRecords.length > 0) {
+         allPastRecords.forEach(record => {
+            const strongestSet = pickStrongestSet(record.sets);
+            if (strongestSet.e1rm > peakE1RM) {
+                peakE1RM = strongestSet.e1rm;
+            }
+        });
+    } else {
+            peakE1RM = calculateEpley1RM(exercise.baseTopSet, 6); // 기록 없을 시 초기값
+        }
 
         let lastTopSet = { weight: 0, reps: 0 };
-        const lastStrengthRecord = allPastRecords.filter(r => r.phase === '강화 주기' && getWeekInfo(r.week, r.cycleId).type === type)
+        const lastStrengthRecord = allPastRecords
+            .filter(r => r.phase === '강화 주기' && getWeekInfo(r.week, r.cycleId).type === type)
             .sort((a, b) => (b.cycleId - a.cycleId) || (b.week - a.week))[0];
 
         if (lastStrengthRecord) {
@@ -872,25 +868,14 @@ function getMainGoalText(exercise, week, cycleId) {
         const unitText = exercise.unit ? (exercise.unit === '총' ? '(전체 중량)' : '(한쪽 원판)') : '';
 
         if (phase === '강화 주기') {
-            // [2] 사용자 단위로 반올림
-            let goalWeight = roundToNearestUserIncrement(targetWeight, userIncrement);
-            
-            // [수정] 5회 이상 수행했다면, 무게가 줄어들지 않도록 방어 (최소 이전 무게 유지)
-            if (lastTopSet.reps >= 5 && goalWeight < lastTopSet.weight) {
-                goalWeight = lastTopSet.weight;
-            }
-
-            // [3] 강제 증량 로직에도 사용자 단위 적용
+            let goalWeight = roundToNearest2point5(targetWeight);
             if (lastTopSet.reps >= 6 && goalWeight <= lastTopSet.weight) {
-                goalWeight = lastTopSet.weight + userIncrement;
+                goalWeight = lastTopSet.weight + 2.5;
             }
-
-            let backoffWeight = roundToNearestUserIncrement(goalWeight * 0.8, userIncrement);
+            let backoffWeight = roundToNearest2point5(goalWeight * 0.8);
             return `🔥 강화 목표: ${unitText} 탑 ${Math.max(10, goalWeight)}kg x 최대 반복 / 백오프 ${Math.max(10, backoffWeight)}kg x 8-10회`;
-        } else {
-            const workingSetWeight = roundToNearestUserIncrement(peakE1RM * 0.7, userIncrement);
-            // [4] 1RM 70% 텍스트 제거됨
-            return `🔥 축적 목표: ${unitText} 워킹 세트 ${workingSetWeight}kg x 8-12회`;
+        } else { // 축적 주기
+            return `🔥 축적 목표: ${unitText} 워킹 세트 ${roundToNearest2point5(peakE1RM * 0.7)}kg x 8-12회`;
         }
     }
 
@@ -898,69 +883,94 @@ function getMainGoalText(exercise, week, cycleId) {
 const aegisCache = new Map(); // 메모리 캐시 추가
 
 function getSmartAssistanceGoal_Aegis_v16(exercise, targetWeek, targetCycleId) {
-        const { staticGoal: initialGoal, sets: setsString } = exercise;
-        const sanitizedName = getSanitizedName(exercise);
-        const week = targetWeek !== undefined ? targetWeek : appState.currentWeek;
-        const cycleId = targetCycleId !== undefined ? targetCycleId : appState.displayCycleId;
+    const { staticGoal: initialGoal, increment, sets: setsString } = exercise;
+    const sanitizedName = getSanitizedName(exercise);
 
-        const cacheKey = `${sanitizedName}-${cycleId}-${week}`;
-        if (typeof aegisCache !== 'undefined' && aegisCache.has(cacheKey)) return aegisCache.get(cacheKey);
+    // 현재 계산 중인 목표 주차 및 사이클 ID (재귀 호출 시 사용)
+    const week = targetWeek !== undefined ? targetWeek : appState.currentWeek;
+    const cycleId = targetCycleId !== undefined ? targetCycleId : appState.displayCycleId;
 
-        // [1] 증량 단위 우선순위 결정 (사용자 설정 > 기본값 2.5)
-        let increment = exercise.increment || 2.5;
-        if (appState.exerciseSettings[sanitizedName] && appState.exerciseSettings[sanitizedName].increment) {
-            increment = parseFloat(appState.exerciseSettings[sanitizedName].increment);
-        }
-
-        if (!initialGoal || !exercise.increment || !setsString || week === 1) return initialGoal;
-
-        const lastRecord = (appState.allRecords[sanitizedName] || [])
-            .filter(r => (r.cycleId < cycleId) || (r.cycleId === cycleId && r.week < week))
-            .sort((a, b) => (b.cycleId - a.cycleId) || (b.week - a.week))[0];
-        if (!lastRecord) return initialGoal;
-
-        const historicGoal = getSmartAssistanceGoal_Aegis_v16(exercise, lastRecord.week, lastRecord.cycleId);
-        const parsedW = parseWeightRange(historicGoal);
-        const parsedR = historicGoal.match(/(\d+)\s*-\s*(\d+)회/);
-        if (!parsedW || !parsedR) return historicGoal;
-
-        const [ , minR, maxR ] = parsedR;
-        const minWeightGoal = parsedW.min, maxWeightGoal = parsedW.max;
-        const minRepsGoal = parseInt(minR), maxRepsGoal = parseInt(maxR);
-        const performedSets = lastRecord.sets;
-        const setsMatch = setsString.match(/(\d+)(?:~|-)?(\d+)?/);
-        const minSetsGoal = setsMatch ? parseInt(setsMatch[1]) : 3;
-
-        const qualityFail = performedSets.filter(s => s.weight < minWeightGoal).length > performedSets.length / 2;
-        const repsFail = performedSets.slice(0, minSetsGoal).some(s => s.weight >= minWeightGoal && s.reps < minRepsGoal);
-        const performedVolume = performedSets.reduce((sum, set) => sum + (set.weight * set.reps), 0);
-        const minTargetVolume = minWeightGoal * minRepsGoal * minSetsGoal;
-        const volumeFail = performedVolume < minTargetVolume;
-        const setsFail = performedSets.length < minSetsGoal;
-
-        let newGoal = historicGoal;
-        if (qualityFail || repsFail || volumeFail || setsFail) {
-            // [2] 감량 시 사용자 단위 적용
-            let newMin = Math.max(0, roundToNearestUserIncrement(minWeightGoal - increment, increment));
-            let newMax = Math.max(0, roundToNearestUserIncrement(maxWeightGoal - increment, increment));
-            if (newMin === 0 && newMax === 0) return historicGoal;
-            const weightText = newMin === newMax ? `${newMin}kg` : `${newMin}-${newMax}kg`;
-            newGoal = historicGoal.replace(/([\d.]+)(?:-([\d.]+))?\s*(kg|lbs)/i, weightText);
-        } else {
-            const didMaxSets = performedSets.length >= minSetsGoal; // minSetsGoal 이상이면 인정
-            const allSetsPerfect = performedSets.every(s => s.weight >= maxWeightGoal && s.reps >= maxRepsGoal);
-            if (didMaxSets && allSetsPerfect) {
-                // [3] 증량 시 사용자 단위 적용
-                let newMin = Math.max(0, roundToNearestUserIncrement(minWeightGoal + increment, increment));
-                let newMax = Math.max(0, roundToNearestUserIncrement(maxWeightGoal + increment, increment));
-                if (minWeightGoal === 0) { newMin = roundToNearestUserIncrement(maxWeightGoal + increment, increment); newMax = newMin; }
-                const weightText = newMin === newMax ? `${newMin}kg` : `${newMin}-${newMax}kg`;
-                newGoal = historicGoal.replace(/([\d.]+)(?:-([\d.]+))?\s*(kg|lbs)/i, weightText).replace(/맨몸 또는 /i, '');
-            }
-        }
-        if (typeof aegisCache !== 'undefined') aegisCache.set(cacheKey, newGoal);
-        return newGoal;
+    // 캐시 키 생성 및 확인
+    const cacheKey = `${sanitizedName}-${cycleId}-${week}`;
+    if (aegisCache.has(cacheKey)) {
+        return aegisCache.get(cacheKey);
     }
+
+    // 기본 조건: 이지스 시스템 적용 대상이 아니거나, 1주차인 경우 초기 목표 반환
+    if (!initialGoal || !increment || !setsString || week === 1) {
+        return initialGoal;
+    }
+
+    // 분석할 가장 최근 기록을 찾는다 (현재 주차보다 이전 기록만)
+    const lastRecord = (appState.allRecords[sanitizedName] || [])
+        .filter(r => (r.cycleId < cycleId) || (r.cycleId === cycleId && r.week < week))
+        .sort((a, b) => (b.cycleId - a.cycleId) || (b.week - a.week))[0];
+
+    // 이전 기록이 없으면 초기 목표 반환
+    if (!lastRecord) {
+        return initialGoal;
+    }
+
+    // --- 핵심 로직: 과거의 목표를 재귀적으로 계산하여 가져온다 ---
+    const historicGoal = getSmartAssistanceGoal_Aegis_v16(exercise, lastRecord.week, lastRecord.cycleId);
+
+    const parsedW = parseWeightRange(historicGoal);
+    const parsedR = historicGoal.match(/(\d+)\s*-\s*(\d+)회/);
+
+    if (!parsedW || !parsedR) return historicGoal; // 이전 목표 계산이 잘못되면 그대로 반환
+
+    const [ , minR, maxR ] = parsedR;
+    const minWeightGoal = parsedW.min, maxWeightGoal = parsedW.max;
+    const minRepsGoal = parseInt(minR), maxRepsGoal = parseInt(maxR);
+
+    const performedSets = lastRecord.sets;
+    const setsMatch = setsString.match(/(\d+)(?:~|-)?(\d+)?/);
+    const minSetsGoal = setsMatch ? parseInt(setsMatch[1]) : 3;
+    const maxSetsGoal = setsMatch ? parseInt(setsMatch[2] || setsMatch[1]) : minSetsGoal;
+
+    // --- 감량 및 증량 조건 판단 ---
+    const qualityFail = performedSets.filter(s => s.weight < minWeightGoal).length > performedSets.length / 2;
+    const repsFail = performedSets.slice(0, minSetsGoal).some(s => s.weight >= minWeightGoal && s.reps < minRepsGoal);
+    const performedVolume = performedSets.reduce((sum, set) => sum + (set.weight * set.reps), 0);
+    const minTargetVolume = minWeightGoal * minRepsGoal * minSetsGoal;
+    const volumeFail = performedVolume < minTargetVolume;
+    const setsFail = performedSets.length < minSetsGoal;
+
+    let newGoal = historicGoal; // 기본값은 이전 목표 유지
+
+    if (qualityFail || repsFail || volumeFail || setsFail) {
+        // 감량 조건 충족
+        let newMin = Math.max(0, roundToNearest2point5(minWeightGoal - increment));
+        let newMax = Math.max(0, roundToNearest2point5(maxWeightGoal - increment));
+        if (newMin === 0 && newMax === 0) return historicGoal;
+        const weightText = newMin === newMax ? `${newMin}kg` : `${newMin}-${newMax}kg`;
+        newGoal = historicGoal.replace(/([\d.]+)(?:-([\d.]+))?\s*(kg|lbs)/i, weightText);
+    } else {
+        // 증량 조건 확인
+        const didMaxSets = performedSets.length >= maxSetsGoal;
+        const allSetsPerfect = performedSets.every(s => s.weight >= maxWeightGoal && s.reps >= maxRepsGoal); // 핵심 성공 조건 (유지)
+        if (didMaxSets && allSetsPerfect) {
+            let newMin = Math.max(0, roundToNearest2point5(minWeightGoal + increment));
+            let newMax = Math.max(0, roundToNearest2point5(maxWeightGoal + increment));
+
+            // ▼▼▼ [버그 수정] 증량 시 0kg 처리 로직 추가 ▼▼▼
+            if (minWeightGoal === 0) {
+                // min이 0이었던 경우 (0-0kg, 0-10kg), 증량 시 min/max를 (max + increment)로 통일
+                newMin = roundToNearest2point5(maxWeightGoal + increment);
+                newMax = newMin; // 범위를 없애고 단일 무게로 설정
+            }
+            // ▲▲▲ [버그 수정] 여기까지 ▲▲▲
+
+            const weightText = newMin === newMax ? `${newMin}kg` : `${newMin}-${newMax}kg`;
+            // "맨몸 또는 " 텍스트를 제거하여 깔끔한 kg 목표로 변경
+            newGoal = historicGoal.replace(/([\d.]+)(?:-([\d.]+))?\s*(kg|lbs)/i, weightText).replace(/맨몸 또는 /i, '');
+        }
+    }
+
+    // 계산된 최종 목표를 캐시에 저장하고 반환
+    aegisCache.set(cacheKey, newGoal);
+    return newGoal;
+}
 
 // --- RENDER & UI FUNCTIONS ---
     function renderWorkout() {
@@ -997,7 +1007,7 @@ function getSmartAssistanceGoal_Aegis_v16(exercise, targetWeek, targetCycleId) {
             return;
         }
 
-routine.forEach(exercise => {
+        routine.forEach(exercise => {
             const card = document.createElement('div');
             card.className = 'bg-white rounded-xl shadow-lg p-4 sm:p-5 flex flex-col card-enter';
             const sanitizedName = getSanitizedName(exercise);
@@ -1005,7 +1015,6 @@ routine.forEach(exercise => {
             let goalText, tipContent;
             const originalExercise = findOriginalExercise(exercise.name) || exercise;
 
-            // [표시 텍스트 결정 로직]
             let methodText;
             if (phase === '축적 주기' && exercise.type === '메인') {
                 methodText = `${method} (3-4세트)`;
@@ -1014,7 +1023,7 @@ routine.forEach(exercise => {
             }
 
             if (phase === '디로딩 주간') {
-                goalText = getDeloadGoalText(exercise); // 이 함수가 없다면 기존 로직 유지
+                goalText = getDeloadGoalText(exercise);
                 tipContent = originalExercise?.tip || "전략적 회복에 집중하세요.";
             } else {
                 if (exercise.type === '메인' && exercise.baseTopSet) {
@@ -1026,33 +1035,16 @@ routine.forEach(exercise => {
                 }
                 tipContent = exercise.tip;
             }
-
-            // 휴식 시간 텍스트 (함수가 없다면 00초로 표시되니 주의, 있다면 유지)
-            const restTime = typeof getRestTime === 'function' ? getRestTime(exercise, phase) : 90;
+            const restTime = getRestTime(exercise, phase);
             const restText = `권장 휴식: ${Math.floor(restTime / 60)}분 ${restTime % 60}초`;
 
-            const alternatives = (typeof findOriginalExercise === 'function' && findOriginalExercise(exercise.name)?.alternatives) || [];
-            const alternativesHTML = alternatives.length > 0 ? `<div class="mt-4 pt-4 border-t border-slate-200"><h5 class="text-sm font-bold text-slate-700 mb-2">대체 운동</h5><ul class="list-disc list-inside text-sm text-slate-600 space-y-1 pl-2">${alternatives.map(alt => `<li>${alt}</li>`).join('')}</ul></div>` : '';
+            const alternativesHTML = originalExercise?.alternatives?.length > 0 ? `
+                <div class="mt-4 pt-4 border-t border-slate-200">
+                    <h5 class="text-sm font-bold text-slate-700 mb-2">대체 운동</h5>
+                    <ul class="list-disc list-inside text-sm text-slate-600 space-y-1 pl-2">${originalExercise.alternatives.map(alt => `<li>${alt}</li>`).join('')}</ul>
+                </div>` : '';
+            
             const movementPatternTag = exercise.movement_pattern ? `<span class="text-xs font-semibold bg-gray-200 text-gray-700 px-2 py-0.5 rounded-full whitespace-nowrap">#${exercise.movement_pattern}</span>` : '';
-
-            // ▼▼▼ [핵심] 증량 단위 선택 박스 생성 ▼▼▼
-            let currentIncrement = exercise.increment || 2.5;
-            if (appState.exerciseSettings[sanitizedName] && appState.exerciseSettings[sanitizedName].increment) {
-                currentIncrement = parseFloat(appState.exerciseSettings[sanitizedName].increment);
-            }
-
-            const incrementSelectorHTML = `
-                <div class="mt-2 flex items-center gap-2 text-sm text-slate-500">
-                    <span>증량 단위:</span>
-                    <select data-action="change-increment" data-target="${sanitizedName}" class="bg-white border border-slate-300 rounded px-2 py-1 text-xs font-bold text-slate-700 focus:ring-2 focus:ring-blue-500">
-                        <option value="1" ${currentIncrement === 1 ? 'selected' : ''}>1kg</option>
-                        <option value="2.5" ${currentIncrement === 2.5 ? 'selected' : ''}>2.5kg</option>
-                        <option value="5" ${currentIncrement === 5 ? 'selected' : ''}>5kg</option>
-                    </select>
-                </div>
-            `;
-            const showIncrementSelector = (exercise.type !== '웜업' && exercise.type !== '회복' && phase !== '디로딩 주간');
-            // ▲▲▲
 
             card.innerHTML = `
                 <div class="flex-1">
@@ -1062,21 +1054,19 @@ routine.forEach(exercise => {
                         ${movementPatternTag}
                     </div>
                     <p class="text-slate-600 text-sm sm:text-base">${tipContent}<br><span class="font-bold text-red-600">${goalText}</span></p>
-                    ${showIncrementSelector ? incrementSelectorHTML : ''}
                     <div class="flex justify-between items-center mt-3 gap-2">
                          <p class="text-sm font-semibold text-slate-500 flex-1 min-w-0">${methodText} &nbsp;&nbsp; | &nbsp;&nbsp; <span class="font-bold text-sky-700">${restText}</span></p>
                          <button data-action="view-history" data-exercise-name="${exercise.name}" class="p-2 text-slate-400 hover:text-blue-500 transition flex-shrink-0" title="과거 기록 보기">
-                            <!-- 아이콘 SVG 생략 (기존 것 사용) -->
-                          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-        <path stroke-linecap="round" stroke-linejoin="round" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
-    </svg>
+                            <svg xmlns="[http://www.w3.org/2000/svg](http://www.w3.org/2000/svg)" width="20" height="20" fill="currentColor" class="bi bi-table" viewBox="0 0 16 16">
+                                <path d="M0 2a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2V2zm15 2h-4v3h4V4zm0 4h-4v3h4V8zm0 4h-4v3h3a1 1 0 0 0 1-1v-2zm-5 3v-3H6v3h4zm-5 0v-3H1v2a1 1 0 0 0 1 1h3zm-4-4h4V8H1v3zm0-4h4V4H1v3zm5-3v3h4V4H6zm5 0v3h4V4h-4z"/>
+                            </svg>
                          </button>
                     </div>
                 </div>
                 ${alternativesHTML}
                 <div data-container-for="${sanitizedName}" class="space-y-3 mt-4"></div>
                 <div class="mt-4"><button data-action="add-set" data-target="${sanitizedName}" class="w-full bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold py-2 px-4 rounded-lg transition shadow-md">+ 세트 추가</button></div>`;
-            appState.dom.workoutList.appendChild(card);
+            dom.workoutList.appendChild(card);
             
             const setsContainer = card.querySelector(`[data-container-for="${sanitizedName}"]`);
             const lastRecord = (appState.allRecords[sanitizedName] || []).find(r => r.week === currentWeek && r.day === currentDay && r.cycleId === displayCycleId);
@@ -1374,15 +1364,6 @@ routine.forEach(exercise => {
         if (typeof aegisCache?.clear === 'function') aegisCache.clear();
     }
 
-    // [추가] 화면이 바뀌기 전에 현재 데이터를 강제로 저장하는 안전장치
-    function forceSaveCurrentView() {
-        if (appState.currentRoutine && appState.currentRoutine.length > 0) {
-            appState.currentRoutine.forEach(ex => {
-                saveAllSetsForExercise(getSanitizedName(ex));
-            });
-        }
-    }
-
     function loadState() {
         const savedState = JSON.parse(localStorage.getItem('workoutState')) || {};
         appState.currentWeek = savedState.currentWeek || 1;
@@ -1393,7 +1374,6 @@ routine.forEach(exercise => {
 
         appState.allRecords = JSON.parse(localStorage.getItem('workoutRecords')) || {};
         appState.inbodyRecords = JSON.parse(localStorage.getItem('inbodyRecords')) || [];
-        appState.exerciseSettings = JSON.parse(localStorage.getItem('exerciseSettings')) || {};
     }
     
     function initializeChart(canvasId, config) {
@@ -1604,21 +1584,6 @@ function initApp() {
                         toggleModal('confirm-modal', false);
                     }
                 );
-            }
-        });
-        appState.dom.workoutList.addEventListener('change', e => {
-            if (e.target.dataset.action === 'change-increment') {
-                const sanitizedName = e.target.dataset.target;
-                const newIncrement = parseFloat(e.target.value);
-                
-                if (!appState.exerciseSettings[sanitizedName]) {
-                    appState.exerciseSettings[sanitizedName] = {};
-                }
-                appState.exerciseSettings[sanitizedName].increment = newIncrement;
-                localStorage.setItem('exerciseSettings', JSON.stringify(appState.exerciseSettings));
-                
-                if (typeof aegisCache !== 'undefined') aegisCache.clear();
-                renderWorkout();
             }
         });
 
@@ -2090,5 +2055,3 @@ async function downloadInstagramCardPNG() {
 </script>
 </body>
 </html>
-
-
