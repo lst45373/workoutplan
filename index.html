@@ -776,7 +776,7 @@ function drawTextWrap(ctx, text, x, y, maxWidth, lineHeight) {
                 const topSet = pickStrongestSet(refRecords[0].sets);
                 if(topSet.weight > 0) e1RM = calculateEpley1RM(topSet.weight, topSet.reps);
             }
-            workingSetWeight = roundToNearest2point5(e1RM * 0.7);
+            workingSetWeight = roundToNearest2point5(e1RM * 0.65);
         } else if (originalExercise.staticGoal) { // 보조 운동
             const parsed = parseWeightRange(originalExercise.staticGoal);
             if (parsed) {
@@ -875,7 +875,7 @@ function drawTextWrap(ctx, text, x, y, maxWidth, lineHeight) {
             let backoffWeight = roundToNearest2point5(goalWeight * 0.8);
             return `🔥 강화 목표: ${unitText} 탑 ${Math.max(10, goalWeight)}kg x 최대 반복 / 백오프 ${Math.max(10, backoffWeight)}kg x 8-10회`;
         } else { // 축적 주기
-            return `🔥 축적 목표: ${unitText} 워킹 세트 ${roundToNearest2point5(peakE1RM * 0.7)}kg x 8-12회`;
+            return `🔥 축적 목표: ${unitText} 워킹 세트 ${roundToNearest2point5(peakE1RM * 0.65)}kg x 8-12회`;
         }
     }
 
@@ -2055,3 +2055,4 @@ async function downloadInstagramCardPNG() {
 </script>
 </body>
 </html>
+
